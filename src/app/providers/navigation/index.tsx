@@ -3,10 +3,37 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
+// 공통 컴포넌트
+import {View, Text} from 'react-native';
+
+// 인증 화면들
+// 임시 컴포넌트들 - 실제 구현 시 import 사용
+const WelcomeScreen = () => {
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text>환영합니다</Text>
+    </View>
+  );
+};
+
+const LoginScreen = () => {
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text>로그인 화면</Text>
+    </View>
+  );
+};
+
+const RegisterScreen = () => {
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text>회원가입 화면</Text>
+    </View>
+  );
+};
+
 // 실제 구현 시에는 각 페이지 컴포넌트를 불러와야 함
 // 예제를 위한 임시 컴포넌트들
-const LoginScreen = () => <></>;
-const RegisterScreen = () => <></>;
 const BoardScreen = () => <></>;
 const BoardDetailScreen = () => <></>;
 const BoardCreateScreen = () => <></>;
@@ -54,9 +81,22 @@ const ProfileNavigator = () => (
 
 // 인증 스택 네비게이터
 const AuthNavigator = () => (
-  <AuthStack.Navigator screenOptions={{headerShown: false}}>
-    <AuthStack.Screen name="Login" component={LoginScreen} />
-    <AuthStack.Screen name="Register" component={RegisterScreen} />
+  <AuthStack.Navigator>
+    <AuthStack.Screen
+      name="Welcome"
+      component={WelcomeScreen}
+      options={{headerShown: false}}
+    />
+    <AuthStack.Screen
+      name="Login"
+      component={LoginScreen}
+      options={{headerShown: false}}
+    />
+    <AuthStack.Screen
+      name="Register"
+      component={RegisterScreen}
+      options={{headerShown: false}}
+    />
   </AuthStack.Navigator>
 );
 
