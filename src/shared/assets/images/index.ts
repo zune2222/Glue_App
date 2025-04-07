@@ -8,11 +8,6 @@ export {default as KakaoSvg} from './social/kakaoLogo.svg';
 
 // 이미지 파일들
 export const logo = require('./logo.png');
-export const welcomeBackground = require('./welcome-bg.jpg');
 
-// 소셜 로그인 아이콘 (PNG 대체용)
-export const socialIcons = {
-  google: require('./social/google.png'),
-  apple: require('./social/apple.png'),
-  kakao: require('./social/kakao.png'),
-};
+// PNG 파일이 없어서 오류 발생 - 삭제
+// 소셜 로그인은 SVG 파일만 사용

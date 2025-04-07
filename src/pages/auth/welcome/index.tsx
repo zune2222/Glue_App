@@ -5,17 +5,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  ImageBackground,
   Image,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTranslation} from 'react-i18next';
 import {theme} from '../../../app/styles/theme';
-import {colors} from '../../../app/styles/colors';
+import {colors, semanticColors} from '../../../app/styles/colors';
 import {typography} from '../../../app/styles/typography';
 import {
-  welcomeBackground,
   logo,
   AppleSvg,
   GoogleSvg,
@@ -84,14 +82,7 @@ const WelcomeScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={
-        welcomeBackground || {
-          uri: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb',
-        }
-      }
-      style={styles.background}
-      resizeMode="cover">
+    <View style={styles.background}>
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <View style={styles.logoContainer}>
@@ -135,7 +126,7 @@ const WelcomeScreen = () => {
           </View>
         </View>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -144,10 +135,11 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
+    backgroundColor: semanticColors.primary, // semanticColors.primary 사용
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // 약간의 어두운 오버레이
   },
   content: {
     flex: 1,
@@ -159,7 +151,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: theme.spacing.lg,
