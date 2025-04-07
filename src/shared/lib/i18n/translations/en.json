@@ -30,7 +30,17 @@
     "passwordMismatch": "Passwords do not match",
     "requiredField": "This field is required",
     "invalidEmail": "Invalid email format",
-    "invalidPassword": "Password must be at least 6 characters"
+    "invalidPassword": "Password must be at least 6 characters",
+    "welcome": {
+      "title": "Glue App",
+      "subtitle": "Connect, Share, and Grow",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithApple": "Continue with Apple",
+      "continueWithKakao": "Continue with Kakao",
+      "termsNotice": "By continuing, you agree to Glue App's Terms of Service and Privacy Policy",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy"
+    }
   },
   "profile": {
     "title": "Profile",

@@ -1,12 +1,28 @@
 import {TextStyle} from 'react-native';
 
-type FontWeight = 'regular' | 'medium' | 'semibold' | 'bold';
+// 폰트 굵기 타입 정의 (Pretendard 폰트의 모든 굵기 추가)
+type FontWeight =
+  | 'thin'
+  | 'extraLight'
+  | 'light'
+  | 'regular'
+  | 'medium'
+  | 'semiBold'
+  | 'bold'
+  | 'extraBold'
+  | 'black';
 
+// Pretendard 폰트 Family 맵핑
 const fontFamily = {
+  thin: 'Pretendard-Thin',
+  extraLight: 'Pretendard-ExtraLight',
+  light: 'Pretendard-Light',
   regular: 'Pretendard-Regular',
   medium: 'Pretendard-Medium',
-  semibold: 'Pretendard-SemiBold',
+  semiBold: 'Pretendard-SemiBold',
   bold: 'Pretendard-Bold',
+  extraBold: 'Pretendard-ExtraBold',
+  black: 'Pretendard-Black',
 };
 
 const fontSize = {
@@ -29,6 +45,7 @@ const lineHeight = {
   xxxl: 40,
 };
 
+// 텍스트 스타일 생성 함수
 export const createTextStyle = (
   size: keyof typeof fontSize,
   weight: FontWeight = 'regular',
@@ -38,15 +55,16 @@ export const createTextStyle = (
   lineHeight: lineHeight[size],
 });
 
+// Typography 스타일 정의
 export const typography = {
   h1: createTextStyle('xxxl', 'bold'),
   h2: createTextStyle('xxl', 'bold'),
   h3: createTextStyle('xl', 'bold'),
-  h4: createTextStyle('lg', 'semibold'),
+  h4: createTextStyle('lg', 'semiBold'),
   subtitle1: createTextStyle('lg', 'medium'),
   subtitle2: createTextStyle('md', 'medium'),
   body1: createTextStyle('md', 'regular'),
   body2: createTextStyle('sm', 'regular'),
-  button: createTextStyle('md', 'semibold'),
+  button: createTextStyle('md', 'semiBold'),
   caption: createTextStyle('xs', 'regular'),
 };
