@@ -7,7 +7,6 @@ import {View, Text, Image} from 'react-native';
 
 // 인증 화면들 - 실제 구현 컴포넌트 import
 import WelcomeScreen from '../../../pages/auth/welcome';
-import LoginScreen from '../../../pages/auth/login';
 import RegisterScreen from '../../../pages/auth/register';
 
 // 실제 구현 시에는 각 페이지 컴포넌트를 불러와야 함
@@ -308,11 +307,6 @@ const AuthNavigator = () => (
     <AuthStack.Screen
       name="Welcome"
       component={WelcomeScreen}
-      options={{headerShown: false}}
-    />
-    <AuthStack.Screen
-      name="Login"
-      component={LoginScreen}
       options={{headerShown: false}}
     />
     <AuthStack.Screen

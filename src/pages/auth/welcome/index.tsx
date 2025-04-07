@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  Text,
-} from 'react-native';
+import {View, StyleSheet, TouchableOpacity, Text} from 'react-native';
 import {theme} from '../../../app/styles/theme';
 import {
   AppLogo,
@@ -14,6 +8,7 @@ import {
 } from '../../../widgets/auth/welcome';
 import {useTranslation} from 'react-i18next';
 import {changeLanguage, Language} from '../../../shared/lib/i18n';
+import {SafeArea} from '../../../shared/ui';
 
 const WelcomeScreen = () => {
   const {i18n} = useTranslation();
@@ -27,7 +22,7 @@ const WelcomeScreen = () => {
 
   return (
     <View style={styles.background}>
-      <SafeAreaView style={styles.container}>
+      <SafeArea style={styles.container}>
         <TouchableOpacity style={styles.langButton} onPress={toggleLanguage}>
           <Text style={styles.langButtonText}>
             {i18n.language === Language.KOREAN ? 'English' : '한국어'}
@@ -38,7 +33,7 @@ const WelcomeScreen = () => {
           <TitleSection />
           <SocialLoginSection />
         </View>
-      </SafeAreaView>
+      </SafeArea>
     </View>
   );
 };

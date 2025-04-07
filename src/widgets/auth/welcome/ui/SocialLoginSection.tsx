@@ -5,8 +5,7 @@ import {SocialLoginButton} from '../../../../features/auth/social-login-button';
 
 type AuthStackParamList = {
   Welcome: undefined;
-  Login: undefined;
-  Register: undefined;
+  Profile: undefined;
 };
 
 export const SocialLoginSection = () => {
@@ -16,7 +15,7 @@ export const SocialLoginSection = () => {
   const handleSocialLogin = (provider: string) => {
     console.log(`${provider} 로그인 시도`);
     // 소셜 로그인 성공 후 처리
-    navigation.navigate('Login' as never); // 임시로 Login 페이지로 이동
+    navigation.navigate('Profile'); // 프로필 페이지로 바로 이동
   };
 
   return (

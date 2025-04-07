@@ -1,6 +1,6 @@
 import React from 'react';
 import {Text as RNText, StyleSheet} from 'react-native';
-import {useTheme} from '@/app/providers/theme';
+import {useTheme} from '../../../app/providers/theme';
 import {TextProps} from './types';
 
 // 폰트 굵기 매핑 함수 (kebab-case 대신 PascalCase 사용)
@@ -21,19 +21,23 @@ export const Text = ({
   children,
   ...props
 }: TextProps) => {
-  const {colors, typography} = useTheme();
+  const {theme} = useTheme();
+  const typography = theme?.typography || {};
+  const colors = theme?.colors || {};
 
   // 기본 스타일 가져오기
-  const baseStyle = typography[variant];
+  const baseStyle = typography[variant] || typography['body1'] || {};
 
   // 가중치 재정의 (제공된 경우)
   // weight 속성이 제공되면 해당 가중치 사용, 아니면 기본 variant 스타일의 fontFamily 사용
-  const fontFamily = weight ? getFontFamily(weight) : baseStyle.fontFamily;
+  const fontFamily = weight
+    ? getFontFamily(weight)
+    : baseStyle.fontFamily || 'Pretendard-Regular';
 
   const textStyle = StyleSheet.compose(
     {
       ...baseStyle,
-      color: color || colors.text,
+      color: color || colors.text || '#000000',
       textAlign: align,
       fontFamily,
     },

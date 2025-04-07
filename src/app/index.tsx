@@ -1,15 +1,11 @@
 import React from 'react';
 import {AppProvider} from './providers';
-import {AppNavigator} from './providers/navigation';
-import {AppModal} from '@/shared/ui/Modal';
-import {AppToast} from '@/shared/ui/Toast';
+import RootNavigator from '../pages';
 
-export const App = () => {
+const App = () => {
   return (
     <AppProvider>
-      <AppNavigator />
-      <AppModal />
-      <AppToast />
+      <RootNavigator />
     </AppProvider>
   );
 };
