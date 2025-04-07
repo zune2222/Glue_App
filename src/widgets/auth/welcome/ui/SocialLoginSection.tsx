@@ -1,7 +1,6 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {theme} from '../../../../app/styles/theme';
 import {SocialLoginButton} from '../../../../features/auth/social-login-button';
 
 type AuthStackParamList = {
@@ -21,7 +20,12 @@ export const SocialLoginSection = () => {
   };
 
   return (
-    <View style={styles.buttonContainer}>
+    <View style={styles.container}>
+      <SocialLoginButton
+        type="kakao"
+        onPress={() => handleSocialLogin('Kakao')}
+      />
+
       <SocialLoginButton
         type="google"
         onPress={() => handleSocialLogin('Google')}
@@ -31,19 +35,13 @@ export const SocialLoginSection = () => {
         type="apple"
         onPress={() => handleSocialLogin('Apple')}
       />
-
-      <SocialLoginButton
-        type="kakao"
-        onPress={() => handleSocialLogin('Kakao')}
-      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  buttonContainer: {
+  container: {
     width: '100%',
-    maxWidth: 320,
-    marginBottom: theme.spacing.xl,
+    alignItems: 'center',
   },
 });

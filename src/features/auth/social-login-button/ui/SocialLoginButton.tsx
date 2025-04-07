@@ -1,10 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {useTranslation} from 'react-i18next';
-import {theme} from '../../../../app/styles/theme';
-import {colors} from '../../../../app/styles/colors';
-import {typography} from '../../../../app/styles/typography';
 import {AppleSvg, GoogleSvg, KakaoSvg} from '../../../../shared/assets/images';
+import {useTranslation} from 'react-i18next';
 
 // 소셜 로그인 버튼 타입
 export type SocialButtonProps = {
@@ -23,8 +20,8 @@ export const SocialLoginButton = ({type, onPress}: SocialButtonProps) => {
       text: [styles.socialButtonText, styles.googleButtonText],
       label: t('auth.welcome.continueWithGoogle'),
       icon: (
-        <View style={styles.iconContainer}>
-          <GoogleSvg width={30} height={30} />
+        <View style={styles.googleIconContainer}>
+          <GoogleSvg width={18} height={18} />
         </View>
       ),
     },
@@ -33,8 +30,8 @@ export const SocialLoginButton = ({type, onPress}: SocialButtonProps) => {
       text: [styles.socialButtonText, styles.appleButtonText],
       label: t('auth.welcome.continueWithApple'),
       icon: (
-        <View style={styles.iconContainer}>
-          <AppleSvg width={50} height={50} />
+        <View style={styles.appleIconContainer}>
+          <AppleSvg width={15} height={18} />
         </View>
       ),
     },
@@ -43,8 +40,8 @@ export const SocialLoginButton = ({type, onPress}: SocialButtonProps) => {
       text: [styles.socialButtonText, styles.kakaoButtonText],
       label: t('auth.welcome.continueWithKakao'),
       icon: (
-        <View style={styles.iconContainer}>
-          <KakaoSvg width={16} height={16} />
+        <View style={styles.kakaoIconContainer}>
+          <KakaoSvg width={18} height={18} />
         </View>
       ),
     },
@@ -62,41 +59,66 @@ export const SocialLoginButton = ({type, onPress}: SocialButtonProps) => {
 
 const styles = StyleSheet.create({
   socialButton: {
+    width: 244,
+    height: 42,
     flexDirection: 'row',
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: theme.spacing.md,
-    ...theme.shadow.light,
+    marginBottom: 16,
+    borderRadius: 4,
   },
   socialButtonText: {
-    ...typography.button,
+    fontSize: 16,
+    fontWeight: '500',
+    lineHeight: 24,
     textAlign: 'center',
   },
-  iconContainer: {
-    width: 24,
-    height: 24,
+  // Google 버튼 스타일
+  googleButton: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#747775',
+    paddingHorizontal: 12,
+  },
+  googleIconContainer: {
+    width: 18,
+    height: 18,
+    marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: theme.spacing.sm,
-  },
-  googleButton: {
-    backgroundColor: '#ffffff',
   },
   googleButtonText: {
-    color: colors.richBlack,
+    color: '#1F1F1F',
   },
+  // Apple 버튼 스타일
   appleButton: {
-    backgroundColor: '#000000',
+    backgroundColor: '#050708',
+    paddingHorizontal: 32,
+    gap: 9,
+  },
+  appleIconContainer: {
+    width: 15,
+    height: 18.75,
+    marginRight: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   appleButtonText: {
-    color: '#ffffff',
+    color: 'white',
   },
+  // 카카오 버튼 스타일
   kakaoButton: {
     backgroundColor: '#FEE500',
+    paddingVertical: 10,
+  },
+  kakaoIconContainer: {
+    width: 18,
+    height: 18,
+    marginRight: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   kakaoButtonText: {
-    color: '#392020',
+    color: 'black',
   },
 });

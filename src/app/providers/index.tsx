@@ -5,7 +5,7 @@ import {QueryProvider} from './query';
 import {ThemeProvider, useTheme} from './theme';
 import {NavigationContainer} from '@react-navigation/native';
 import {I18nextProvider} from 'react-i18next';
-import i18n from '@/shared/lib/i18n';
+import i18n from '../../shared/lib/i18n';
 
 // 앱 프로바이더 타입
 interface AppProviderProps {

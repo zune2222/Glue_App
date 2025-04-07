@@ -32,8 +32,8 @@
     "invalidEmail": "Invalid email format",
     "invalidPassword": "Password must be at least 6 characters",
     "welcome": {
-      "title": "Glue App",
-      "subtitle": "Connect, Share, and Grow",
+      "title": "GLUE",
+      "subtitle": "For stronger language exchange connections",
       "continueWithGoogle": "Continue with Google",
       "continueWithApple": "Continue with Apple",
       "continueWithKakao": "Continue with Kakao",
