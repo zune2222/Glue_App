@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {Input, Button, Text, SafeArea} from '../../../../shared/ui';
+import {Input, Button, Text, SafeArea} from '@shared/ui';
 import {ProfileStackParamList} from './index';
 
 const NameInputScreen = () => {

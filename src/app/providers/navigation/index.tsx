@@ -7,32 +7,28 @@ import {
   ChatIcon,
   ProfileIcon,
   SettingsIcon,
-} from '../../../widgets/bottomTab/icons';
+} from '@widgets/bottomTab/icons';
 
 // 홈/게시판 화면 컴포넌트 임포트
-import {
-  HomeScreen,
-  PostDetailScreen,
-  PostCreateScreen,
-} from '../../../features/Home';
+import {HomeScreen, PostDetailScreen, PostCreateScreen} from '@features/Home';
 
 // 채팅 화면 컴포넌트 임포트
-import {ChatListScreen, ChatRoomScreen} from '../../../features/Chat';
+import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
 
 // 프로필 화면 컴포넌트 임포트
-import {ProfileMainScreen, ProfileEditScreen} from '../../../features/Profile';
+import {ProfileMainScreen, ProfileEditScreen} from '@features/Profile';
 
 // 설정 화면 컴포넌트 임포트
-import {SettingsScreen} from '../../../features/Settings';
+import {SettingsScreen} from '@features/Settings';
 
 // 인증 화면 임포트
-import {WelcomeScreen, AuthProfileNavigator} from '../../../features/Auth';
+import {WelcomeScreen, AuthProfileNavigator} from '@features/Auth';
 
 // 헤더 컴포넌트 임포트
-import {Header} from '../../../widgets/header';
+import {Header} from '@widgets/header';
 
 // 알림 패널 임포트
-import {NotificationsPanel} from '../../../widgets/notifications';
+import {NotificationsPanel} from '@widgets/notifications';
 
 // 네비게이션 스택 생성
 const RootStack = createNativeStackNavigator();

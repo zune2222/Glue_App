@@ -6,7 +6,7 @@ import React, {
   useEffect,
 } from 'react';
 import {useColorScheme, Appearance} from 'react-native';
-import {lightTheme, darkTheme} from '@/app/styles/theme';
+import {lightTheme, darkTheme} from '@app/styles/theme';
 
 // ThemeType 정의
 type ThemeType = typeof lightTheme;

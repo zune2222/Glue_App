@@ -1,14 +1,10 @@
 import React from 'react';
 import {View, StyleSheet, TouchableOpacity, Text} from 'react-native';
-import {theme} from '../../../../app/styles/theme';
-import {
-  AppLogo,
-  TitleSection,
-  SocialLoginSection,
-} from '../../../../widgets/auth/welcome';
+import {theme} from '@app/styles/theme';
+import {AppLogo, TitleSection, SocialLoginSection} from '@widgets/auth/welcome';
 import {useTranslation} from 'react-i18next';
-import {changeLanguage, Language} from '../../../../shared/lib/i18n';
-import {SafeArea} from '../../../../shared/ui';
+import {changeLanguage, Language} from '@shared/lib/i18n';
+import {SafeArea} from '@shared/ui';
 
 const WelcomeScreen = () => {
   const {i18n} = useTranslation();
