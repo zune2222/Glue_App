@@ -14,20 +14,19 @@ import {
   HomeScreen,
   PostDetailScreen,
   PostCreateScreen,
-} from '../../../pages/home';
+} from '../../../features/Home';
 
 // 채팅 화면 컴포넌트 임포트
-import {ChatListScreen, ChatRoomScreen} from '../../../pages/chat';
+import {ChatListScreen, ChatRoomScreen} from '../../../features/Chat';
 
 // 프로필 화면 컴포넌트 임포트
-import {ProfileMainScreen, ProfileEditScreen} from '../../../pages/profile';
+import {ProfileMainScreen, ProfileEditScreen} from '../../../features/Profile';
 
 // 설정 화면 컴포넌트 임포트
-import {SettingsScreen} from '../../../pages/settings';
+import {SettingsScreen} from '../../../features/Settings';
 
 // 인증 화면 임포트
-import WelcomeScreen from '../../../pages/auth/welcome';
-import AuthProfileNavigator from '../../../pages/auth/profile';
+import {WelcomeScreen, AuthProfileNavigator} from '../../../features/Auth';
 
 // 헤더 컴포넌트 임포트
 import {Header} from '../../../widgets/header';

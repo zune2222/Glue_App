@@ -1,9 +1,9 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {RouteProp, useRoute} from '@react-navigation/native';
-import {Button, Text, SafeArea} from '../../../shared/ui';
+import {Button, Text, SafeArea} from '../../../../shared/ui';
 import {ProfileStackParamList} from './index';
-import * as RootNavigation from '../../../app/navigation/RootNavigation';
+import * as RootNavigation from '../../../../app/navigation/RootNavigation';
 
 type ProfileCompleteRouteProps = RouteProp<
   ProfileStackParamList,

@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {SocialLoginButton} from '../../../../features/auth/social-login-button';
+import {SocialLoginButton} from '../../../../features/Auth/social-login-button';
 
 // 전체 내비게이션 타입 정의
 type RootStackParamList = {

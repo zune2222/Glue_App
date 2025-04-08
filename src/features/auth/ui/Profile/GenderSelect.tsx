@@ -6,8 +6,8 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {Input, Button, Text, SafeArea} from '../../../shared/ui';
-import {SelectModal, SelectOption} from '../../../shared/ui/SelectModal';
+import {Input, Button, Text, SafeArea} from '../../../../shared/ui';
+import {SelectModal, SelectOption} from '../../../../shared/ui/SelectModal';
 import {ProfileStackParamList} from './index';
 
 type GenderSelectRouteProps = RouteProp<ProfileStackParamList, 'GenderSelect'>;
