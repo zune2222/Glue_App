@@ -1,7 +1,13 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, Text} from 'react-native';
+import {StyleSheet} from 'react-native';
+import {
+  HomeIcon,
+  ChatIcon,
+  ProfileIcon,
+  SettingsIcon,
+} from '../../../widgets/bottomTab/icons';
 
 // 홈/게시판 화면 컴포넌트 임포트
 import {
@@ -21,6 +27,7 @@ import {SettingsScreen} from '../../../pages/settings';
 
 // 인증 화면 임포트
 import WelcomeScreen from '../../../pages/auth/welcome';
+import AuthProfileNavigator from '../../../pages/auth/profile';
 
 // 헤더 컴포넌트 임포트
 import {Header} from '../../../widgets/header';
@@ -38,80 +45,157 @@ const ProfileStack = createNativeStackNavigator();
 const SettingsStack = createNativeStackNavigator();
 const MainTab = createBottomTabNavigator();
 
+// 네비게이션 헤더 스타일 정의
+const navTheme = {
+  colors: {
+    primary: '#1CBFDC',
+    secondary: '#44FF54',
+    background: '#FFFFFF',
+    card: '#F8F9FA',
+    text: '#212529',
+    border: '#E9ECEF',
+    notification: '#FF3B30',
+  },
+};
+
+// 공통 헤더 스타일 옵션
+const commonHeaderOptions = {
+  headerStyle: {
+    backgroundColor: navTheme.colors.primary,
+    elevation: 0, // Android 그림자 제거
+    shadowOpacity: 0, // iOS 그림자 제거
+    borderBottomWidth: 0,
+    height: 60,
+  },
+  headerTintColor: '#FFFFFF',
+  headerTitleStyle: {
+    fontWeight: '600' as const,
+    fontSize: 18,
+  },
+  headerShadowVisible: false,
+};
+
 // 홈/게시판 스택 네비게이터
 const BoardNavigator = () => (
-  <BoardStack.Navigator>
+  <BoardStack.Navigator screenOptions={commonHeaderOptions}>
     <BoardStack.Screen
       name="BoardList"
       component={HomeScreen}
       options={{headerShown: false}}
     />
-    <BoardStack.Screen name="BoardDetail" component={PostDetailScreen} />
-    <BoardStack.Screen name="BoardCreate" component={PostCreateScreen} />
+    <BoardStack.Screen
+      name="BoardDetail"
+      component={PostDetailScreen}
+      options={{
+        title: '게시글',
+        headerBackTitle: '뒤로',
+      }}
+    />
+    <BoardStack.Screen
+      name="BoardCreate"
+      component={PostCreateScreen}
+      options={{
+        title: '글 작성하기',
+        headerBackTitle: '취소',
+      }}
+    />
   </BoardStack.Navigator>
 );
 
 // 메시지 스택 네비게이터
 const MessagesNavigator = () => (
-  <MessagesStack.Navigator>
+  <MessagesStack.Navigator screenOptions={commonHeaderOptions}>
     <MessagesStack.Screen
       name="MessagesList"
       component={ChatListScreen}
       options={{headerShown: false}}
     />
-    <MessagesStack.Screen name="Chat" component={ChatRoomScreen} />
+    <MessagesStack.Screen
+      name="Chat"
+      component={ChatRoomScreen}
+      options={({route}: any) => ({
+        title: route.params?.chatName || '채팅방',
+        headerBackTitle: '목록',
+      })}
+    />
   </MessagesStack.Navigator>
 );
 
 // 프로필 스택 네비게이터
 const ProfileNavigator = () => (
-  <ProfileStack.Navigator>
+  <ProfileStack.Navigator screenOptions={commonHeaderOptions}>
     <ProfileStack.Screen
       name="ProfileMain"
       component={ProfileMainScreen}
       options={{headerShown: false}}
     />
-    <ProfileStack.Screen name="ProfileEdit" component={ProfileEditScreen} />
+    <ProfileStack.Screen
+      name="ProfileEdit"
+      component={ProfileEditScreen}
+      options={{
+        title: '프로필 수정',
+        headerBackTitle: '취소',
+      }}
+    />
   </ProfileStack.Navigator>
 );
 
 // 설정 스택 네비게이터
 const SettingsNavigator = () => (
-  <SettingsStack.Navigator screenOptions={{headerShown: false}}>
+  <SettingsStack.Navigator
+    screenOptions={{
+      ...commonHeaderOptions,
+      headerShown: false,
+    }}>
     <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
   </SettingsStack.Navigator>
 );
 
 // 인증 스택 네비게이터
 const AuthNavigator = () => (
-  <AuthStack.Navigator screenOptions={{headerShown: false}}>
+  <AuthStack.Navigator
+    screenOptions={{
+      ...commonHeaderOptions,
+      headerShown: false,
+    }}>
     <AuthStack.Screen name="Welcome" component={WelcomeScreen} />
+    <AuthStack.Screen name="Profile" component={AuthProfileNavigator} />
   </AuthStack.Navigator>
 );
+
+// 탭 아이콘 컴포넌트 (렌더링 함수 밖에서 정의)
+const renderHomeIcon = ({color}: {color: string}) => (
+  <HomeIcon color={color} size={28} />
+);
+const renderChatIcon = ({color}: {color: string}) => (
+  <ChatIcon color={color} size={28} />
+);
+const renderProfileIcon = ({color}: {color: string}) => (
+  <ProfileIcon color={color} size={28} />
+);
+const renderSettingsIcon = ({color}: {color: string}) => (
+  <SettingsIcon color={color} size={28} />
+);
+
+// 커스텀 헤더 랜더러
+const renderHeader = (props: any) => <Header {...props} theme={navTheme} />;
 
 // 메인 탭 네비게이터
 const MainTabNavigator = () => (
   <MainTab.Navigator
     screenOptions={{
       // 커스텀 헤더를 사용하여 모든 탭에 동일한 헤더 적용
-      header: props => <Header {...props} />,
-      tabBarActiveTintColor: '#44FF54',
+      header: renderHeader,
+      tabBarActiveTintColor: navTheme.colors.primary,
       tabBarInactiveTintColor: '#757575',
-      tabBarStyle: {
-        height: 60,
-        paddingBottom: 10,
-      },
+      tabBarStyle: tabStyles.tabBar,
     }}>
     <MainTab.Screen
       name="Board"
       component={BoardNavigator}
       options={{
         tabBarLabel: '홈',
-        tabBarIcon: ({color}) => (
-          <View style={{alignItems: 'center', justifyContent: 'center'}}>
-            <Text style={{color, fontSize: 24}}>🏠</Text>
-          </View>
-        ),
+        tabBarIcon: renderHomeIcon,
       }}
     />
     <MainTab.Screen
@@ -119,11 +203,7 @@ const MainTabNavigator = () => (
       component={MessagesNavigator}
       options={{
         tabBarLabel: '채팅',
-        tabBarIcon: ({color}) => (
-          <View style={{alignItems: 'center', justifyContent: 'center'}}>
-            <Text style={{color, fontSize: 24}}>💬</Text>
-          </View>
-        ),
+        tabBarIcon: renderChatIcon,
       }}
     />
     <MainTab.Screen
@@ -131,11 +211,7 @@ const MainTabNavigator = () => (
       component={ProfileNavigator}
       options={{
         tabBarLabel: '프로필',
-        tabBarIcon: ({color}) => (
-          <View style={{alignItems: 'center', justifyContent: 'center'}}>
-            <Text style={{color, fontSize: 24}}>👤</Text>
-          </View>
-        ),
+        tabBarIcon: renderProfileIcon,
       }}
     />
     <MainTab.Screen
@@ -143,15 +219,22 @@ const MainTabNavigator = () => (
       component={SettingsNavigator}
       options={{
         tabBarLabel: '설정',
-        tabBarIcon: ({color}) => (
-          <View style={{alignItems: 'center', justifyContent: 'center'}}>
-            <Text style={{color, fontSize: 24}}>⚙️</Text>
-          </View>
-        ),
+        tabBarIcon: renderSettingsIcon,
       }}
     />
   </MainTab.Navigator>
 );
+
+// 탭 스타일
+const tabStyles = StyleSheet.create({
+  tabBar: {
+    height: 60,
+    paddingBottom: 10,
+    backgroundColor: '#FFFFFF',
+    borderTopColor: '#F0F0F0',
+    borderTopWidth: 1,
+  },
+});
 
 // 메인 네비게이터 (인증 후 진입, 모달 포함)
 const MainNavigator = () => (
