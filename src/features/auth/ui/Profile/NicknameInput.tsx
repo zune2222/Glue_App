@@ -6,7 +6,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {Input, Button, Text, SafeArea} from '../../../shared/ui';
+import {Input, Button, Text, SafeArea} from '@shared/ui';
 import {ProfileStackParamList} from './index';
 
 type NicknameInputRouteProps = RouteProp<

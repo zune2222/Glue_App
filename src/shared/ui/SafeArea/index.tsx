@@ -17,7 +17,6 @@ export const SafeArea = ({
   backgroundColor,
 }: SafeAreaProps) => {
   const {theme} = useTheme();
-
   const bgColor = backgroundColor || theme?.colors?.background || '#FFFFFF';
 
   return (

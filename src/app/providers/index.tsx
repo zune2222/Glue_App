@@ -6,6 +6,7 @@ import {ThemeProvider, useTheme} from './theme';
 import {NavigationContainer} from '@react-navigation/native';
 import {I18nextProvider} from 'react-i18next';
 import i18n from '../../shared/lib/i18n';
+import {navigationRef} from '../navigation/RootNavigation';
 
 // 앱 프로바이더 타입
 interface AppProviderProps {
@@ -44,7 +45,12 @@ export const AppProvider = ({children}: AppProviderProps) => {
     <QueryProvider>
       <ThemeProvider>
         <I18nextProvider i18n={i18n}>
-          <NavigationContainer>
+          <NavigationContainer
+            ref={navigationRef}
+            onStateChange={state => {
+              // 네비게이션 상태 변경 디버깅 로그
+              console.log('Navigation State:', state);
+            }}>
             <AppContent>{children}</AppContent>
           </NavigationContainer>
         </I18nextProvider>
