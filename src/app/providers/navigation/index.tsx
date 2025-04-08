@@ -1,14 +1,13 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {StyleSheet} from 'react-native';
 import {
   HomeIcon,
   ChatIcon,
   ProfileIcon,
   SettingsIcon,
 } from '@widgets/bottomTab/icons';
-
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 // 홈/게시판 화면 컴포넌트 임포트
 import {HomeScreen, PostDetailScreen, PostCreateScreen} from '@features/Home';
 
@@ -176,60 +175,60 @@ const renderSettingsIcon = ({color}: {color: string}) => (
 const renderHeader = (props: any) => <Header {...props} theme={navTheme} />;
 
 // 메인 탭 네비게이터
-const MainTabNavigator = () => (
-  <MainTab.Navigator
-    screenOptions={{
-      // 커스텀 헤더를 사용하여 모든 탭에 동일한 헤더 적용
-      header: renderHeader,
-      tabBarActiveTintColor: navTheme.colors.primary,
-      tabBarInactiveTintColor: '#757575',
-      tabBarStyle: tabStyles.tabBar,
-    }}>
-    <MainTab.Screen
-      name="Board"
-      component={BoardNavigator}
-      options={{
-        tabBarLabel: '홈',
-        tabBarIcon: renderHomeIcon,
-      }}
-    />
-    <MainTab.Screen
-      name="Messages"
-      component={MessagesNavigator}
-      options={{
-        tabBarLabel: '채팅',
-        tabBarIcon: renderChatIcon,
-      }}
-    />
-    <MainTab.Screen
-      name="Profile"
-      component={ProfileNavigator}
-      options={{
-        tabBarLabel: '프로필',
-        tabBarIcon: renderProfileIcon,
-      }}
-    />
-    <MainTab.Screen
-      name="Settings"
-      component={SettingsNavigator}
-      options={{
-        tabBarLabel: '설정',
-        tabBarIcon: renderSettingsIcon,
-      }}
-    />
-  </MainTab.Navigator>
-);
+const MainTabNavigator = () => {
+  // SafeArea 하단 여백 가져오기
+  const insets = useSafeAreaInsets();
 
-// 탭 스타일
-const tabStyles = StyleSheet.create({
-  tabBar: {
-    height: 60,
-    paddingBottom: 10,
-    backgroundColor: '#FFFFFF',
-    borderTopColor: '#F0F0F0',
-    borderTopWidth: 1,
-  },
-});
+  return (
+    <MainTab.Navigator
+      screenOptions={{
+        // 커스텀 헤더를 사용하여 모든 탭에 동일한 헤더 적용
+        header: renderHeader,
+        tabBarActiveTintColor: navTheme.colors.primary,
+        tabBarInactiveTintColor: '#757575',
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#F0F0F0',
+          borderTopWidth: 1,
+          paddingBottom: insets.bottom, // 하단 SafeArea 적용
+          height: 60 + insets.bottom, // 기본 높이 + 안전 영역
+        },
+      }}>
+      <MainTab.Screen
+        name="Board"
+        component={BoardNavigator}
+        options={{
+          tabBarLabel: '홈',
+          tabBarIcon: renderHomeIcon,
+        }}
+      />
+      <MainTab.Screen
+        name="Messages"
+        component={MessagesNavigator}
+        options={{
+          tabBarLabel: '채팅',
+          tabBarIcon: renderChatIcon,
+        }}
+      />
+      <MainTab.Screen
+        name="Profile"
+        component={ProfileNavigator}
+        options={{
+          tabBarLabel: '프로필',
+          tabBarIcon: renderProfileIcon,
+        }}
+      />
+      <MainTab.Screen
+        name="Settings"
+        component={SettingsNavigator}
+        options={{
+          tabBarLabel: '설정',
+          tabBarIcon: renderSettingsIcon,
+        }}
+      />
+    </MainTab.Navigator>
+  );
+};
 
 // 메인 네비게이터 (인증 후 진입, 모달 포함)
 const MainNavigator = () => (

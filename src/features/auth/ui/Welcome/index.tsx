@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
   },
   langButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: '5%',
+    right: 20,
     paddingVertical: 5,
     paddingHorizontal: 10,
     backgroundColor: '#f0f0f0',
