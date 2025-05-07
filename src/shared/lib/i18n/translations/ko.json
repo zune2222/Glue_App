@@ -13,7 +13,9 @@
     "next": "다음",
     "prev": "이전",
     "search": "검색",
-    "send": "보내기"
+    "send": "보내기",
+    "select": "선택",
+    "permission": "권한 필요"
   },
   "auth": {
     "login": "로그인",
@@ -61,6 +63,35 @@
       "title": "생년월일을 입력해주세요",
       "placeholder": "YYYY-MM-DD",
       "selectDate": "생년월일 선택"
+    },
+    "email": {
+      "title": "학교의 웹메일 아이디를\n입력해주세요",
+      "subtitle": "입력하신 아이디로 인증 코드를 보내드릴게요.",
+      "label": "웹메일 아이디",
+      "placeholder": "웹메일 아이디를 입력하세요"
+    },
+    "verification": {
+      "title": "전송해드린 코드를\n입력해주세요",
+      "didNotReceive": "메일을 받지 못하셨나요?",
+      "resend": "재전송",
+      "resendSuccess": "인증 코드를 다시 전송해드렸어요"
+    },
+    "nickname": {
+      "title": "GLUE에서 사용할\n닉네임을 입력해주세요",
+      "label": "닉네임",
+      "placeholder": "닉네임을 입력하세요",
+      "duplicate": "이미 사용하고 있는 닉네임이에요."
+    },
+    "profilePhoto": {
+      "title": "프로필 사진을 설정해주세요",
+      "subtitle": "프로필 사진은 언제든지 다시 설정하실 수 있어요.",
+      "selectOption": "프로필 사진을 어떻게 추가할까요?",
+      "camera": "카메라",
+      "gallery": "갤러리",
+      "unavailable": "이 기기에서는 이 기능을 사용할 수 없습니다.",
+      "blocked": "앱이 카메라 또는 갤러리에 접근할 수 없습니다. 설정에서 권한을 허용해주세요.",
+      "goToSettings": "설정으로 이동",
+      "error": "이미지를 불러오는 중 오류가 발생했습니다."
     },
     "nativeLanguage": {
       "title": "모국어를 선택해주세요",

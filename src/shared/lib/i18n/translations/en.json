@@ -13,7 +13,9 @@
     "next": "Next",
     "prev": "Previous",
     "search": "Search",
-    "send": "Send"
+    "send": "Send",
+    "select": "Select",
+    "permission": "Permission Required"
   },
   "auth": {
     "login": "Log in",
@@ -61,6 +63,35 @@
       "title": "Please enter your date of birth",
       "placeholder": "YYYY-MM-DD",
       "selectDate": "Select Date of Birth"
+    },
+    "email": {
+      "title": "Please enter your university\nweb mail ID",
+      "subtitle": "We will send a verification code to the ID you entered.",
+      "label": "Web mail ID",
+      "placeholder": "Enter your web mail ID"
+    },
+    "verification": {
+      "title": "Please enter the code\nwe sent you",
+      "didNotReceive": "Didn't receive the email?",
+      "resend": "Resend",
+      "resendSuccess": "Verification code has been resent"
+    },
+    "nickname": {
+      "title": "Please enter the nickname\nyou want to use on GLUE",
+      "label": "Nickname",
+      "placeholder": "Enter your nickname",
+      "duplicate": "This nickname is already in use."
+    },
+    "profilePhoto": {
+      "title": "Set your profile picture",
+      "subtitle": "You can change your profile picture anytime.",
+      "selectOption": "How would you like to add a profile photo?",
+      "camera": "Camera",
+      "gallery": "Gallery",
+      "unavailable": "This feature is not available on this device.",
+      "blocked": "The app cannot access the camera or gallery. Please enable permissions in settings.",
+      "goToSettings": "Go to Settings",
+      "error": "An error occurred while loading the image."
     },
     "nativeLanguage": {
       "title": "Please select your native language",

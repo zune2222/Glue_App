@@ -11,6 +11,10 @@ import NativeLanguageSelection from './screens/NativeLanguageSelection';
 import LanguageLevelSelection from './screens/LanguageLevelSelection';
 import UniversitySelection from './screens/UniversitySelection';
 import DepartmentSelection from './screens/DepartmentSelection';
+import EmailInput from './screens/EmailInput';
+import VerificationCodeInput from './screens/VerificationCodeInput';
+import NicknameInput from './screens/NicknameInput';
+import ProfilePhotoInput from './screens/ProfilePhotoInput';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
@@ -24,7 +28,7 @@ type SignUpScreenProps = {
 
 const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [step, setStep] = useState(1); // 현재 진행 단계
-  const totalSteps = 8; // 회원가입 총 단계
+  const totalSteps = 12; // 회원가입 총 단계
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(
     'korean',
   );
@@ -35,6 +39,11 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [languageLevel, setLanguageLevel] = useState<string | null>(null);
   const [university, setUniversity] = useState<string | null>(null);
   const [department, setDepartment] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [isNicknameDuplicate, setIsNicknameDuplicate] = useState(false);
+  const [profilePhotoUri, setProfilePhotoUri] = useState<string | null>(null);
 
   // 애니메이션 값
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -119,6 +128,31 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     setDepartment(dept);
   };
 
+  const handleEmailChange = (email: string) => {
+    setEmail(email);
+  };
+
+  const handleVerificationComplete = (code: string) => {
+    setVerificationCode(code);
+  };
+
+  const handleNicknameChange = (nickname: string) => {
+    setNickname(nickname);
+  };
+
+  const handlePhotoSelect = (uri: string | null) => {
+    setProfilePhotoUri(uri);
+  };
+
+  // 닉네임 중복 확인 함수
+  const checkNicknameDuplicate = async (nickname: string): Promise<boolean> => {
+    // 실제 구현에서는 API 호출하여 중복 확인
+    // 예시: 글루라는 닉네임은 중복으로 설정
+    const isDuplicate = nickname.toLowerCase() === '글루';
+    setIsNicknameDuplicate(isDuplicate);
+    return isDuplicate;
+  };
+
   // 현재 단계에 따라 다른 화면 렌더링
   const renderScreen = () => {
     switch (currentView) {
@@ -174,6 +208,31 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
             onDepartmentSelect={handleDepartmentSelect}
           />
         );
+      case 9:
+        return (
+          <EmailInput onEmailChange={handleEmailChange} initialEmail={email} />
+        );
+      case 10:
+        return (
+          <VerificationCodeInput
+            onVerificationComplete={handleVerificationComplete}
+          />
+        );
+      case 11:
+        return (
+          <NicknameInput
+            onNicknameChange={handleNicknameChange}
+            initialNickname={nickname}
+            onNicknameCheck={checkNicknameDuplicate}
+          />
+        );
+      case 12:
+        return (
+          <ProfilePhotoInput
+            onPhotoSelect={handlePhotoSelect}
+            initialPhotoUri={profilePhotoUri}
+          />
+        );
       // 추후 다른 단계 추가 예정
       default:
         return (
@@ -204,6 +263,14 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         return !university;
       case 8:
         return !department;
+      case 9:
+        return email.trim() === '';
+      case 10:
+        return verificationCode.length !== 6;
+      case 11:
+        return nickname.trim() === '' || isNicknameDuplicate;
+      case 12:
+        return false; // 프로필 사진은 선택 사항
       default:
         return false;
     }
