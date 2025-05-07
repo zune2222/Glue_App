@@ -56,6 +56,11 @@
       "title": "Please select your gender",
       "male": "Male",
       "female": "Female"
+    },
+    "birthdate": {
+      "title": "Please enter your date of birth",
+      "placeholder": "YYYY-MM-DD",
+      "selectDate": "Select Date of Birth"
     }
   },
   "profile": {

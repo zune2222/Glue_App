@@ -6,6 +6,7 @@ import SignUpLayout from './layout';
 import LanguageSelection from './screens/LanguageSelection';
 import NameInput from './screens/NameInput';
 import GenderSelection from './screens/GenderSelection';
+import BirthDateInput from './screens/BirthDateInput';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
@@ -25,6 +26,7 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   );
   const [name, setName] = useState('');
   const [gender, setGender] = useState<string | null>(null);
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
 
   // 애니메이션 값
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -89,6 +91,10 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     setGender(gender);
   };
 
+  const handleBirthDateChange = (date: Date) => {
+    setBirthDate(date);
+  };
+
   // 현재 단계에 따라 다른 화면 렌더링
   const renderScreen = () => {
     switch (currentView) {
@@ -106,6 +112,13 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
           <GenderSelection
             selectedGender={gender}
             onGenderSelect={handleGenderSelect}
+          />
+        );
+      case 4:
+        return (
+          <BirthDateInput
+            onBirthDateChange={handleBirthDateChange}
+            initialDate={birthDate}
           />
         );
       // 추후 다른 단계 추가 예정
@@ -128,6 +141,8 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         return name.trim() === '';
       case 3:
         return !gender;
+      case 4:
+        return !birthDate;
       default:
         return false;
     }
