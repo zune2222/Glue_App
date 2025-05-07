@@ -11,7 +11,7 @@ import {
 import {colors} from '@app/styles/colors';
 import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
-
+import SearchIcon from '@shared/assets/icons/SearchIcon';
 type UniversitySelectionProps = {
   selectedUniversity: string | null;
   onUniversitySelect: (university: string) => void;
@@ -66,13 +66,7 @@ const UniversitySelection = ({
                 ? getSelectedUniversityName()
                 : t('signup.university.placeholder')}
             </Text>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/laddv804_expires_30_days.png',
-              }}
-              resizeMode="stretch"
-              style={styles.dropdownIcon}
-            />
+            <SearchIcon width={24} height={24} />
           </View>
           <View style={styles.selectorBorder} />
         </TouchableOpacity>

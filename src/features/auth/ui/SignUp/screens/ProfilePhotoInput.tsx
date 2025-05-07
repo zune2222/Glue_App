@@ -26,6 +26,7 @@ import {
   Permission,
 } from 'react-native-permissions';
 import CameraIcon from '@shared/assets/icons/CameraIcon';
+import PlusIcon from '@shared/assets/icons/PlusIcon';
 
 type ProfilePhotoInputProps = {
   onPhotoSelect: (uri: string | null) => void;
@@ -177,33 +178,33 @@ const ProfilePhotoInput = ({
       </View>
 
       <View style={styles.photoContainer}>
-        <TouchableOpacity
-          style={styles.photoCircle}
-          onPress={handleSelectPhoto}
-          activeOpacity={0.8}>
-          {photoUri ? (
-            <Image source={{uri: photoUri}} style={styles.profileImage} />
-          ) : (
-            <View style={styles.placeholderContainer}>
-              <View style={styles.iconContainer}>
-                <CameraIcon
-                  width={40}
-                  height={40}
-                  color={colors.auroMetalSaurus}
-                />
+        <View>
+          <TouchableOpacity
+            style={styles.photoCircle}
+            onPress={handleSelectPhoto}
+            activeOpacity={0.8}>
+            {photoUri ? (
+              <Image source={{uri: photoUri}} style={styles.profileImage} />
+            ) : (
+              <View style={styles.placeholderContainer}>
+                <View style={styles.iconContainer}>
+                  <CameraIcon
+                    width={40}
+                    height={40}
+                    color={colors.auroMetalSaurus}
+                  />
+                </View>
               </View>
-              <View style={styles.editContainer}>
-                <Image
-                  source={{
-                    uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/g1a3vl5z_expires_30_days.png',
-                  }}
-                  style={styles.editIcon}
-                  resizeMode="stretch"
-                />
-              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSelectPhoto}
+            style={styles.editContainer}>
+            <View style={styles.editIconBackground}>
+              <PlusIcon width={16} height={16} color="#FFFFFF" />
             </View>
-          )}
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -260,13 +261,21 @@ const styles = StyleSheet.create({
   },
   editContainer: {
     position: 'absolute',
-    bottom: 5,
-    right: 20,
+    bottom: 15,
+    right: 5,
   },
-  editIcon: {
-    width: 42,
-    height: 68,
-    borderRadius: 21,
+  editIconBackground: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.batteryChargedBlue,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
   },
 });
 
