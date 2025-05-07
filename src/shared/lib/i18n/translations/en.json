@@ -42,6 +42,17 @@
       "privacy": "Privacy Policy"
     }
   },
+  "signup": {
+    "language": {
+      "title": "Select system language",
+      "korean": "Korean",
+      "english": "English"
+    },
+    "name": {
+      "title": "Enter your name",
+      "placeholder": "Name"
+    }
+  },
   "profile": {
     "title": "Profile",
     "edit": "Edit Profile",

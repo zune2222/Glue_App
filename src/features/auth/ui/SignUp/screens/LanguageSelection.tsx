@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {colors} from '@app/styles/colors';
 import {typography} from '@app/styles/typography';
+import {useTranslation} from 'react-i18next';
 
 type LanguageSelectionProps = {
   onLanguageSelect: (language: string) => void;
@@ -15,6 +16,7 @@ const LanguageSelection = ({
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(
     initialLanguage,
   );
+  const {t} = useTranslation();
 
   const handleLanguageSelect = (language: string) => {
     setSelectedLanguage(language);
@@ -24,7 +26,7 @@ const LanguageSelection = ({
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>시스템 언어를 설정해주세요</Text>
+        <Text style={styles.title}>{t('signup.language.title')}</Text>
       </View>
 
       <View style={styles.optionsContainer}>
@@ -52,7 +54,7 @@ const LanguageSelection = ({
                   selectedLanguage === 'korean' ? '#FFFFFF' : colors.manatee,
               },
             ]}>
-            한국어
+            {t('signup.language.korean')}
           </Text>
         </TouchableOpacity>
 
@@ -80,7 +82,7 @@ const LanguageSelection = ({
                   selectedLanguage === 'english' ? '#FFFFFF' : colors.manatee,
               },
             ]}>
-            영어
+            {t('signup.language.english')}
           </Text>
         </TouchableOpacity>
       </View>

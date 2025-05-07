@@ -12,6 +12,7 @@ import {NavigationProp} from '@react-navigation/native';
 import {colors} from '@app/styles/colors';
 import {Button} from '@shared/ui/Button';
 import BackArrow from '@shared/assets/images/backArrow.svg';
+import {useTranslation} from 'react-i18next';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
@@ -36,9 +37,12 @@ const SignUpLayout = ({
   totalSteps,
   onNext,
   onBack,
-  nextButtonLabel = '다음',
+  nextButtonLabel,
   isNextDisabled = false,
 }: SignUpLayoutProps) => {
+  const {t} = useTranslation();
+  const buttonLabel = nextButtonLabel || t('common.next');
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -73,7 +77,7 @@ const SignUpLayout = ({
         {/* 다음 버튼 */}
         <View style={styles.buttonContainer}>
           <Button
-            label={nextButtonLabel}
+            label={buttonLabel}
             onPress={onNext}
             variant={isNextDisabled ? 'disabled' : 'primary'}
             disabled={isNextDisabled}
