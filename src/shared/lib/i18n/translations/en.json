@@ -87,6 +87,11 @@
       "label": "University",
       "placeholder": "Select your university",
       "pusan": "Pusan National University"
+    },
+    "department": {
+      "title": "Please select your department",
+      "placeholder": "Select your department",
+      "search": "Search department"
     }
   },
   "profile": {

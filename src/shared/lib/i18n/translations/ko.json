@@ -87,6 +87,11 @@
       "label": "대학교",
       "placeholder": "대학교를 선택해주세요",
       "pusan": "부산대학교"
+    },
+    "department": {
+      "title": "학과를 알려주세요",
+      "placeholder": "학과를 선택해주세요",
+      "search": "학과 검색"
     }
   },
   "profile": {

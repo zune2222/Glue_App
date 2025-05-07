@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import {colors} from '@app/styles/colors';
 import {typography} from '@app/styles/typography';
-import {departments} from '../data/departments';
+import {departments, getDepartmentName, Department} from '../data/departments';
+import {useTranslation} from 'react-i18next';
 
 type DepartmentSelectionProps = {
   selectedDepartment: string | null;
@@ -26,12 +27,16 @@ const DepartmentSelection = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const searchInputRef = useRef<TextInput>(null);
+  const {t, i18n} = useTranslation();
+
+  const currentLanguage = i18n.language.startsWith('ko') ? 'ko' : 'en';
 
   // 검색어에 따른 필터링된 학과 목록
   const filteredDepartments = searchText
-    ? departments.filter(dept =>
-        dept.toLowerCase().includes(searchText.toLowerCase()),
-      )
+    ? departments.filter(dept => {
+        const deptName = getDepartmentName(dept, currentLanguage);
+        return deptName.toLowerCase().includes(searchText.toLowerCase());
+      })
     : departments;
 
   const openModal = () => {
@@ -50,15 +55,22 @@ const DepartmentSelection = ({
     setSearchText('');
   };
 
-  const handleSelect = (department: string) => {
-    onDepartmentSelect(department);
+  const handleSelect = (department: Department) => {
+    // 학과 객체에서 현재 언어에 맞는 이름을 추출해서 저장
+    onDepartmentSelect(getDepartmentName(department, currentLanguage));
     closeModal();
+  };
+
+  // 선택된 학과명 표시
+  const getSelectedDepartmentDisplay = () => {
+    if (!selectedDepartment) return '';
+    return selectedDepartment;
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{'학과를 알려주세요'}</Text>
+        <Text style={styles.title}>{t('signup.department.title')}</Text>
       </View>
 
       <View style={styles.inputContainer}>
@@ -69,7 +81,9 @@ const DepartmentSelection = ({
                 styles.selectorText,
                 !selectedDepartment && styles.placeholderText,
               ]}>
-              {selectedDepartment || '학과를 선택해주세요'}
+              {selectedDepartment
+                ? getSelectedDepartmentDisplay()
+                : t('signup.department.placeholder')}
             </Text>
             <Image
               source={{
@@ -100,7 +114,7 @@ const DepartmentSelection = ({
                     style={styles.searchInput}
                     value={searchText}
                     onChangeText={setSearchText}
-                    placeholder="학과 검색"
+                    placeholder={t('signup.department.search')}
                     placeholderTextColor="#9DA2AF"
                   />
                   <Image
@@ -121,7 +135,9 @@ const DepartmentSelection = ({
                       <TouchableOpacity
                         style={styles.departmentItem}
                         onPress={() => handleSelect(item)}>
-                        <Text style={styles.departmentName}>{item}</Text>
+                        <Text style={styles.departmentName}>
+                          {getDepartmentName(item, currentLanguage)}
+                        </Text>
                       </TouchableOpacity>
                     )}
                     keyboardShouldPersistTaps="handled"
