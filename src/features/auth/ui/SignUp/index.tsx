@@ -15,11 +15,14 @@ import EmailInput from './screens/EmailInput';
 import VerificationCodeInput from './screens/VerificationCodeInput';
 import NicknameInput from './screens/NicknameInput';
 import ProfilePhotoInput from './screens/ProfilePhotoInput';
+import IntroductionScreen from './screens/IntroductionScreen';
+import SignupCompleteScreen from './screens/SignupCompleteScreen';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
   Welcome: undefined;
   SignUp: undefined;
+  Main: undefined;
 };
 
 type SignUpScreenProps = {
@@ -28,7 +31,7 @@ type SignUpScreenProps = {
 
 const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [step, setStep] = useState(1); // 현재 진행 단계
-  const totalSteps = 12; // 회원가입 총 단계
+  const totalSteps = 13; // 회원가입 총 단계 (소개 추가로 13으로 변경)
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(
     'korean',
   );
@@ -44,6 +47,8 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [nickname, setNickname] = useState('');
   const [isNicknameDuplicate, setIsNicknameDuplicate] = useState(false);
   const [profilePhotoUri, setProfilePhotoUri] = useState<string | null>(null);
+  const [introduction, setIntroduction] = useState(''); // 한 줄 소개 상태 추가
+  const [isSignupComplete, setIsSignupComplete] = useState(false); // 회원가입 완료 상태 추가
 
   // 애니메이션 값
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -80,6 +85,11 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   }, [step, currentView, animateTransition]);
 
   const handleGoBack = () => {
+    if (isSignupComplete) {
+      // 가입 완료 화면에서는 뒤로가기 없음
+      return;
+    }
+
     if (step > 1) {
       setStep(step - 1);
     } else {
@@ -88,6 +98,19 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   };
 
   const handleNext = () => {
+    if (isSignupComplete) {
+      // 가입 완료 화면에서 시작하기 버튼 클릭
+      navigation.navigate('Main');
+      return;
+    }
+
+    // 마지막 단계에서 다음을 눌렀을 때 가입 완료 화면으로 전환
+    if (step === totalSteps) {
+      // 여기서 실제 회원가입 API 호출 등의 로직을 수행할 수 있음
+      setIsSignupComplete(true);
+      return;
+    }
+
     // 다음 단계로 이동
     setStep(step + 1);
   };
@@ -144,6 +167,11 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     setProfilePhotoUri(uri);
   };
 
+  // 한 줄 소개 변경 핸들러 추가
+  const handleIntroductionChange = (text: string) => {
+    setIntroduction(text);
+  };
+
   // 닉네임 중복 확인 함수
   const checkNicknameDuplicate = async (nickname: string): Promise<boolean> => {
     // 실제 구현에서는 API 호출하여 중복 확인
@@ -153,8 +181,21 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     return isDuplicate;
   };
 
+  // 회원가입 완료 후 시작하기
+  const handleStartApp = () => {
+    navigation.navigate('Main');
+  };
+
   // 현재 단계에 따라 다른 화면 렌더링
   const renderScreen = () => {
+    // 회원가입 완료 화면
+    if (isSignupComplete) {
+      return (
+        <SignupCompleteScreen nickname={nickname} onStart={handleStartApp} />
+      );
+    }
+
+    // 회원가입 진행 화면
     switch (currentView) {
       case 1:
         return (
@@ -233,6 +274,13 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
             initialPhotoUri={profilePhotoUri}
           />
         );
+      case 13: // 한 줄 소개 화면 추가
+        return (
+          <IntroductionScreen
+            introduction={introduction}
+            onIntroductionChange={handleIntroductionChange}
+          />
+        );
       // 추후 다른 단계 추가 예정
       default:
         return (
@@ -246,6 +294,11 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
 
   // 현재 단계에 따른 다음 버튼 활성화 여부
   const isNextButtonDisabled = () => {
+    // 회원가입 완료 화면에서는 버튼 항상 활성화
+    if (isSignupComplete) {
+      return false;
+    }
+
     switch (step) {
       case 1:
         return !selectedLanguage;
@@ -271,14 +324,24 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         return nickname.trim() === '' || isNicknameDuplicate;
       case 12:
         return false; // 프로필 사진은 선택 사항
+      case 13: // 한 줄 소개 활성화 조건 추가
+        return introduction.trim() === '';
       default:
         return false;
     }
   };
 
+  // 회원가입 완료 화면일 때는 레이아웃을 사용하지 않음
+  if (isSignupComplete) {
+    return (
+      <Animated.View style={{opacity: fadeAnim, flex: 1}}>
+        {renderScreen()}
+      </Animated.View>
+    );
+  }
+
   return (
     <SignUpLayout
-      navigation={navigation}
       currentStep={step}
       totalSteps={totalSteps}
       onNext={handleNext}

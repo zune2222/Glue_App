@@ -93,6 +93,11 @@
       "goToSettings": "Go to Settings",
       "error": "An error occurred while loading the image."
     },
+    "introduction": {
+      "title": "Please introduce yourself in one line :)",
+      "subtitle": "You can enter up to {{maxLength}} characters including spaces.",
+      "placeholder": "Describe yourself in one line"
+    },
     "nativeLanguage": {
       "title": "Please select your native language",
       "subtitle": "If your native language is not listed, please select the language you are most comfortable with.",
