@@ -1,5 +1,6 @@
 import React from 'react';
 import {SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import Header from './components/Header';
 import BannerSection from './components/BannerSection';
 import CategorySection from './components/CategorySection';
@@ -10,20 +11,16 @@ import {
 } from '../model/dummyData';
 
 const HomeScreen = () => {
+  const {t} = useTranslation();
+
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Header />
       <ScrollView style={styles.scrollContainer}>
-        <Header />
         <BannerSection />
-        <CategorySection title="실시간 인기 모임글" cards={popularMeetings} />
-        <CategorySection
-          title="한국어 사용자를 찾는 모임"
-          cards={koreanMeetings}
-        />
-        <CategorySection
-          title="영어 사용자를 찾는 모임"
-          cards={englishMeetings}
-        />
+        <CategorySection title={t('home.popular')} cards={popularMeetings} />
+        <CategorySection title={t('home.nearby')} cards={koreanMeetings} />
+        <CategorySection title={t('home.recent')} cards={englishMeetings} />
       </ScrollView>
     </SafeAreaView>
   );

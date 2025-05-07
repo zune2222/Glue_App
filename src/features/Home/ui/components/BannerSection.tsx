@@ -3,20 +3,29 @@ import {View, ScrollView, StyleSheet} from 'react-native';
 
 const BannerSection = () => {
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.bannerScrollContent}
-      style={styles.bannerScroll}>
-      <View style={styles.bannerContainer}>
-        <View style={[styles.banner, styles.bannerMarginLeft]}></View>
-        <View style={[styles.banner, styles.bannerMarginLeft]}></View>
-      </View>
-    </ScrollView>
+    <>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.bannerScrollContent}
+        style={styles.bannerScroll}>
+        <View style={styles.bannerContainer}>
+          <View style={[styles.banner, styles.bannerMarginLeft]}></View>
+          <View style={[styles.banner, styles.bannerMarginLeft]}></View>
+        </View>
+      </ScrollView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  welcomeText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#384050',
+    marginBottom: 16,
+    marginLeft: 19,
+  },
   bannerScroll: {
     marginBottom: 31,
   },

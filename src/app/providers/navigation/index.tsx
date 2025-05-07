@@ -5,6 +5,9 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 // 홈/게시판 화면 컴포넌트 임포트
 import {HomeScreen} from '@features/Home';
 
+// 모임글 화면 컴포넌트 임포트
+import {GroupList, GroupDetail} from '@features/Group';
+
 // 채팅 화면 컴포넌트 임포트
 import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
 
@@ -37,6 +40,7 @@ const RootStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 const BoardStack = createNativeStackNavigator();
+const GroupStack = createNativeStackNavigator();
 const MessagesStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
 const MainTab = createBottomTabNavigator();
@@ -133,6 +137,30 @@ const AuthNavigator = () => (
   </AuthStack.Navigator>
 );
 
+// 모임글 스택 네비게이터
+const GroupNavigator = () => (
+  <GroupStack.Navigator screenOptions={commonHeaderOptions}>
+    <GroupStack.Screen
+      name="GroupList"
+      component={GroupList}
+      options={{headerShown: false}}
+    />
+    <GroupStack.Screen
+      name="GroupDetail"
+      component={GroupDetail}
+      options={{headerShown: false}}
+    />
+    <GroupStack.Screen
+      name="CreateGroup"
+      component={GroupList} // 임시로 동일한 컴포넌트 사용, 추후 변경 필요
+      options={{
+        title: '모임 만들기',
+        headerBackTitle: '취소',
+      }}
+    />
+  </GroupStack.Navigator>
+);
+
 // 탭 아이콘 컴포넌트 (렌더링 함수 밖에서 정의)
 const renderHomeIcon = ({color}: {color: string}) => (
   <HomeIcon color={color} size={28} />
@@ -180,7 +208,7 @@ const MainTabNavigator = () => {
       />
       <MainTab.Screen
         name="Group"
-        component={MessagesNavigator}
+        component={GroupNavigator}
         options={{
           tabBarLabel: '모임글',
           tabBarIcon: renderGroupIcon,
