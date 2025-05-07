@@ -39,7 +39,7 @@ const NativeLanguageSelection = ({
       <View style={styles.optionsContainer}>
         {/* 첫 번째 행: 한국어, 영어 */}
         <View style={styles.row}>
-          <View style={styles.gridItem}>
+          <View style={styles.leftItem}>
             <SelectionButton
               label={languageOptions[0].name}
               isSelected={selectedLanguage === languageOptions[0].id}
@@ -47,7 +47,7 @@ const NativeLanguageSelection = ({
               compact={true}
             />
           </View>
-          <View style={styles.gridItem}>
+          <View style={styles.rightItem}>
             <SelectionButton
               label={languageOptions[1].name}
               isSelected={selectedLanguage === languageOptions[1].id}
@@ -59,7 +59,7 @@ const NativeLanguageSelection = ({
 
         {/* 두 번째 행: 일본어, 중국어 */}
         <View style={styles.row}>
-          <View style={styles.gridItem}>
+          <View style={styles.leftItem}>
             <SelectionButton
               label={languageOptions[2].name}
               isSelected={selectedLanguage === languageOptions[2].id}
@@ -67,7 +67,7 @@ const NativeLanguageSelection = ({
               compact={true}
             />
           </View>
-          <View style={styles.gridItem}>
+          <View style={styles.rightItem}>
             <SelectionButton
               label={languageOptions[3].name}
               isSelected={selectedLanguage === languageOptions[3].id}
@@ -79,7 +79,7 @@ const NativeLanguageSelection = ({
 
         {/* 세 번째 행: 독일어, 프랑스어 */}
         <View style={styles.row}>
-          <View style={styles.gridItem}>
+          <View style={styles.leftItem}>
             <SelectionButton
               label={languageOptions[4].name}
               isSelected={selectedLanguage === languageOptions[4].id}
@@ -87,7 +87,7 @@ const NativeLanguageSelection = ({
               compact={true}
             />
           </View>
-          <View style={styles.gridItem}>
+          <View style={styles.rightItem}>
             <SelectionButton
               label={languageOptions[5].name}
               isSelected={selectedLanguage === languageOptions[5].id}
@@ -99,7 +99,7 @@ const NativeLanguageSelection = ({
 
         {/* 네 번째 행: 스페인어 (한 개만) */}
         <View style={styles.row}>
-          <View style={styles.gridItem}>
+          <View style={styles.leftItem}>
             <SelectionButton
               label={languageOptions[6].name}
               isSelected={selectedLanguage === languageOptions[6].id}
@@ -107,7 +107,7 @@ const NativeLanguageSelection = ({
               compact={true}
             />
           </View>
-          <View style={styles.gridItem}>{/* 빈 영역 */}</View>
+          <View style={styles.rightItem}>{/* 빈 영역 */}</View>
         </View>
       </View>
     </View>
@@ -138,9 +138,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     width: '100%',
   },
-  gridItem: {
+  leftItem: {
     flex: 1,
     marginRight: 9,
+  },
+  rightItem: {
+    flex: 1,
   },
 });
 
