@@ -62,16 +62,6 @@ const DepartmentSelection = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <View style={styles.labelContainer}>
-          <Text style={styles.label}>{'학과'}</Text>
-          <Image
-            source={{
-              uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/g23g7kf6_expires_30_days.png',
-            }}
-            resizeMode="stretch"
-            style={styles.labelIcon}
-          />
-        </View>
         <TouchableOpacity style={styles.selector} onPress={openModal}>
           <View style={styles.selectorContent}>
             <Text
