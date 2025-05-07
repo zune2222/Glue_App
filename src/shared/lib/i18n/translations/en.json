@@ -72,6 +72,21 @@
       "german": "German",
       "french": "French",
       "spanish": "Spanish"
+    },
+    "languageLevel": {
+      "title": "Please set your proficiency level\nfor the selected language",
+      "subtitle": "Language proficiency level can be changed at any time.",
+      "beginner": "Beginner",
+      "elementary": "Elementary",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "proficient": "Proficient"
+    },
+    "university": {
+      "title": "Please select your\nuniversity",
+      "label": "University",
+      "placeholder": "Select your university",
+      "pusan": "Pusan National University"
     }
   },
   "profile": {

@@ -72,6 +72,21 @@
       "german": "독일어",
       "french": "프랑스어",
       "spanish": "스페인어"
+    },
+    "languageLevel": {
+      "title": "선택한 모국어에 대한\n언어 수준을 설정해 주세요",
+      "subtitle": "교환 언어 수준은 언제든지 다시 설정할 수 있어요.",
+      "beginner": "초급",
+      "elementary": "기초",
+      "intermediate": "중급",
+      "advanced": "고급",
+      "proficient": "능숙"
+    },
+    "university": {
+      "title": "재학하고 있는 대학교를\n선택해주세요",
+      "label": "대학교",
+      "placeholder": "대학교를 선택해주세요",
+      "pusan": "부산대학교"
     }
   },
   "profile": {

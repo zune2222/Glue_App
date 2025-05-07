@@ -8,6 +8,9 @@ import NameInput from './screens/NameInput';
 import GenderSelection from './screens/GenderSelection';
 import BirthDateInput from './screens/BirthDateInput';
 import NativeLanguageSelection from './screens/NativeLanguageSelection';
+import LanguageLevelSelection from './screens/LanguageLevelSelection';
+import UniversitySelection from './screens/UniversitySelection';
+import DepartmentSelection from './screens/DepartmentSelection';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
@@ -21,7 +24,7 @@ type SignUpScreenProps = {
 
 const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [step, setStep] = useState(1); // 현재 진행 단계
-  const totalSteps = 6; // 회원가입 총 단계
+  const totalSteps = 8; // 회원가입 총 단계
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(
     'korean',
   );
@@ -29,6 +32,9 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [gender, setGender] = useState<string | null>(null);
   const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [nativeLanguage, setNativeLanguage] = useState<string | null>(null);
+  const [languageLevel, setLanguageLevel] = useState<string | null>(null);
+  const [university, setUniversity] = useState<string | null>(null);
+  const [department, setDepartment] = useState<string | null>(null);
 
   // 애니메이션 값
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -101,6 +107,18 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     setNativeLanguage(language);
   };
 
+  const handleLanguageLevelSelect = (level: string) => {
+    setLanguageLevel(level);
+  };
+
+  const handleUniversitySelect = (univ: string) => {
+    setUniversity(univ);
+  };
+
+  const handleDepartmentSelect = (dept: string) => {
+    setDepartment(dept);
+  };
+
   // 현재 단계에 따라 다른 화면 렌더링
   const renderScreen = () => {
     switch (currentView) {
@@ -134,6 +152,28 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
             onLanguageSelect={handleNativeLanguageSelect}
           />
         );
+      case 6:
+        return (
+          <LanguageLevelSelection
+            selectedLevel={languageLevel}
+            onLevelSelect={handleLanguageLevelSelect}
+            nativeLanguage={nativeLanguage}
+          />
+        );
+      case 7:
+        return (
+          <UniversitySelection
+            selectedUniversity={university}
+            onUniversitySelect={handleUniversitySelect}
+          />
+        );
+      case 8:
+        return (
+          <DepartmentSelection
+            selectedDepartment={department}
+            onDepartmentSelect={handleDepartmentSelect}
+          />
+        );
       // 추후 다른 단계 추가 예정
       default:
         return (
@@ -158,6 +198,12 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         return !birthDate;
       case 5:
         return !nativeLanguage;
+      case 6:
+        return !languageLevel;
+      case 7:
+        return !university;
+      case 8:
+        return !department;
       default:
         return false;
     }
