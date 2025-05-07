@@ -21,7 +21,11 @@ import {ProfileMainScreen, ProfileEditScreen} from '@features/Profile';
 import {SettingsScreen} from '@features/Settings';
 
 // 인증 화면 임포트
-import {WelcomeScreen, AuthProfileNavigator} from '@features/Auth';
+import {
+  WelcomeScreen,
+  AuthProfileNavigator,
+  SignUpScreen,
+} from '@features/auth';
 
 // 헤더 컴포넌트 임포트
 import {Header} from '@widgets/header';
@@ -153,6 +157,7 @@ const AuthNavigator = () => (
       headerShown: false,
     }}>
     <AuthStack.Screen name="Welcome" component={WelcomeScreen} />
+    <AuthStack.Screen name="SignUp" component={SignUpScreen} />
     <AuthStack.Screen name="Profile" component={AuthProfileNavigator} />
   </AuthStack.Navigator>
 );
