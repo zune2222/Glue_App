@@ -9,7 +9,7 @@ import {
 } from '@widgets/bottomTab/icons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 // 홈/게시판 화면 컴포넌트 임포트
-import {HomeScreen, PostDetailScreen, PostCreateScreen} from '@features/Home';
+import {HomeScreen} from '@features/Home';
 
 // 채팅 화면 컴포넌트 임포트
 import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
@@ -80,22 +80,6 @@ const BoardNavigator = () => (
       name="BoardList"
       component={HomeScreen}
       options={{headerShown: false}}
-    />
-    <BoardStack.Screen
-      name="BoardDetail"
-      component={PostDetailScreen}
-      options={{
-        title: '게시글',
-        headerBackTitle: '뒤로',
-      }}
-    />
-    <BoardStack.Screen
-      name="BoardCreate"
-      component={PostCreateScreen}
-      options={{
-        title: '글 작성하기',
-        headerBackTitle: '취소',
-      }}
     />
   </BoardStack.Navigator>
 );

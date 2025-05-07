@@ -38,8 +38,7 @@ export const Header = (props: HeaderProps) => {
   };
 
   return (
-    <View
-      style={[styles.header, theme && {backgroundColor: theme.colors.primary}]}>
+    <View style={[styles.header]}>
       <Text
         variant="h4"
         weight="bold"
@@ -56,15 +55,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    // 그림자 효과 추가
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
   },
 });
 

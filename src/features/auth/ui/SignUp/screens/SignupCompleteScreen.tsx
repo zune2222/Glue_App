@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   SafeAreaView,
   View,
   ScrollView,
   Text,
-  Image,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {colors} from '@app/styles/colors';
@@ -26,77 +26,150 @@ const SignupCompleteScreen: React.FC<SignupCompleteScreenProps> = ({
 }) => {
   const {t} = useTranslation();
 
+  // 애니메이션 값 정의
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const card1Anim = useRef(new Animated.Value(0)).current;
+  const card2Anim = useRef(new Animated.Value(0)).current;
+  const card3Anim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // 메인 화면 페이드인 및 슬라이드 업 애니메이션
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // 카드 순차적으로 나타나는 애니메이션
+    Animated.stagger(200, [
+      Animated.timing(card1Anim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(card2Anim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(card3Anim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim, card1Anim, card2Anim, card3Anim]);
+
   return (
     <LinearGradient colors={['#FFFFFF', '#F6FEFF']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView style={styles.scrollView}>
-          <View style={styles.welcomeSection}>
-            <View style={styles.logoPlaceholder} />
-            <Text style={styles.welcomeText}>
-              {t('signup.complete.welcome', {
-                nickname: nickname,
-                defaultValue: '{{nickname}} 님,\nGLUE에 오신 것을 환영합니다!',
-              })}
-            </Text>
-          </View>
-
-          {/* 첫 번째 기능 소개 */}
-          <View style={styles.featureCard}>
-            <Complete1SVG width={42} height={42} style={styles.featureIcon} />
-            <View>
-              <Text style={styles.featureTitle}>
-                {t('signup.complete.feature1.title', '같은 학교 학생끼리니까,')}
-              </Text>
-              <Text style={styles.featureDescription}>
-                {t(
-                  'signup.complete.feature1.description',
-                  '더욱 안전하게 교류할 수 있어요.',
-                )}
+        <Animated.View
+          style={[
+            {flex: 1},
+            {opacity: fadeAnim, transform: [{translateY: slideAnim}]},
+          ]}>
+          <ScrollView style={styles.scrollView}>
+            <View style={styles.welcomeSection}>
+              <View style={styles.logoPlaceholder} />
+              <Text style={styles.welcomeText}>
+                {t('signup.complete.welcome', {
+                  nickname: nickname,
+                  defaultValue:
+                    '{{nickname}} 님,\nGLUE에 오신 것을 환영합니다!',
+                })}
               </Text>
             </View>
-          </View>
 
-          {/* 두 번째 기능 소개 */}
-          <View style={styles.featureCard}>
-            <Complete2SVG width={42} height={42} style={styles.featureIcon} />
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>
-                {t('signup.complete.feature2.title', '다양한 나라의 친구들과')}
-              </Text>
-              <Text style={styles.featureDescription}>
-                {t(
-                  'signup.complete.feature2.description',
-                  '소통하면서 언어 능력을 향상시킬 수 있어요.',
-                )}
-              </Text>
-            </View>
-          </View>
+            {/* 첫 번째 기능 소개 */}
+            <Animated.View style={{opacity: card1Anim}}>
+              <View style={styles.featureCard}>
+                <Complete1SVG
+                  width={42}
+                  height={42}
+                  style={styles.featureIcon}
+                />
+                <View>
+                  <Text style={styles.featureTitle}>
+                    {t(
+                      'signup.complete.feature1.title',
+                      '같은 학교 학생끼리니까,',
+                    )}
+                  </Text>
+                  <Text style={styles.featureDescription}>
+                    {t(
+                      'signup.complete.feature1.description',
+                      '더욱 안전하게 교류할 수 있어요.',
+                    )}
+                  </Text>
+                </View>
+              </View>
+            </Animated.View>
 
-          {/* 세 번째 기능 소개 */}
-          <View style={styles.featureCard}>
-            <Complete3SVG width={42} height={42} style={styles.featureIcon} />
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>
-                {t('signup.complete.feature3.title', '모임을 형성하여')}
-              </Text>
-              <Text style={styles.featureDescription}>
-                {t(
-                  'signup.complete.feature3.description',
-                  '원하는 친구들과 교류를 이어나갈 수 있어요.',
-                )}
-              </Text>
-            </View>
-          </View>
-        </ScrollView>
+            {/* 두 번째 기능 소개 */}
+            <Animated.View style={{opacity: card2Anim}}>
+              <View style={styles.featureCard}>
+                <Complete2SVG
+                  width={42}
+                  height={42}
+                  style={styles.featureIcon}
+                />
+                <View style={styles.featureContent}>
+                  <Text style={styles.featureTitle}>
+                    {t(
+                      'signup.complete.feature2.title',
+                      '다양한 나라의 친구들과',
+                    )}
+                  </Text>
+                  <Text style={styles.featureDescription}>
+                    {t(
+                      'signup.complete.feature2.description',
+                      '소통하면서 언어 능력을 향상시킬 수 있어요.',
+                    )}
+                  </Text>
+                </View>
+              </View>
+            </Animated.View>
 
-        {/* 시작하기 버튼 - 하단에 고정 */}
-        <View style={styles.buttonContainer}>
-          <Button
-            label={t('signup.complete.startButton', '지금 바로 시작하기')}
-            onPress={onStart}
-            variant="primary"
-          />
-        </View>
+            {/* 세 번째 기능 소개 */}
+            <Animated.View style={{opacity: card3Anim}}>
+              <View style={styles.featureCard}>
+                <Complete3SVG
+                  width={42}
+                  height={42}
+                  style={styles.featureIcon}
+                />
+                <View style={styles.featureContent}>
+                  <Text style={styles.featureTitle}>
+                    {t('signup.complete.feature3.title', '모임을 형성하여')}
+                  </Text>
+                  <Text style={styles.featureDescription}>
+                    {t(
+                      'signup.complete.feature3.description',
+                      '원하는 친구들과 교류를 이어나갈 수 있어요.',
+                    )}
+                  </Text>
+                </View>
+              </View>
+            </Animated.View>
+          </ScrollView>
+
+          {/* 시작하기 버튼 - 하단에 고정 */}
+          <View style={styles.buttonContainer}>
+            <Button
+              label={t('signup.complete.startButton', '지금 바로 시작하기')}
+              onPress={onStart}
+              variant="primary"
+            />
+          </View>
+        </Animated.View>
       </SafeAreaView>
     </LinearGradient>
   );

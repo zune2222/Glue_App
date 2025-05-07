@@ -1,4 +1,4 @@
-import React, {ReactNode} from 'react';
+import React, {ReactNode, useEffect, useRef} from 'react';
 import {
   SafeAreaView,
   View,
@@ -7,6 +7,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import {NavigationProp} from '@react-navigation/native';
 import {colors} from '@app/styles/colors';
@@ -43,6 +44,35 @@ const SignUpLayout = ({
   const {t} = useTranslation();
   const buttonLabel = nextButtonLabel || t('common.next');
 
+  // 애니메이션 값 생성
+  const progressAnimation = useRef(new Animated.Value(0)).current;
+
+  // 현재 단계에 따른 애니메이션 업데이트
+  useEffect(() => {
+    Animated.timing(progressAnimation, {
+      toValue: currentStep,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [currentStep, progressAnimation]);
+
+  // 각 세그먼트의 진행도 계산
+  const getSegmentProgress = (segmentIndex: number) => {
+    // 각 세그먼트가 담당하는 스텝 수 계산
+    const stepsPerSegment = totalSteps / 3;
+
+    // 현재 스텝이 해당 세그먼트에 해당하는지 계산
+    const segmentStartStep = segmentIndex * stepsPerSegment;
+    const segmentEndStep = (segmentIndex + 1) * stepsPerSegment;
+
+    // 애니메이션 값에서 현재 진행도 계산
+    return progressAnimation.interpolate({
+      inputRange: [segmentStartStep, segmentEndStep],
+      outputRange: ['0%', '100%'],
+      extrapolate: 'clamp',
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -60,14 +90,18 @@ const SignUpLayout = ({
             <View style={styles.headerSpacer} />
           </View>
 
-          {/* 진행 상태 바 */}
+          {/* 진행 상태 바 (3등분) */}
           <View style={styles.progressContainer}>
-            <View
-              style={[
-                styles.progressBar,
-                {width: `${(currentStep / totalSteps) * 100}%`},
-              ]}
-            />
+            {[0, 1, 2].map(segment => (
+              <View key={segment} style={styles.progressSegment}>
+                <Animated.View
+                  style={[
+                    styles.progressBarSegment,
+                    {width: getSegmentProgress(segment)},
+                  ]}
+                />
+              </View>
+            ))}
           </View>
 
           {/* 컨텐츠 영역 */}
@@ -116,13 +150,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   progressContainer: {
-    height: 4,
-    backgroundColor: '#EEEEEE',
-    borderRadius: 2,
+    flexDirection: 'row',
     marginHorizontal: 20,
     marginBottom: 30,
+    justifyContent: 'space-between',
   },
-  progressBar: {
+  progressSegment: {
+    height: 4,
+    flex: 1,
+    backgroundColor: '#EEEEEE',
+    borderRadius: 2,
+    marginHorizontal: 3,
+    overflow: 'hidden',
+  },
+  progressBarSegment: {
     height: '100%',
     backgroundColor: colors.batteryChargedBlue,
     borderRadius: 2,
