@@ -107,16 +107,18 @@ const BirthDateInput = ({
                   </Text>
                 </TouchableOpacity>
               </View>
-              <DateTimePicker
-                value={birthDate || defaultDate}
-                mode="date"
-                display="spinner"
-                onChange={handleDateChange}
-                maximumDate={new Date()}
-                minimumDate={new Date(1900, 0, 1)}
-                style={styles.dateTimePicker}
-                locale={currentLocale}
-              />
+              <View style={styles.dateTimePickerContainer}>
+                <DateTimePicker
+                  value={birthDate || defaultDate}
+                  mode="date"
+                  display="spinner"
+                  onChange={handleDateChange}
+                  maximumDate={new Date()}
+                  minimumDate={new Date(1900, 0, 1)}
+                  style={styles.dateTimePicker}
+                  locale={currentLocale}
+                />
+              </View>
             </View>
           </View>
         </Modal>
@@ -180,6 +182,10 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     paddingBottom: Platform.OS === 'ios' ? 34 : 24,
     width: '100%',
+  },
+  dateTimePickerContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalHeader: {
     flexDirection: 'row',

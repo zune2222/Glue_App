@@ -61,6 +61,17 @@
       "title": "Please enter your date of birth",
       "placeholder": "YYYY-MM-DD",
       "selectDate": "Select Date of Birth"
+    },
+    "nativeLanguage": {
+      "title": "Please select your native language",
+      "subtitle": "If your native language is not listed, please select the language you are most comfortable with.",
+      "korean": "Korean",
+      "english": "English",
+      "japanese": "Japanese",
+      "chinese": "Chinese",
+      "german": "German",
+      "french": "French",
+      "spanish": "Spanish"
     }
   },
   "profile": {

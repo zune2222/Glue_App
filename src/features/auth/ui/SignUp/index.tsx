@@ -7,6 +7,7 @@ import LanguageSelection from './screens/LanguageSelection';
 import NameInput from './screens/NameInput';
 import GenderSelection from './screens/GenderSelection';
 import BirthDateInput from './screens/BirthDateInput';
+import NativeLanguageSelection from './screens/NativeLanguageSelection';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
@@ -20,13 +21,14 @@ type SignUpScreenProps = {
 
 const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [step, setStep] = useState(1); // 현재 진행 단계
-  const totalSteps = 5; // 회원가입 총 단계
+  const totalSteps = 6; // 회원가입 총 단계
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(
     'korean',
   );
   const [name, setName] = useState('');
   const [gender, setGender] = useState<string | null>(null);
   const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [nativeLanguage, setNativeLanguage] = useState<string | null>(null);
 
   // 애니메이션 값
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -95,6 +97,10 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     setBirthDate(date);
   };
 
+  const handleNativeLanguageSelect = (language: string) => {
+    setNativeLanguage(language);
+  };
+
   // 현재 단계에 따라 다른 화면 렌더링
   const renderScreen = () => {
     switch (currentView) {
@@ -121,6 +127,13 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
             initialDate={birthDate}
           />
         );
+      case 5:
+        return (
+          <NativeLanguageSelection
+            selectedLanguage={nativeLanguage}
+            onLanguageSelect={handleNativeLanguageSelect}
+          />
+        );
       // 추후 다른 단계 추가 예정
       default:
         return (
@@ -143,6 +156,8 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         return !gender;
       case 4:
         return !birthDate;
+      case 5:
+        return !nativeLanguage;
       default:
         return false;
     }
