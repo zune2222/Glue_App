@@ -1,4 +1,6 @@
-export {HomeIcon} from './HomeIcon';
-export {ChatIcon} from './ChatIcon';
-export {ProfileIcon} from './ProfileIcon';
-export {SettingsIcon} from './SettingsIcon';
+import HomeIcon from './HomeIcon';
+import GroupIcon from './GroupIcon';
+import ChatIcon from './ChatIcon';
+import ProfileIcon from './ProfileIcon';
+
+export {HomeIcon, GroupIcon, ChatIcon, ProfileIcon};
