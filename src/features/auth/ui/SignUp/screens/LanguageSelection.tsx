@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import {colors} from '@app/styles/colors';
 import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
+import SelectionButton from '@shared/ui/SelectionButton';
 
 type LanguageSelectionProps = {
   onLanguageSelect: (language: string) => void;
@@ -30,61 +31,17 @@ const LanguageSelection = ({
       </View>
 
       <View style={styles.optionsContainer}>
-        {/* 한국어 선택 버튼 */}
-        <TouchableOpacity
+        <SelectionButton
+          label={t('signup.language.korean')}
+          isSelected={selectedLanguage === 'korean'}
           onPress={() => handleLanguageSelect('korean')}
-          style={[
-            styles.languageButton,
-            {
-              backgroundColor:
-                selectedLanguage === 'korean'
-                  ? colors.batteryChargedBlue
-                  : '#FFFFFF',
-              borderColor:
-                selectedLanguage === 'korean'
-                  ? colors.batteryChargedBlue
-                  : colors.lightSilver,
-            },
-          ]}>
-          <Text
-            style={[
-              styles.languageText,
-              {
-                color:
-                  selectedLanguage === 'korean' ? '#FFFFFF' : colors.manatee,
-              },
-            ]}>
-            {t('signup.language.korean')}
-          </Text>
-        </TouchableOpacity>
+        />
 
-        {/* 영어 선택 버튼 */}
-        <TouchableOpacity
+        <SelectionButton
+          label={t('signup.language.english')}
+          isSelected={selectedLanguage === 'english'}
           onPress={() => handleLanguageSelect('english')}
-          style={[
-            styles.languageButton,
-            {
-              backgroundColor:
-                selectedLanguage === 'english'
-                  ? colors.batteryChargedBlue
-                  : '#FFFFFF',
-              borderColor:
-                selectedLanguage === 'english'
-                  ? colors.batteryChargedBlue
-                  : colors.lightSilver,
-            },
-          ]}>
-          <Text
-            style={[
-              styles.languageText,
-              {
-                color:
-                  selectedLanguage === 'english' ? '#FFFFFF' : colors.manatee,
-              },
-            ]}>
-            {t('signup.language.english')}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
     </View>
   );
@@ -104,16 +61,6 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     marginBottom: 40,
-  },
-  languageButton: {
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingVertical: 13,
-    paddingHorizontal: 22,
-    marginBottom: 16,
-  },
-  languageText: {
-    ...typography.h3,
   },
 });
 

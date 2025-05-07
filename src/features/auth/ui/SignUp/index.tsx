@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {NavigationProp} from '@react-navigation/native';
-import {useTranslation} from 'react-i18next';
 import {changeLanguage, Language} from '@shared/lib/i18n';
+import {Animated} from 'react-native';
 import SignUpLayout from './layout';
 import LanguageSelection from './screens/LanguageSelection';
 import NameInput from './screens/NameInput';
+import GenderSelection from './screens/GenderSelection';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
@@ -23,7 +24,41 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     'korean',
   );
   const [name, setName] = useState('');
-  const {i18n} = useTranslation();
+  const [gender, setGender] = useState<string | null>(null);
+
+  // 애니메이션 값
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const [currentView, setCurrentView] = useState(1);
+
+  // 화면 전환 애니메이션 함수
+  const animateTransition = useCallback(
+    (nextStep: number) => {
+      // 현재 화면 페이드 아웃
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => {
+        // 화면이 완전히 투명해지면 다음 화면으로 내용 변경
+        setCurrentView(nextStep);
+
+        // 새 화면 페이드 인
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      });
+    },
+    [fadeAnim],
+  );
+
+  // step이 변경될 때마다 애니메이션 실행
+  useEffect(() => {
+    if (currentView !== step) {
+      animateTransition(step);
+    }
+  }, [step, currentView, animateTransition]);
 
   const handleGoBack = () => {
     if (step > 1) {
@@ -50,9 +85,13 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     setName(name);
   };
 
+  const handleGenderSelect = (gender: string) => {
+    setGender(gender);
+  };
+
   // 현재 단계에 따라 다른 화면 렌더링
   const renderScreen = () => {
-    switch (step) {
+    switch (currentView) {
       case 1:
         return (
           <LanguageSelection
@@ -62,6 +101,13 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         );
       case 2:
         return <NameInput onNameChange={handleNameChange} initialName={name} />;
+      case 3:
+        return (
+          <GenderSelection
+            selectedGender={gender}
+            onGenderSelect={handleGenderSelect}
+          />
+        );
       // 추후 다른 단계 추가 예정
       default:
         return (
@@ -80,6 +126,8 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         return !selectedLanguage;
       case 2:
         return name.trim() === '';
+      case 3:
+        return !gender;
       default:
         return false;
     }
@@ -93,7 +141,9 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
       onNext={handleNext}
       onBack={handleGoBack}
       isNextDisabled={isNextButtonDisabled()}>
-      {renderScreen()}
+      <Animated.View style={{opacity: fadeAnim, flex: 1}}>
+        {renderScreen()}
+      </Animated.View>
     </SignUpLayout>
   );
 };

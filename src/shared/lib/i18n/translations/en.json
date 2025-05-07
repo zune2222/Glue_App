@@ -44,13 +44,18 @@
   },
   "signup": {
     "language": {
-      "title": "Select system language",
+      "title": "Please set system language",
       "korean": "Korean",
       "english": "English"
     },
     "name": {
-      "title": "Enter your name",
+      "title": "Please enter your name",
       "placeholder": "Name"
+    },
+    "gender": {
+      "title": "Please select your gender",
+      "male": "Male",
+      "female": "Female"
     }
   },
   "profile": {

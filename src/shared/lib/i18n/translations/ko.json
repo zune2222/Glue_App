@@ -51,6 +51,11 @@
     "name": {
       "title": "이름을 입력해주세요",
       "placeholder": "이름"
+    },
+    "gender": {
+      "title": "성별을 알려주세요",
+      "male": "남성",
+      "female": "여성"
     }
   },
   "profile": {
