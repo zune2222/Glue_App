@@ -7,13 +7,13 @@ import {
   Modal,
   FlatList,
   TextInput,
-  Image,
   Keyboard,
 } from 'react-native';
 import {colors} from '@app/styles/colors';
 import {typography} from '@app/styles/typography';
 import {departments, getDepartmentName, Department} from '../data/departments';
 import {useTranslation} from 'react-i18next';
+import SearchIcon from '@shared/assets/icons/SearchIcon';
 
 type DepartmentSelectionProps = {
   selectedDepartment: string | null;
@@ -85,13 +85,7 @@ const DepartmentSelection = ({
                 ? getSelectedDepartmentDisplay()
                 : t('signup.department.placeholder')}
             </Text>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/pq98va0e_expires_30_days.png',
-              }}
-              resizeMode="stretch"
-              style={styles.dropdownIcon}
-            />
+            <SearchIcon width={24} height={24} />
           </View>
         </TouchableOpacity>
         <View style={styles.selectorBorder} />
@@ -117,13 +111,7 @@ const DepartmentSelection = ({
                     placeholder={t('signup.department.search')}
                     placeholderTextColor="#9DA2AF"
                   />
-                  <Image
-                    source={{
-                      uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/ga8fz8tv_expires_30_days.png',
-                    }}
-                    resizeMode="stretch"
-                    style={styles.searchIcon}
-                  />
+                  <SearchIcon width={24} height={24} />
                 </View>
 
                 {/* 검색 결과 목록 */}

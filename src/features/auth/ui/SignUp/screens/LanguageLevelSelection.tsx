@@ -23,32 +23,27 @@ const LanguageLevelSelection = ({
     {
       id: 'beginner',
       name: t('signup.languageLevel.beginner'),
-      imageUri:
-        'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/opsam5as_expires_30_days.png',
+      level: 1,
     },
     {
       id: 'elementary',
       name: t('signup.languageLevel.elementary'),
-      imageUri:
-        'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/hkjuuf3o_expires_30_days.png',
+      level: 2,
     },
     {
       id: 'intermediate',
       name: t('signup.languageLevel.intermediate'),
-      imageUri:
-        'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/e96z1kp8_expires_30_days.png',
+      level: 3,
     },
     {
       id: 'advanced',
       name: t('signup.languageLevel.advanced'),
-      imageUri:
-        'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/vng2kfti_expires_30_days.png',
+      level: 4,
     },
     {
       id: 'proficient',
       name: t('signup.languageLevel.proficient'),
-      imageUri:
-        'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/xkjb1jao_expires_30_days.png',
+      level: 5,
     },
   ];
 
@@ -79,7 +74,7 @@ const LanguageLevelSelection = ({
           <LevelButton
             key={level.id}
             label={level.name}
-            levelImageUri={level.imageUri}
+            level={level.level as 1 | 2 | 3 | 4 | 5}
             isSelected={selectedLevel === level.id}
             onPress={() => onLevelSelect(level.id)}
           />

@@ -2,17 +2,17 @@ import React from 'react';
 import {
   TouchableOpacity,
   Text,
-  Image,
   StyleSheet,
   ViewStyle,
   View,
 } from 'react-native';
 import {colors} from '@app/styles/colors';
 import {typography} from '@app/styles/typography';
+import LevelIcon from '@shared/assets/icons/LevelIcon';
 
 type LevelButtonProps = {
   label: string;
-  levelImageUri: string;
+  level: 1 | 2 | 3 | 4 | 5;
   isSelected: boolean;
   onPress: () => void;
   style?: ViewStyle;
@@ -20,7 +20,7 @@ type LevelButtonProps = {
 
 const LevelButton = ({
   label,
-  levelImageUri,
+  level,
   isSelected,
   onPress,
   style,
@@ -50,10 +50,10 @@ const LevelButton = ({
         {label}
       </Text>
       <View style={styles.spacer} />
-      <Image
-        source={{uri: levelImageUri}}
-        resizeMode="stretch"
-        style={styles.levelImage}
+      <LevelIcon
+        level={level}
+        activeColor={isSelected ? colors.ghostWhite : '#384050'}
+        inactiveColor={isSelected ? 'rgba(255, 255, 255, 0.5)' : '#D2D5DB'}
       />
     </TouchableOpacity>
   );
