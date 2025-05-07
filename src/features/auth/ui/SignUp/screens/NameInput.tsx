@@ -1,5 +1,12 @@
 import React, {useState} from 'react';
-import {View, Text, TextInput, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import {colors} from '@app/styles/colors';
 import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
@@ -20,7 +27,9 @@ const NameInput = ({onNameChange, initialName = ''}: NameInputProps) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{t('signup.name.title')}</Text>
       </View>
@@ -46,7 +55,7 @@ const NameInput = ({onNameChange, initialName = ''}: NameInputProps) => {
           ]}
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
