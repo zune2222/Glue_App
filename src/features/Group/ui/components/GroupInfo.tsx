@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, Image} from 'react-native';
+import {View, Image} from 'react-native';
 import {groupDetailStyles} from '../styles/groupDetailStyles';
+import {Text} from '../../../../shared/ui/typography/Text';
 
 interface GroupInfoProps {
   capacity: string;
@@ -20,7 +21,12 @@ const GroupInfo: React.FC<GroupInfoProps> = ({
 }) => {
   return (
     <View style={groupDetailStyles.infoContainer}>
-      <Text style={groupDetailStyles.infoTitle}>모임 정보</Text>
+      <Text
+        variant="subtitle1"
+        weight="medium"
+        style={groupDetailStyles.infoTitle}>
+        모임 정보
+      </Text>
       <View style={groupDetailStyles.infoItemsContainer}>
         <View style={groupDetailStyles.infoItem}>
           <Image
@@ -30,7 +36,9 @@ const GroupInfo: React.FC<GroupInfoProps> = ({
             resizeMode={'stretch'}
             style={groupDetailStyles.infoIcon}
           />
-          <Text style={groupDetailStyles.infoText}>{capacity}</Text>
+          <Text variant="body2" style={groupDetailStyles.infoText}>
+            {capacity}
+          </Text>
         </View>
         <View style={groupDetailStyles.infoItem}>
           <Image
@@ -40,7 +48,9 @@ const GroupInfo: React.FC<GroupInfoProps> = ({
             resizeMode={'stretch'}
             style={groupDetailStyles.infoIconWide}
           />
-          <Text style={groupDetailStyles.infoText}>{language}</Text>
+          <Text variant="body2" style={groupDetailStyles.infoText}>
+            {language}
+          </Text>
         </View>
         <View style={groupDetailStyles.infoItem}>
           <Image
@@ -50,7 +60,9 @@ const GroupInfo: React.FC<GroupInfoProps> = ({
             resizeMode={'stretch'}
             style={groupDetailStyles.infoIconWide}
           />
-          <Text style={groupDetailStyles.infoText}>{minForeigners}</Text>
+          <Text variant="body2" style={groupDetailStyles.infoText}>
+            {minForeigners}
+          </Text>
         </View>
         <View style={groupDetailStyles.infoItemLast}>
           <Image
@@ -60,7 +72,9 @@ const GroupInfo: React.FC<GroupInfoProps> = ({
             resizeMode={'stretch'}
             style={groupDetailStyles.infoIconWide}
           />
-          <Text style={groupDetailStyles.infoText}>{meetingDate}</Text>
+          <Text variant="body2" style={groupDetailStyles.infoText}>
+            {meetingDate}
+          </Text>
         </View>
       </View>
     </View>

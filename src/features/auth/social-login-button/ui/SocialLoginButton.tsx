@@ -1,7 +1,8 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {AppleSvg, GoogleSvg, KakaoSvg} from '../../../../shared/assets/images';
 import {useTranslation} from 'react-i18next';
+import {Text} from '../../../../shared/ui/typography/Text';
 
 // 소셜 로그인 버튼 타입
 export type SocialButtonProps = {
@@ -19,6 +20,7 @@ export const SocialLoginButton = ({type, onPress}: SocialButtonProps) => {
       container: [styles.socialButton, styles.googleButton],
       text: [styles.socialButtonText, styles.googleButtonText],
       label: t('auth.welcome.continueWithGoogle'),
+      color: '#1F1F1F',
       icon: (
         <View style={styles.googleIconContainer}>
           <GoogleSvg width={18} height={18} />
@@ -29,6 +31,7 @@ export const SocialLoginButton = ({type, onPress}: SocialButtonProps) => {
       container: [styles.socialButton, styles.appleButton],
       text: [styles.socialButtonText, styles.appleButtonText],
       label: t('auth.welcome.continueWithApple'),
+      color: 'white',
       icon: (
         <View style={styles.appleIconContainer}>
           <AppleSvg width={15} height={18} />
@@ -39,6 +42,7 @@ export const SocialLoginButton = ({type, onPress}: SocialButtonProps) => {
       container: [styles.socialButton, styles.kakaoButton],
       text: [styles.socialButtonText, styles.kakaoButtonText],
       label: t('auth.welcome.continueWithKakao'),
+      color: 'black',
       icon: (
         <View style={styles.kakaoIconContainer}>
           <KakaoSvg width={18} height={18} />
@@ -47,12 +51,14 @@ export const SocialLoginButton = ({type, onPress}: SocialButtonProps) => {
     },
   };
 
-  const {container, text, label, icon} = buttonStyles[type];
+  const {container, text, label, icon, color} = buttonStyles[type];
 
   return (
     <TouchableOpacity style={container} onPress={onPress}>
       {icon}
-      <Text style={text}>{label}</Text>
+      <Text variant="button" weight="medium" color={color} style={text}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -69,7 +75,6 @@ const styles = StyleSheet.create({
   },
   socialButtonText: {
     fontSize: 16,
-    fontWeight: '500',
     lineHeight: 24,
     textAlign: 'center',
   },
@@ -88,7 +93,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   googleButtonText: {
-    color: '#1F1F1F',
+    // Google 텍스트 스타일 (color는 Text 컴포넌트의 color prop으로 전달)
   },
   // Apple 버튼 스타일
   appleButton: {
@@ -104,7 +109,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appleButtonText: {
-    color: 'white',
+    // Apple 텍스트 스타일 (color는 Text 컴포넌트의 color prop으로 전달)
   },
   // 카카오 버튼 스타일
   kakaoButton: {
@@ -119,6 +124,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   kakaoButtonText: {
-    color: 'black',
+    // 카카오 텍스트 스타일 (color는 Text 컴포넌트의 color prop으로 전달)
   },
 });

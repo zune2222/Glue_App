@@ -1,11 +1,11 @@
 import React from 'react';
-import {SafeAreaView, View, Text, Image, FlatList} from 'react-native';
+import {SafeAreaView, View, Image, FlatList} from 'react-native';
 import {GroupListProps} from '../model/types';
 import {MOCK_GROUPS} from '../model/mockData';
 import {GroupItemCard} from './components/GroupItemCard';
-import {BottomTabBar} from './components/BottomTabBar';
 import {FloatingButton} from './components/FloatingButton';
 import {commonStyles} from './styles/groupStyles';
+import {Text} from '../../../shared/ui/typography/Text';
 
 /**
  * 모임 목록 화면 컴포넌트
@@ -22,21 +22,18 @@ const GroupList: React.FC<GroupListProps> = ({navigation}) => {
     navigation.navigate('CreateGroup');
   };
 
-  // 탭 버튼 클릭 핸들러
-  const handleTabPress = (tabName: 'board' | 'group' | 'chat' | 'profile') => {
-    // 메인 탭 네비게이션으로는 바로 이동할 수 없으므로, 실제로는
-    // 앱 전체 네비게이션에서 구현해야 함
-    console.log(`탭 이동: ${tabName}`);
-    // 실제 구현시: navigation.getParent()?.navigate(tabName);
-  };
-
   return (
     <SafeAreaView style={commonStyles.container}>
       {/* 상단 상태바 */}
 
       {/* 서브 헤더 */}
       <View style={commonStyles.subHeader}>
-        <Text style={commonStyles.subHeaderTitle}>{'전체'}</Text>
+        <Text
+          variant="subtitle1"
+          weight="medium"
+          style={commonStyles.subHeaderTitle}>
+          {'전체'}
+        </Text>
         <Image
           source={{
             uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/7y63nh4b_expires_30_days.png',
@@ -75,8 +72,6 @@ const GroupList: React.FC<GroupListProps> = ({navigation}) => {
 
       {/* 글쓰기 버튼 */}
       <FloatingButton onPress={handleCreatePress} label="글쓰기" />
-
-      {/* 하단 탭바 */}
     </SafeAreaView>
   );
 };

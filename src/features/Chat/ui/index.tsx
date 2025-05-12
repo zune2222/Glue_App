@@ -1,12 +1,15 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {SafeArea} from '../../../shared/ui';
+import {Text} from '../../../shared/ui/typography/Text';
 
 const ChatListScreen = () => {
   return (
     <SafeArea>
       <View style={styles.container}>
-        <Text style={styles.title}>메시지 목록 화면</Text>
+        <Text variant="subtitle1" weight="medium" style={styles.title}>
+          메시지 목록 화면
+        </Text>
       </View>
     </SafeArea>
   );
@@ -21,7 +24,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '500',
   },
 });
 

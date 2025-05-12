@@ -1,15 +1,14 @@
 import React, {useState} from 'react';
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import {colors} from '@app/styles/colors';
-import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
+import {Text} from '@shared/ui/typography/Text';
 
 type EmailInputProps = {
   onEmailChange: (email: string) => void;
@@ -31,8 +30,12 @@ const EmailInput = ({onEmailChange, initialEmail = ''}: EmailInputProps) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{t('signup.email.title')}</Text>
-        <Text style={styles.subtitle}>{t('signup.email.subtitle')}</Text>
+        <Text variant="h2" color={colors.richBlack} style={styles.title}>
+          {t('signup.email.title')}
+        </Text>
+        <Text variant="body2" color={colors.charcoal} style={styles.subtitle}>
+          {t('signup.email.subtitle')}
+        </Text>
       </View>
 
       <View style={styles.inputContainer}>
@@ -71,13 +74,10 @@ const styles = StyleSheet.create({
     marginBottom: 64,
   },
   title: {
-    ...typography.h2,
-    color: colors.richBlack,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 12,
-    color: colors.charcoal,
   },
   inputContainer: {
     marginBottom: 40,

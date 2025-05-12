@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, Image, StyleSheet} from 'react-native';
+import {View, Image, StyleSheet} from 'react-native';
 import {MeetingCardProps} from '../../model/types';
+import {Text} from '../../../../shared/ui/typography/Text';
 
 const MeetingCard = ({
   category,
@@ -19,12 +20,18 @@ const MeetingCard = ({
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={[styles.categoryTag, {backgroundColor: categoryBgColor}]}>
-          <Text style={[styles.categoryText, {color: categoryColor}]}>
+          <Text
+            variant="caption"
+            color={categoryColor}
+            weight="bold"
+            style={styles.categoryText}>
             {category}
           </Text>
         </View>
         <View style={styles.flex1}></View>
-        <Text style={styles.dateText}>{date}</Text>
+        <Text variant="caption" color="#9DA2AF" style={styles.dateText}>
+          {date}
+        </Text>
       </View>
       <View style={styles.authorRow}>
         <View style={styles.authorInfo}>
@@ -33,7 +40,13 @@ const MeetingCard = ({
             resizeMode={'stretch'}
             style={styles.authorImage}
           />
-          <Text style={styles.authorName}>{author}</Text>
+          <Text
+            variant="caption"
+            color="#384050"
+            weight="bold"
+            style={styles.authorName}>
+            {author}
+          </Text>
         </View>
         <View style={styles.flex1}></View>
         <View style={styles.viewCountContainer}>
@@ -44,13 +57,23 @@ const MeetingCard = ({
             resizeMode={'stretch'}
             style={styles.smallIcon}
           />
-          <Text style={styles.metaText}>{viewCount}</Text>
+          <Text variant="caption" color="#9DA2AF" style={styles.metaText}>
+            {viewCount}
+          </Text>
         </View>
       </View>
       <View style={styles.cardContent}>
         <View style={styles.cardTextContainer}>
-          <Text style={styles.cardTitle}>{title}</Text>
-          <Text style={styles.cardDescription}>{description}</Text>
+          <Text
+            variant="subtitle1"
+            color="#303030"
+            weight="bold"
+            style={styles.cardTitle}>
+            {title}
+          </Text>
+          <Text variant="body2" color="#303030" style={styles.cardDescription}>
+            {description}
+          </Text>
         </View>
         <View style={styles.cardFooter}>
           <View style={styles.footerItem}>
@@ -61,7 +84,9 @@ const MeetingCard = ({
               resizeMode={'stretch'}
               style={styles.smallIcon}
             />
-            <Text style={styles.metaInfoText}>{likeCount}</Text>
+            <Text variant="caption" color="#384050" style={styles.metaInfoText}>
+              {likeCount}
+            </Text>
           </View>
           <View style={styles.footerItem}>
             <Image
@@ -71,7 +96,9 @@ const MeetingCard = ({
               resizeMode={'stretch'}
               style={styles.smallIcon}
             />
-            <Text style={styles.metaInfoText}>{memberCount}</Text>
+            <Text variant="caption" color="#384050" style={styles.metaInfoText}>
+              {memberCount}
+            </Text>
           </View>
         </View>
       </View>
@@ -110,10 +137,8 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 12,
-    fontWeight: 'bold',
   },
   dateText: {
-    color: '#9DA2AF',
     fontSize: 12,
   },
   authorRow: {
@@ -132,9 +157,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   authorName: {
-    color: '#384050',
     fontSize: 12,
-    fontWeight: 'bold',
   },
   viewCountContainer: {
     flexDirection: 'row',
@@ -146,7 +169,6 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   metaText: {
-    color: '#9DA2AF',
     fontSize: 12,
   },
   cardContent: {
@@ -158,13 +180,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   cardTitle: {
-    color: '#303030',
     fontSize: 16,
-    fontWeight: 'bold',
     marginBottom: 4,
   },
   cardDescription: {
-    color: '#303030',
     fontSize: 14,
   },
   cardFooter: {
@@ -179,7 +198,6 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   metaInfoText: {
-    color: '#384050',
     fontSize: 12,
   },
   flex1: {

@@ -1,10 +1,7 @@
 import React from 'react';
-import {View, Image, StyleSheet, TouchableOpacity, Text} from 'react-native';
-import {useTranslation} from 'react-i18next';
+import {View, Image, StyleSheet, TouchableOpacity} from 'react-native';
 
 const Header = () => {
-  const {t} = useTranslation();
-
   return (
     <View style={styles.navbar}>
       <View style={styles.logoContainer}>
@@ -56,11 +53,6 @@ const styles = StyleSheet.create({
     width: 35,
     height: 25,
     marginRight: 8,
-  },
-  logoText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#384050',
   },
   navbarIcon: {
     width: 24,

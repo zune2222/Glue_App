@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, Image} from 'react-native';
+import {View, Image} from 'react-native';
 import {groupDetailStyles} from '../styles/groupDetailStyles';
+import {Text} from '../../../../shared/ui/typography/Text';
 
 interface GroupLikesProps {
   likeCount: number;
@@ -19,7 +20,7 @@ const GroupLikes: React.FC<GroupLikesProps> = ({likeCount}) => {
         resizeMode={'stretch'}
         style={groupDetailStyles.likesTotalIcon}
       />
-      <Text style={groupDetailStyles.likesTotalText}>
+      <Text variant="body2" style={groupDetailStyles.likesTotalText}>
         {`${likeCount}명이 좋아합니다`}
       </Text>
     </View>

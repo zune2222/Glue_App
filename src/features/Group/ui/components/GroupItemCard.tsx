@@ -1,7 +1,8 @@
 import React from 'react';
-import {View, Text, Image, TouchableOpacity} from 'react-native';
+import {View, Image, TouchableOpacity} from 'react-native';
 import {GroupItemProps} from '../../model/types';
 import {commonStyles, groupListStyles} from '../styles/groupStyles';
+import {Text} from '../../../../shared/ui/typography/Text';
 
 /**
  * 모임 아이템 카드 컴포넌트
@@ -20,10 +21,9 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
                 {backgroundColor: item.categoryColor},
               ]}>
               <Text
-                style={[
-                  groupListStyles.categoryText,
-                  {color: item.categoryTextColor},
-                ]}>
+                variant="caption"
+                color={item.categoryTextColor}
+                style={groupListStyles.categoryText}>
                 {item.category}
               </Text>
             </View>
@@ -35,13 +35,20 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
                 resizeMode={'stretch'}
                 style={groupListStyles.likeIcon}
               />
-              <Text style={groupListStyles.likesText}>{item.likes}</Text>
+              <Text variant="body2" style={groupListStyles.likesText}>
+                {item.likes}
+              </Text>
             </View>
           </View>
           <View style={groupListStyles.itemContent}>
             <View style={groupListStyles.textContainer}>
-              <Text style={groupListStyles.title}>{item.title}</Text>
-              <Text style={groupListStyles.description}>
+              <Text
+                variant="subtitle1"
+                weight="medium"
+                style={groupListStyles.title}>
+                {item.title}
+              </Text>
+              <Text variant="body2" style={groupListStyles.description}>
                 {item.description}
               </Text>
               <View style={groupListStyles.metaContainer}>
@@ -53,7 +60,9 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
                     resizeMode={'stretch'}
                     style={groupListStyles.metaIcon}
                   />
-                  <Text style={groupListStyles.metaText}>{item.comments}</Text>
+                  <Text variant="caption" style={groupListStyles.metaText}>
+                    {item.comments}
+                  </Text>
                 </View>
                 <View style={groupListStyles.metaItem}>
                   <Image
@@ -63,11 +72,13 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
                     resizeMode={'stretch'}
                     style={groupListStyles.metaIcon}
                   />
-                  <Text style={groupListStyles.metaText}>
+                  <Text variant="caption" style={groupListStyles.metaText}>
                     {item.participants}
                   </Text>
                 </View>
-                <Text style={groupListStyles.metaText}>{item.time}</Text>
+                <Text variant="caption" style={groupListStyles.metaText}>
+                  {item.time}
+                </Text>
               </View>
             </View>
             {item.image && (
@@ -94,10 +105,9 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
                 {backgroundColor: item.categoryColor},
               ]}>
               <Text
-                style={[
-                  groupListStyles.categoryText,
-                  {color: item.categoryTextColor},
-                ]}>
+                variant="caption"
+                color={item.categoryTextColor}
+                style={groupListStyles.categoryText}>
                 {item.category}
               </Text>
             </View>
@@ -109,12 +119,21 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
                 resizeMode={'stretch'}
                 style={groupListStyles.likeIcon}
               />
-              <Text style={groupListStyles.likesText}>{item.likes}</Text>
+              <Text variant="body2" style={groupListStyles.likesText}>
+                {item.likes}
+              </Text>
             </View>
           </View>
           <View style={groupListStyles.itemContentNoImage}>
-            <Text style={groupListStyles.title}>{item.title}</Text>
-            <Text style={groupListStyles.description}>{item.description}</Text>
+            <Text
+              variant="subtitle1"
+              weight="medium"
+              style={groupListStyles.title}>
+              {item.title}
+            </Text>
+            <Text variant="body2" style={groupListStyles.description}>
+              {item.description}
+            </Text>
             <View style={groupListStyles.metaContainer}>
               <View style={groupListStyles.metaItem}>
                 <Image
@@ -124,7 +143,9 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
                   resizeMode={'stretch'}
                   style={groupListStyles.metaIcon}
                 />
-                <Text style={groupListStyles.metaText}>{item.comments}</Text>
+                <Text variant="caption" style={groupListStyles.metaText}>
+                  {item.comments}
+                </Text>
               </View>
               <View style={groupListStyles.metaItem}>
                 <Image
@@ -134,11 +155,13 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
                   resizeMode={'stretch'}
                   style={groupListStyles.metaIcon}
                 />
-                <Text style={groupListStyles.metaText}>
+                <Text variant="caption" style={groupListStyles.metaText}>
                   {item.participants}
                 </Text>
               </View>
-              <Text style={groupListStyles.metaText}>{item.time}</Text>
+              <Text variant="caption" style={groupListStyles.metaText}>
+                {item.time}
+              </Text>
             </View>
           </View>
         </View>

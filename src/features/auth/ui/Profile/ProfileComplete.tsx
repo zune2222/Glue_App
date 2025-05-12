@@ -28,23 +28,49 @@ const ProfileCompleteScreen = () => {
             <Text variant="h2" weight="semiBold" style={styles.title}>
               환영합니다!
             </Text>
-            <Text style={styles.subtitle}>
+            <Text
+              variant="body1"
+              color="#4F4F4F"
+              align="center"
+              style={styles.subtitle}>
               {nickname}님의 프로필 설정이 완료되었습니다.
             </Text>
           </View>
 
           <View style={styles.profileInfo}>
             <View style={styles.infoItem}>
-              <Text style={styles.label}>이름</Text>
-              <Text style={styles.value}>{name}</Text>
+              <Text variant="body1" color="#6B7280" style={styles.label}>
+                이름
+              </Text>
+              <Text
+                variant="body1"
+                weight="medium"
+                color="#111827"
+                style={styles.value}>
+                {name}
+              </Text>
             </View>
             <View style={styles.infoItem}>
-              <Text style={styles.label}>닉네임</Text>
-              <Text style={styles.value}>{nickname}</Text>
+              <Text variant="body1" color="#6B7280" style={styles.label}>
+                닉네임
+              </Text>
+              <Text
+                variant="body1"
+                weight="medium"
+                color="#111827"
+                style={styles.value}>
+                {nickname}
+              </Text>
             </View>
             <View style={styles.infoItem}>
-              <Text style={styles.label}>성별</Text>
-              <Text style={styles.value}>
+              <Text variant="body1" color="#6B7280" style={styles.label}>
+                성별
+              </Text>
+              <Text
+                variant="body1"
+                weight="medium"
+                color="#111827"
+                style={styles.value}>
                 {gender === 'male' ? '남성' : '여성'}
               </Text>
             </View>
@@ -81,15 +107,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
-    color: '#030712',
     marginBottom: 16,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#4F4F4F',
-    textAlign: 'center',
-  },
+  subtitle: {},
   profileInfo: {
     backgroundColor: '#F9FAFB',
     borderRadius: 12,
@@ -103,15 +123,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#EAECF0',
   },
-  label: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  value: {
-    fontSize: 16,
-    color: '#111827',
-    fontWeight: '500',
-  },
+  label: {},
+  value: {},
   footer: {
     alignItems: 'center',
     paddingBottom: 24,

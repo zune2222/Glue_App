@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {SafeArea} from '../../../shared/ui';
+import {Text} from '../../../shared/ui/typography/Text';
 
 const ProfileMainScreen = () => {
   // 사용자 데이터 (실제 구현 시에는 API나 컨텍스트에서 데이터를 가져옴)
@@ -23,22 +24,40 @@ const ProfileMainScreen = () => {
         {/* 상단 프로필 섹션 */}
         <View style={styles.profileSection}>
           <Text style={styles.profileImage}>{user.profileImage}</Text>
-          <Text style={styles.username}>{user.username}</Text>
-          <Text style={styles.email}>{user.email}</Text>
-          <Text style={styles.bio}>{user.bio}</Text>
+          <Text variant="h4" weight="bold" style={styles.username}>
+            {user.username}
+          </Text>
+          <Text variant="body2" color="#757575" style={styles.email}>
+            {user.email}
+          </Text>
+          <Text variant="body2" align="center" style={styles.bio}>
+            {user.bio}
+          </Text>
 
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.posts}</Text>
-              <Text style={styles.statLabel}>게시글</Text>
+              <Text variant="body1" weight="bold" style={styles.statValue}>
+                {user.posts}
+              </Text>
+              <Text variant="body2" color="#757575" style={styles.statLabel}>
+                게시글
+              </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.followers}</Text>
-              <Text style={styles.statLabel}>팔로워</Text>
+              <Text variant="body1" weight="bold" style={styles.statValue}>
+                {user.followers}
+              </Text>
+              <Text variant="body2" color="#757575" style={styles.statLabel}>
+                팔로워
+              </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.following}</Text>
-              <Text style={styles.statLabel}>팔로잉</Text>
+              <Text variant="body1" weight="bold" style={styles.statValue}>
+                {user.following}
+              </Text>
+              <Text variant="body2" color="#757575" style={styles.statLabel}>
+                팔로잉
+              </Text>
             </View>
           </View>
         </View>
@@ -46,16 +65,24 @@ const ProfileMainScreen = () => {
         {/* 설정 옵션 */}
         <View style={styles.optionsContainer}>
           <View style={styles.optionItem}>
-            <Text style={styles.optionText}>계정 설정</Text>
+            <Text variant="body1" style={styles.optionText}>
+              계정 설정
+            </Text>
           </View>
           <View style={styles.optionItem}>
-            <Text style={styles.optionText}>알림 설정</Text>
+            <Text variant="body1" style={styles.optionText}>
+              알림 설정
+            </Text>
           </View>
           <View style={styles.optionItem}>
-            <Text style={styles.optionText}>개인정보 보호</Text>
+            <Text variant="body1" style={styles.optionText}>
+              개인정보 보호
+            </Text>
           </View>
           <View style={styles.optionItem}>
-            <Text style={styles.optionText}>로그아웃</Text>
+            <Text variant="body1" style={styles.optionText}>
+              로그아웃
+            </Text>
           </View>
         </View>
       </View>
@@ -81,15 +108,12 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 22,
-    fontWeight: 'bold',
     marginBottom: 5,
   },
   email: {
-    color: '#757575',
     marginBottom: 15,
   },
   bio: {
-    textAlign: 'center',
     marginBottom: 15,
   },
   statsContainer: {
@@ -100,12 +124,8 @@ const styles = StyleSheet.create({
   statItem: {
     alignItems: 'center',
   },
-  statValue: {
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    color: '#757575',
-  },
+  statValue: {},
+  statLabel: {},
   optionsContainer: {
     backgroundColor: 'white',
     marginTop: 15,

@@ -100,7 +100,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
             alignItems: 'center',
             padding: 20,
           }}>
-          <Text style={{fontSize: 16, color: '#e74c3c', textAlign: 'center'}}>
+          <Text variant="body1" color="#e74c3c" align="center">
             {error || '모임 정보를 불러올 수 없습니다.'}
           </Text>
         </View>
@@ -122,8 +122,12 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
         />
 
         {/* 제목 및 내용 */}
-        <Text style={groupDetailStyles.title}>{groupDetail.title}</Text>
-        <Text style={groupDetailStyles.content}>{groupDetail.content}</Text>
+        <Text variant="h4" weight="bold" style={groupDetailStyles.title}>
+          {groupDetail.title}
+        </Text>
+        <Text variant="body1" style={groupDetailStyles.content}>
+          {groupDetail.content}
+        </Text>
 
         {/* 이미지 */}
         {groupDetail.imageUrl && (

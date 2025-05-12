@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -10,7 +9,6 @@ import {
   Alert,
 } from 'react-native';
 import {colors} from '@app/styles/colors';
-import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
 import {
   launchImageLibrary,
@@ -27,6 +25,7 @@ import {
 } from 'react-native-permissions';
 import CameraIcon from '@shared/assets/icons/CameraIcon';
 import PlusIcon from '@shared/assets/icons/PlusIcon';
+import {Text} from '@shared/ui/typography/Text';
 
 type ProfilePhotoInputProps = {
   onPhotoSelect: (uri: string | null) => void;
@@ -173,8 +172,12 @@ const ProfilePhotoInput = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{t('signup.profilePhoto.title')}</Text>
-        <Text style={styles.subtitle}>{t('signup.profilePhoto.subtitle')}</Text>
+        <Text variant="h2" color={colors.richBlack} style={styles.title}>
+          {t('signup.profilePhoto.title')}
+        </Text>
+        <Text variant="body2" color={colors.charcoal} style={styles.subtitle}>
+          {t('signup.profilePhoto.subtitle')}
+        </Text>
       </View>
 
       <View style={styles.photoContainer}>
@@ -218,13 +221,10 @@ const styles = StyleSheet.create({
     marginBottom: 64,
   },
   title: {
-    ...typography.h2,
-    color: colors.richBlack,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 12,
-    color: colors.charcoal,
   },
   photoContainer: {
     alignItems: 'center',
