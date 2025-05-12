@@ -13,7 +13,9 @@
     "next": "Next",
     "prev": "Previous",
     "search": "Search",
-    "send": "Send"
+    "send": "Send",
+    "select": "Select",
+    "permission": "Permission Required"
   },
   "auth": {
     "login": "Log in",
@@ -40,6 +42,92 @@
       "termsNotice": "By continuing, you agree to Glue App's Terms of Service and Privacy Policy",
       "terms": "Terms of Service",
       "privacy": "Privacy Policy"
+    }
+  },
+  "signup": {
+    "language": {
+      "title": "Please set system language",
+      "korean": "Korean",
+      "english": "English"
+    },
+    "name": {
+      "title": "Please enter your name",
+      "placeholder": "Name"
+    },
+    "gender": {
+      "title": "Please select your gender",
+      "male": "Male",
+      "female": "Female"
+    },
+    "birthdate": {
+      "title": "Please enter your date of birth",
+      "placeholder": "YYYY-MM-DD",
+      "selectDate": "Select Date of Birth"
+    },
+    "email": {
+      "title": "Please enter your university\nweb mail ID",
+      "subtitle": "We will send a verification code to the ID you entered.",
+      "label": "Web mail ID",
+      "placeholder": "Enter your web mail ID"
+    },
+    "verification": {
+      "title": "Please enter the code\nwe sent you",
+      "didNotReceive": "Didn't receive the email?",
+      "resend": "Resend",
+      "resendSuccess": "Verification code has been resent"
+    },
+    "nickname": {
+      "title": "Please enter the nickname\nyou want to use on GLUE",
+      "label": "Nickname",
+      "placeholder": "Enter your nickname",
+      "duplicate": "This nickname is already in use."
+    },
+    "profilePhoto": {
+      "title": "Set your profile picture",
+      "subtitle": "You can change your profile picture anytime.",
+      "selectOption": "How would you like to add a profile photo?",
+      "camera": "Camera",
+      "gallery": "Gallery",
+      "unavailable": "This feature is not available on this device.",
+      "blocked": "The app cannot access the camera or gallery. Please enable permissions in settings.",
+      "goToSettings": "Go to Settings",
+      "error": "An error occurred while loading the image."
+    },
+    "introduction": {
+      "title": "Please introduce yourself in one line :)",
+      "subtitle": "You can enter up to {{maxLength}} characters including spaces.",
+      "placeholder": "Describe yourself in one line"
+    },
+    "nativeLanguage": {
+      "title": "Please select your native language",
+      "subtitle": "If your native language is not listed, please select the language you are most comfortable with.",
+      "korean": "Korean",
+      "english": "English",
+      "japanese": "Japanese",
+      "chinese": "Chinese",
+      "german": "German",
+      "french": "French",
+      "spanish": "Spanish"
+    },
+    "languageLevel": {
+      "title": "Please set your proficiency level\nfor the selected language",
+      "subtitle": "Language proficiency level can be changed at any time.",
+      "beginner": "Beginner",
+      "elementary": "Elementary",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "proficient": "Proficient"
+    },
+    "university": {
+      "title": "Please select your\nuniversity",
+      "label": "University",
+      "placeholder": "Select your university",
+      "pusan": "Pusan National University"
+    },
+    "department": {
+      "title": "Please select your department",
+      "placeholder": "Select your department",
+      "search": "Search department"
     }
   },
   "profile": {
@@ -132,6 +220,38 @@
       "confirmButtonPressed": "Confirm button was pressed.",
       "cancelButtonPressed": "Cancel button was pressed."
     }
+  },
+  "group": {
+    "detail": {
+      "study": "Study",
+      "meeting_info": "Meeting Information",
+      "capacity": "8/10",
+      "language": "Preferred exchange language: English",
+      "minForeigners": "Minimum English-speaking students: 2",
+      "meetingDate": "April 12, 2025 at 6:00 PM",
+      "likesCount": "{{count}} people like this.",
+      "joinGroup": "Send a message"
+    },
+    "author": {
+      "name": "Kim Glue",
+      "date": "2025.04.12. 13:12"
+    },
+    "content": {
+      "title": "Recruiting for English study group",
+      "body": "Looking for people to study English together! To be honest, I'm not that good myself, so I'm looking for people who want to study together in a comfortable environment.\n\nMainly looking for people who want to practice conversation!\nI think it would be nice to learn together with other people studying English... I want Korean students and English-speaking students to learn together!\n\nRather than studying in a too formal atmosphere, I'd like to learn together while having comfortable conversations 😄\nFeel free to contact me!"
+    }
+  },
+  "home": {
+    "title": "Home",
+    "recent": "Recent Activity",
+    "popular": "Popular Groups in Real-time",
+    "koreanUsers": "Groups Looking for Korean Speakers",
+    "englishUsers": "Groups Looking for English Speakers",
+    "nearby": "Nearby Groups",
+    "seeAll": "See All",
+    "welcome": "Welcome",
+    "emptyState": "No groups yet",
+    "createFirst": "Create your first group"
   },
   "error": {
     "noInternet": "No internet connection",

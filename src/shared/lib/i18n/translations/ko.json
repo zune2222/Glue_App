@@ -13,7 +13,9 @@
     "next": "다음",
     "prev": "이전",
     "search": "검색",
-    "send": "보내기"
+    "send": "보내기",
+    "select": "선택",
+    "permission": "권한 필요"
   },
   "auth": {
     "login": "로그인",
@@ -40,6 +42,92 @@
       "termsNotice": "계속 진행하시면 Glue App의 이용약관과 개인정보처리방침에 동의하게 됩니다",
       "terms": "이용약관",
       "privacy": "개인정보처리방침"
+    }
+  },
+  "signup": {
+    "language": {
+      "title": "시스템 언어를 설정해주세요",
+      "korean": "한국어",
+      "english": "영어"
+    },
+    "name": {
+      "title": "이름을 입력해주세요",
+      "placeholder": "이름"
+    },
+    "gender": {
+      "title": "성별을 알려주세요",
+      "male": "남성",
+      "female": "여성"
+    },
+    "birthdate": {
+      "title": "생년월일을 입력해주세요",
+      "placeholder": "YYYY-MM-DD",
+      "selectDate": "생년월일 선택"
+    },
+    "email": {
+      "title": "학교의 웹메일 아이디를\n입력해주세요",
+      "subtitle": "입력하신 아이디로 인증 코드를 보내드릴게요.",
+      "label": "웹메일 아이디",
+      "placeholder": "웹메일 아이디를 입력하세요"
+    },
+    "verification": {
+      "title": "전송해드린 코드를\n입력해주세요",
+      "didNotReceive": "메일을 받지 못하셨나요?",
+      "resend": "재전송",
+      "resendSuccess": "인증 코드를 다시 전송해드렸어요"
+    },
+    "nickname": {
+      "title": "GLUE에서 사용할\n닉네임을 입력해주세요",
+      "label": "닉네임",
+      "placeholder": "닉네임을 입력하세요",
+      "duplicate": "이미 사용하고 있는 닉네임이에요."
+    },
+    "profilePhoto": {
+      "title": "프로필 사진을 설정해주세요",
+      "subtitle": "프로필 사진은 언제든지 다시 설정하실 수 있어요.",
+      "selectOption": "프로필 사진을 어떻게 추가할까요?",
+      "camera": "카메라",
+      "gallery": "갤러리",
+      "unavailable": "이 기기에서는 이 기능을 사용할 수 없습니다.",
+      "blocked": "앱이 카메라 또는 갤러리에 접근할 수 없습니다. 설정에서 권한을 허용해주세요.",
+      "goToSettings": "설정으로 이동",
+      "error": "이미지를 불러오는 중 오류가 발생했습니다."
+    },
+    "introduction": {
+      "title": "본인을 한 줄로 소개해보세요 :)",
+      "subtitle": "공백 포함 {{maxLength}}자까지 입력 가능해요.",
+      "placeholder": "나를 한 줄로 표현해보세요"
+    },
+    "nativeLanguage": {
+      "title": "모국어를 선택해주세요",
+      "subtitle": "이 중 모국어가 없는 경우, 가장 친숙한 언어를 선택해 주세요.",
+      "korean": "한국어",
+      "english": "영어",
+      "japanese": "일본어",
+      "chinese": "중국어",
+      "german": "독일어",
+      "french": "프랑스어",
+      "spanish": "스페인어"
+    },
+    "languageLevel": {
+      "title": "선택한 모국어에 대한\n언어 수준을 설정해 주세요",
+      "subtitle": "교환 언어 수준은 언제든지 다시 설정할 수 있어요.",
+      "beginner": "초급",
+      "elementary": "기초",
+      "intermediate": "중급",
+      "advanced": "고급",
+      "proficient": "능숙"
+    },
+    "university": {
+      "title": "재학하고 있는 대학교를\n선택해주세요",
+      "label": "대학교",
+      "placeholder": "대학교를 선택해주세요",
+      "pusan": "부산대학교"
+    },
+    "department": {
+      "title": "학과를 알려주세요",
+      "placeholder": "학과를 선택해주세요",
+      "search": "학과 검색"
     }
   },
   "profile": {
@@ -132,6 +220,38 @@
       "confirmButtonPressed": "확인 버튼이 눌렸습니다.",
       "cancelButtonPressed": "취소 버튼이 눌렸습니다."
     }
+  },
+  "group": {
+    "detail": {
+      "study": "공부",
+      "meeting_info": "모임 정보",
+      "capacity": "8/10",
+      "language": "교환 희망 언어: 영어",
+      "minForeigners": "영어권 학생 최소 희망 인원: 2명",
+      "meetingDate": "2025년 4월 12일 오후 6시 00분",
+      "likesCount": "{{count}}명이 좋아합니다.",
+      "joinGroup": "쪽지 보내기"
+    },
+    "author": {
+      "name": "김글루",
+      "date": "2025.04.12. 13:12"
+    },
+    "content": {
+      "title": "영어 공부할 모임 모집합니다",
+      "body": "같이 영어 공부할 사람 모집해요! 솔직히 저도 잘하는 편이 아니라 그냥 편하게 열심히 같이 공부하실 분 모집해요.\n\n회화 위주로 공부할 사람들 위주로 모집하고 있어요!\n저 말고도 영어 공부하면서 같이 파이팅하면 좋을 것 같아서... 한국인 학생 - 영어권 학생끼리 같이 학습하고 싶습니다!\n\n그렇다고 너무 딱딱한 분위기에서 공부하는 것보다는, 편안한 분위기에서 같이 대화하면서 공부하고 싶어요 😄\n편하게 연락주세요!"
+    }
+  },
+  "home": {
+    "title": "홈",
+    "recent": "최근 활동",
+    "popular": "실시간 인기 모임글",
+    "koreanUsers": "한국어 사용자를 찾는 모임",
+    "englishUsers": "영어 사용자를 찾는 모임",
+    "nearby": "주변 모임",
+    "seeAll": "전체보기",
+    "welcome": "환영합니다",
+    "emptyState": "아직 모임이 없습니다",
+    "createFirst": "첫 모임을 만들어보세요"
   },
   "error": {
     "noInternet": "인터넷 연결을 확인해주세요",

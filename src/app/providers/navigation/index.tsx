@@ -1,15 +1,12 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {
-  HomeIcon,
-  ChatIcon,
-  ProfileIcon,
-  SettingsIcon,
-} from '@widgets/bottomTab/icons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 // 홈/게시판 화면 컴포넌트 임포트
-import {HomeScreen, PostDetailScreen, PostCreateScreen} from '@features/Home';
+import {HomeScreen} from '@features/Home';
+
+// 모임글 화면 컴포넌트 임포트
+import {GroupList, GroupDetail} from '@features/Group';
 
 // 채팅 화면 컴포넌트 임포트
 import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
@@ -17,11 +14,12 @@ import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
 // 프로필 화면 컴포넌트 임포트
 import {ProfileMainScreen, ProfileEditScreen} from '@features/Profile';
 
-// 설정 화면 컴포넌트 임포트
-import {SettingsScreen} from '@features/Settings';
-
 // 인증 화면 임포트
-import {WelcomeScreen, AuthProfileNavigator} from '@features/Auth';
+import {
+  WelcomeScreen,
+  AuthProfileNavigator,
+  SignUpScreen,
+} from '@features/auth';
 
 // 헤더 컴포넌트 임포트
 import {Header} from '@widgets/header';
@@ -29,14 +27,22 @@ import {Header} from '@widgets/header';
 // 알림 패널 임포트
 import {NotificationsPanel} from '@widgets/notifications';
 
+// SVG 아이콘 컴포넌트 임포트
+import {
+  HomeIcon,
+  GroupIcon,
+  ChatIcon,
+  ProfileIcon,
+} from '@widgets/bottomTab/icons';
+
 // 네비게이션 스택 생성
 const RootStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 const BoardStack = createNativeStackNavigator();
+const GroupStack = createNativeStackNavigator();
 const MessagesStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
-const SettingsStack = createNativeStackNavigator();
 const MainTab = createBottomTabNavigator();
 
 // 네비게이션 헤더 스타일 정의
@@ -76,22 +82,6 @@ const BoardNavigator = () => (
       name="BoardList"
       component={HomeScreen}
       options={{headerShown: false}}
-    />
-    <BoardStack.Screen
-      name="BoardDetail"
-      component={PostDetailScreen}
-      options={{
-        title: '게시글',
-        headerBackTitle: '뒤로',
-      }}
-    />
-    <BoardStack.Screen
-      name="BoardCreate"
-      component={PostCreateScreen}
-      options={{
-        title: '글 작성하기',
-        headerBackTitle: '취소',
-      }}
     />
   </BoardStack.Navigator>
 );
@@ -134,17 +124,6 @@ const ProfileNavigator = () => (
   </ProfileStack.Navigator>
 );
 
-// 설정 스택 네비게이터
-const SettingsNavigator = () => (
-  <SettingsStack.Navigator
-    screenOptions={{
-      ...commonHeaderOptions,
-      headerShown: false,
-    }}>
-    <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
-  </SettingsStack.Navigator>
-);
-
 // 인증 스택 네비게이터
 const AuthNavigator = () => (
   <AuthStack.Navigator
@@ -153,22 +132,47 @@ const AuthNavigator = () => (
       headerShown: false,
     }}>
     <AuthStack.Screen name="Welcome" component={WelcomeScreen} />
+    <AuthStack.Screen name="SignUp" component={SignUpScreen} />
     <AuthStack.Screen name="Profile" component={AuthProfileNavigator} />
   </AuthStack.Navigator>
+);
+
+// 모임글 스택 네비게이터
+const GroupNavigator = () => (
+  <GroupStack.Navigator screenOptions={commonHeaderOptions}>
+    <GroupStack.Screen
+      name="GroupList"
+      component={GroupList}
+      options={{headerShown: false}}
+    />
+    <GroupStack.Screen
+      name="GroupDetail"
+      component={GroupDetail}
+      options={{headerShown: false}}
+    />
+    <GroupStack.Screen
+      name="CreateGroup"
+      component={GroupList} // 임시로 동일한 컴포넌트 사용, 추후 변경 필요
+      options={{
+        title: '모임 만들기',
+        headerBackTitle: '취소',
+      }}
+    />
+  </GroupStack.Navigator>
 );
 
 // 탭 아이콘 컴포넌트 (렌더링 함수 밖에서 정의)
 const renderHomeIcon = ({color}: {color: string}) => (
   <HomeIcon color={color} size={28} />
 );
+const renderGroupIcon = ({color}: {color: string}) => (
+  <GroupIcon color={color} size={28} />
+);
 const renderChatIcon = ({color}: {color: string}) => (
   <ChatIcon color={color} size={28} />
 );
 const renderProfileIcon = ({color}: {color: string}) => (
   <ProfileIcon color={color} size={28} />
-);
-const renderSettingsIcon = ({color}: {color: string}) => (
-  <SettingsIcon color={color} size={28} />
 );
 
 // 커스텀 헤더 랜더러
@@ -185,7 +189,7 @@ const MainTabNavigator = () => {
         // 커스텀 헤더를 사용하여 모든 탭에 동일한 헤더 적용
         header: renderHeader,
         tabBarActiveTintColor: navTheme.colors.primary,
-        tabBarInactiveTintColor: '#757575',
+        tabBarInactiveTintColor: '#9DA2AF',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#F0F0F0',
@@ -203,6 +207,14 @@ const MainTabNavigator = () => {
         }}
       />
       <MainTab.Screen
+        name="Group"
+        component={GroupNavigator}
+        options={{
+          tabBarLabel: '모임글',
+          tabBarIcon: renderGroupIcon,
+        }}
+      />
+      <MainTab.Screen
         name="Messages"
         component={MessagesNavigator}
         options={{
@@ -214,16 +226,8 @@ const MainTabNavigator = () => {
         name="Profile"
         component={ProfileNavigator}
         options={{
-          tabBarLabel: '프로필',
+          tabBarLabel: '마이',
           tabBarIcon: renderProfileIcon,
-        }}
-      />
-      <MainTab.Screen
-        name="Settings"
-        component={SettingsNavigator}
-        options={{
-          tabBarLabel: '설정',
-          tabBarIcon: renderSettingsIcon,
         }}
       />
     </MainTab.Navigator>
