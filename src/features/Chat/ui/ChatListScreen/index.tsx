@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Alert} from 'react-native';
 import EmptyChatScreen from '../EmptyChatScreen';
+import ChatRoomListScreen from '../ChatRoomListScreen';
 import {fetchChatRooms} from '../../model';
 import {ChatRoom} from '../../entities/types';
 
@@ -32,13 +33,28 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({navigation: _}) => {
     Alert.alert('모임 둘러보기', '모임 둘러보기 화면으로 이동합니다.');
   };
 
+  const handleChatRoomPress = (roomId: string) => {
+    // 채팅방 상세 화면으로 이동하는 로직
+    Alert.alert('채팅방 입장', `${roomId} 채팅방으로 이동합니다.`);
+  };
+
+  // 로딩 중이면 아무것도 보여주지 않음
+  if (loading) {
+    return null; // 로딩 컴포넌트를 추가할 수 있음
+  }
+
   // 채팅방이 없는 경우 빈 화면 표시
-  if (!loading && chatRooms.length === 0) {
+  if (chatRooms.length === 0) {
     return <EmptyChatScreen onExplorePress={handleExplorePress} />;
   }
 
-  // 채팅방이 있는 경우의 화면 (추후 구현)
-  return <EmptyChatScreen onExplorePress={handleExplorePress} />;
+  // 채팅방이 있는 경우 채팅방 목록 표시
+  return (
+    <ChatRoomListScreen
+      chatRooms={chatRooms}
+      onChatRoomPress={handleChatRoomPress}
+    />
+  );
 };
 
 export default ChatListScreen;

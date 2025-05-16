@@ -1,7 +1,5 @@
 import {ChatRoom} from '../entities/types';
-
-// 더미 데이터
-export const dummyChatRooms: ChatRoom[] = [];
+import {dummyChatRooms} from './dummyData';
 
 // 실제 API 호출을 통해 채팅방 목록을 가져오는 함수
 export const fetchChatRooms = async (): Promise<ChatRoom[]> => {
@@ -13,7 +11,7 @@ export const fetchChatRooms = async (): Promise<ChatRoom[]> => {
     // 임시로 더미 데이터 반환
     return dummyChatRooms;
   } catch (error) {
-    console.error('채팅방 목록을 가져오는데 실패했습니다.', error);
+    console.error('채팅방 목록을 불러오는데 실패했습니다.', error);
     return [];
   }
 };
