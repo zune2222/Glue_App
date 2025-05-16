@@ -27,9 +27,19 @@ export const SocialLoginSection = () => {
     console.log(`${provider} 로그인 시도`);
 
     // 회원 정보가 없다고 가정하고 회원가입 화면으로 이동
-    navigation.navigate('Auth', {
-      screen: 'SignUp',
-    });
+    if (provider === 'Kakao') {
+      navigation.navigate('Auth', {
+        screen: 'SignUp',
+      });
+    } else if (provider === 'Google') {
+      navigation.navigate('Auth', {
+        screen: 'SignUp',
+      });
+    } else if (provider === 'Apple') {
+      navigation.navigate('Main', {
+        screen: 'Home',
+      });
+    }
   };
 
   return (
