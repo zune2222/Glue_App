@@ -9,7 +9,7 @@ interface ChatListScreenProps {
   navigation?: any;
 }
 
-const ChatListScreen: React.FC<ChatListScreenProps> = ({navigation: _}) => {
+const ChatListScreen: React.FC<ChatListScreenProps> = ({navigation}) => {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -35,7 +35,9 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({navigation: _}) => {
 
   const handleChatRoomPress = (roomId: string) => {
     // 채팅방 상세 화면으로 이동하는 로직
-    Alert.alert('채팅방 입장', `${roomId} 채팅방으로 이동합니다.`);
+    if (navigation) {
+      navigation.navigate('Chat', {roomId});
+    }
   };
 
   // 로딩 중이면 아무것도 보여주지 않음

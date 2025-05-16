@@ -1,8 +1,15 @@
 import ChatListScreen from './ui/ChatListScreen';
-import ChatRoomScreen from './ui/ChatScreen';
+import ChatRoomScreen from './ui/ChatRoomScreen';
 import EmptyChatScreen from './ui/EmptyChatScreen';
 import ChatRoomListScreen from './ui/ChatRoomListScreen';
-import {ChatRoomItem, TabHeader} from './components';
+import {
+  ChatRoomItem,
+  TabHeader,
+  ChatMessage,
+  ChatInput,
+  ChatHeader,
+  DateDivider,
+} from './components';
 
 export {
   // Screens
@@ -14,4 +21,8 @@ export {
   // Components
   ChatRoomItem,
   TabHeader,
+  ChatMessage,
+  ChatInput,
+  ChatHeader,
+  DateDivider,
 };

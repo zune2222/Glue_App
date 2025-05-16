@@ -94,14 +94,6 @@ const MessagesNavigator = () => (
       component={ChatListScreen}
       options={{headerShown: false}}
     />
-    <MessagesStack.Screen
-      name="Chat"
-      component={ChatRoomScreen}
-      options={({route}: any) => ({
-        title: route.params?.chatName || '채팅방',
-        headerBackTitle: '목록',
-      })}
-    />
   </MessagesStack.Navigator>
 );
 
@@ -256,6 +248,7 @@ export const AppNavigator = () => {
     <RootStack.Navigator screenOptions={{headerShown: false}}>
       <RootStack.Screen name="Auth" component={AuthNavigator} />
       <RootStack.Screen name="Main" component={MainNavigator} />
+      <RootStack.Screen name="Chat" component={ChatRoomScreen} />
     </RootStack.Navigator>
   );
 };
