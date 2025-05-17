@@ -5,6 +5,8 @@ import {
   View,
   Animated,
   Dimensions,
+  TouchableWithoutFeedback,
+  PanResponder,
 } from 'react-native';
 import {styles} from './styles';
 import {
@@ -36,27 +38,81 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRoomInfo, setShowRoomInfo] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const slideAnim = useRef(new Animated.Value(width)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
 
   const roomId = route?.params?.roomId || '1'; // 기본값 제공
 
+  // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // 오른쪽으로 스와이프할 때만 반응
+        return gestureState.dx > 5;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        // 오른쪽으로 드래그하는 거리만큼 애니메이션 값 조정
+        if (gestureState.dx > 0) {
+          slideAnim.setValue(width * 0.25 + gestureState.dx);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        // 일정 거리 이상 스와이프하면 메뉴 닫기
+        if (gestureState.dx > width * 0.2) {
+          closeRoomInfo();
+        } else {
+          // 그렇지 않으면 원래 위치로 돌아가기
+          Animated.spring(slideAnim, {
+            toValue: width * 0.25,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    }),
+  ).current;
+
   useEffect(() => {
-    if (showRoomInfo) {
-      Animated.timing(slideAnim, {
-        toValue: width * 0.1, // 화면의 10% 위치에서 멈춤 (남은 10%가 비어있게)
-        duration: 300,
-        delay: 0,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(slideAnim, {
-        toValue: width,
-        duration: 250, // 닫힐 때는 조금 더 빠르게
-        useNativeDriver: true,
-      }).start();
+    if (showRoomInfo && !isClosing) {
+      // 메뉴 열기 애니메이션 (패널 슬라이드 + 배경 페이드인)
+      Animated.parallel([
+        Animated.spring(slideAnim, {
+          toValue: width * 0.25, // 화면의 25% 위치 (75%만 차지)
+          useNativeDriver: true,
+          friction: 8, // 부드러운 애니메이션을 위한 설정
+          tension: 40,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else if (isClosing) {
+      // 메뉴 닫기 애니메이션
+      Animated.parallel([
+        Animated.spring(slideAnim, {
+          toValue: width,
+          useNativeDriver: true,
+          friction: 8,
+          tension: 40,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(({finished}) => {
+        // 애니메이션이 완료된 후에만 메뉴를 숨김
+        if (finished) {
+          setShowRoomInfo(false);
+          setIsClosing(false);
+        }
+      });
     }
-  }, [showRoomInfo, slideAnim]);
+  }, [showRoomInfo, isClosing, slideAnim, fadeAnim]);
 
   useEffect(() => {
     const loadChatDetails = async () => {
@@ -100,10 +156,13 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   const handleMenuPress = () => {
     setShowRoomInfo(true);
+    setIsClosing(false);
   };
 
   const closeRoomInfo = () => {
-    setShowRoomInfo(false);
+    if (!isClosing) {
+      setIsClosing(true);
+    }
   };
 
   const handleLeaveRoom = () => {
@@ -163,17 +222,26 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       <ChatInput onSend={handleSendMessage} />
 
       {/* 채팅방 정보 - 우측에서 슬라이드 */}
-      <View
-        style={[styles.modalOverlay, {display: showRoomInfo ? 'flex' : 'none'}]}
-        onTouchEnd={closeRoomInfo}>
+      <Animated.View
+        style={[
+          styles.modalOverlay,
+          {
+            opacity: fadeAnim,
+            display: showRoomInfo || isClosing ? 'flex' : 'none',
+          },
+        ]}>
+        <TouchableWithoutFeedback onPress={closeRoomInfo}>
+          <View style={styles.overlayTouchable} />
+        </TouchableWithoutFeedback>
+
         <Animated.View
+          {...panResponder.panHandlers}
           style={[
             styles.sidePanel,
             {
               transform: [{translateX: slideAnim}],
             },
-          ]}
-          onTouchEnd={e => e.stopPropagation()}>
+          ]}>
           <ChatRoomInfo
             roomName={chatDetails.name}
             roomIcon={chatDetails.roomIcon}
@@ -189,7 +257,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
             onLeaveRoom={handleLeaveRoom}
           />
         </Animated.View>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 };
