@@ -11,12 +11,15 @@ import { styles } from './styles/MyPageScreen.styles';
 import { useProfile, useGroupHistory, useLikedGroups } from '../model/useProfile';
 import { RightArrowIcon } from '@shared/assets/images';
 import CustomHeader from '@widgets/header/ui/CustomHeader';
+import { useTranslation } from 'react-i18next';
+
 
 export const MyPageScreen = () => {
   const navigation = useNavigation();
   const { profile } = useProfile();
   const { history } = useGroupHistory();
   const { liked } = useLikedGroups();
+  const { t } = useTranslation();
    // 임시 더미 프로필 데이터
   const dummyProfile = {
     avatar: require('@shared/assets/images/logo.png'),
@@ -64,28 +67,28 @@ export const MyPageScreen = () => {
           ))}   
         </View>
         {/* 언어 설정 */}
-        <Text style={styles.sectionTitle}>언어 설정</Text>
+        <Text style={styles.sectionTitle}>{t('profile.languageSettings')}</Text>
         <View style={styles.languageContainer}>
           <LanguageCard
-            title="나의 언어"
+            title={t('profile.myLanguage')}
             language={profile?.language}
             level={profile?.languageLevel}
             onEdit={() => navigation.navigate('ProfileEdit')}
           />
           <LanguageCard
-            title="교환 언어"
+            title={t('profile.exchangeLanguage')}
             language={profile?.exchangeLanguage}
             level={profile?.exchangeLanguageLevel}
             onEdit={() => navigation.navigate('ProfileEdit')}
           />
         </View>
         {/* 내 정보 리스트 */}
-        <Text style={styles.sectionTitle}>내 정보</Text>
+        <Text style={styles.sectionTitle}>{t('profile.myInfo')}</Text>
         <View style={styles.infoList}>
-          <MyInfoItem label="내가 모임 히스토리" onPress={() => navigation.navigate('GroupHistory')} />
-          <MyInfoItem label="내 좋아요 목록" onPress={() => navigation.navigate('LikedGroups')} />
-          <MyInfoItem label="내 방명록" onPress={() => navigation.navigate('Guestbook')} />
-          <MyInfoItem label="공개범위 설정" onPress={() => navigation.navigate('PrivacySettings')} />
+          <MyInfoItem label={t('profile.myGroupsHistory')} onPress={() => navigation.navigate('GroupHistory')} />
+          <MyInfoItem label={t('profile.myLikes')} onPress={() => navigation.navigate('LikedGroups')} />
+          <MyInfoItem label={t('profile.myGuestbook')} onPress={() => navigation.navigate('Guestbook')} />
+          <MyInfoItem label={t('profile.privacySettings')} onPress={() => navigation.navigate('PrivacySettings')} />
         </View>
       </ScrollView>
     </SafeAreaView>

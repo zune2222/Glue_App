@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@shared/ui/typography/Text';
+import {useTranslation} from 'react-i18next';
 
 import { styles } from '../styles/LanguageCard.styles';
 
@@ -12,21 +13,24 @@ interface LanguageCardProps {
   onEdit: () => void;
 }
 
-export const LanguageCard: React.FC<LanguageCardProps> = ({ title, language, level, onEdit }) => (
+export const LanguageCard: React.FC<LanguageCardProps> = ({ title, language, level, onEdit }) => {
+  const { t } = useTranslation();
+  return(
   <View style={styles.card}>
     <View style={styles.header}>
       <Text style={styles.title}>{title}</Text>
       <TouchableOpacity onPress={onEdit}>
-        <Text style={styles.edit}>수정</Text>
+        <Text style={styles.edit}>{t('profile.edit')}</Text>
       </TouchableOpacity>
     </View>
     <View style={styles.body}>
-      <Text style={styles.label}>언어</Text>
+      <Text style={styles.label}>{t('settings.language')}</Text>
       <Text style={styles.value}>{language}</Text>
     </View>
     <View style={styles.body}>
-      <Text style={styles.label}>수준</Text>
+      <Text style={styles.label}>{t('profile.level')}</Text>
       <Text style={styles.value}>{level}</Text>
     </View>
   </View>
-);
+  );
+};
