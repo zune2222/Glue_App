@@ -1,6 +1,8 @@
 ﻿// src/features/Profile/ui/components/MyInfoItem.tsx
 import React from 'react';
-import { TouchableOpacity, Text } from 'react-native';
+import { TouchableOpacity } from 'react-native';
+import { Text } from '@shared/ui/typography/Text';
+
 import { styles } from '../styles/MyInfoItem.styles';
 
 interface MyInfoItemProps {

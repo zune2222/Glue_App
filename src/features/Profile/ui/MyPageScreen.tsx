@@ -1,6 +1,7 @@
 ﻿import React from 'react';
-import { SafeAreaView, ScrollView, View, Text, Image, TouchableOpacity, } from 'react-native';
+import { SafeAreaView, ScrollView, View, Image, TouchableOpacity, } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Text } from '@shared/ui/typography/Text'
 import { ProfileCard } from './components/ProfileCard';
 import { GroupHistoryCard } from './components/GroupHistoryCard';
 import { LikedGroupCard } from './components/LikedGroupCard';

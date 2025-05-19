@@ -1,6 +1,7 @@
 ﻿// src/features/Profile/ui/components/GroupHistoryCard.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { Text } from '@shared/ui/typography/Text';
 import { GroupHistoryItem } from '../../model/types';
 import { styles } from '../styles/GroupHistory.styles';
 

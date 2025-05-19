@@ -1,7 +1,8 @@
 ﻿// src/features/Profile/ui/components/ProfileCard.tsx
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Text } from '@shared/ui/typography/Text';
 import { UserProfile } from '../../model/types';
 import { styles } from '../styles/MyPageScreen.styles';
 

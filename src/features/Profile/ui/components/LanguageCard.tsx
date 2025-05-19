@@ -1,6 +1,8 @@
 ﻿// src/features/Profile/ui/components/LanguageCard.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { Text } from '@shared/ui/typography/Text';
+
 import { styles } from '../styles/LanguageCard.styles';
 
 interface LanguageCardProps {

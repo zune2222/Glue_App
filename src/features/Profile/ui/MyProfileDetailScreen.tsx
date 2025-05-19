@@ -1,6 +1,8 @@
 ﻿// src/features/Profile/ui/MyProfileDetailScreen.tsx
 import React from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity } from 'react-native';
+import { SafeAreaView, View, TouchableOpacity } from 'react-native';
+import { Text } from '@shared/ui/typography/Text';
+
 import { useProfile } from '../model/useProfile';
 import { styles } from './styles/MyProfileDetail.styles';
 

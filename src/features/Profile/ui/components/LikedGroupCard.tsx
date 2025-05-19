@@ -1,6 +1,8 @@
 ﻿// src/features/Profile/ui/components/LikedGroupCard.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { Text } from '@shared/ui/typography/Text';
+
 import { LikedGroupItem } from '../../model/types';
 import { styles } from '../styles/LikedGroups.styles';
 
