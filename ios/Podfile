@@ -1,12 +1,32 @@
 # Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
+def node_require(script)
+  # Resolve script with node to allow for hoisting
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
+
+# Use it to require both react-native's and this package's scripts:
+node_require('react-native/scripts/react_native_pods.rb')
+node_require('react-native-permissions/scripts/setup.rb')
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
+
+# Permissions 설정
+setup_permissions([
+  'Camera',
+  'PhotoLibrary',
+  'PhotoLibraryAddOnly',
+])
+
+# 기존의 react-native-permissions 관련 pod 제거
+# permissions_path = '../node_modules/react-native-permissions/ios'
+# pod 'Permission-Camera', :path => "#{permissions_path}/Camera"
+# pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary"
+# pod 'Permission-PhotoLibraryAddOnly', :path => "#{permissions_path}/PhotoLibraryAddOnly"
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
