@@ -1,36 +1,19 @@
 import React from 'react';
 import {View, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {Bell, logo, Search} from '@shared/assets/images';
 
 const Header = () => {
   return (
     <View style={styles.navbar}>
       <View style={styles.logoContainer}>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/y30cgyqd_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={styles.logo}
-        />
+        <Image source={logo} resizeMode={'stretch'} style={styles.logo} />
       </View>
       <View style={styles.flex1}></View>
       <TouchableOpacity>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/b7z391og_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={styles.navbarIcon}
-        />
+        <Search style={styles.navbarIcon} />
       </TouchableOpacity>
       <TouchableOpacity>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/n1po82jh_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={[styles.navbarIcon, styles.marginLeft0]}
-        />
+        <Bell style={[styles.navbarIcon, styles.marginLeft0]} />
       </TouchableOpacity>
     </View>
   );

@@ -43,6 +43,9 @@ export interface GroupApi {
   joinGroup: (id: string) => Promise<{success: boolean}>;
 }
 
+const dummyProfile =
+  'https://mblogthumb-phinf.pstatic.net/MjAyNDA2MTJfMTYy/MDAxNzE4MTQ0NTg3NDg4.SG1k_pRTayyUW6hqG78tGZJFRZlRJz8uLIp4Lk4CVnAg.d8hxl6ErJlLY3bJeL4laCTBEaRx3mVKJBAvocA1FTl0g.JPEG/31db0e1e70d1b273f0146516a784723a.jpg?type=w800';
+
 /**
  * API mock 구현 - 개발 중에 사용
  */
@@ -56,8 +59,7 @@ export const mockGroupApi: GroupApi = {
       category: '스터디',
       authorName: '김영어',
       authorDate: '2023.05.15',
-      authorAvatarUrl:
-        'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/2ztssxiw_expires_30_days.png',
+      authorAvatarUrl: dummyProfile,
       likes: 48,
 
       capacity: '10명',

@@ -7,7 +7,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-
+import {Crown} from '@shared/assets/images';
 // 인라인 스타일 정의
 const styles = StyleSheet.create({
   container: {
@@ -133,15 +133,7 @@ const ChatMessage: React.FC<MessageProps> = ({
         {!isMine && (
           <View style={styles.senderContainer}>
             <Text style={styles.senderName}>{sender.name}</Text>
-            {sender.isHost && (
-              <Image
-                source={{
-                  uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/z6iid336_expires_30_days.png',
-                }}
-                resizeMode="cover"
-                style={styles.hostIcon}
-              />
-            )}
+            {sender.isHost && <Crown style={styles.hostIcon} />}
           </View>
         )}
 

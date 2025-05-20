@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, Image, TouchableOpacity} from 'react-native';
 import {styles} from './styles';
 import {ChatRoom} from '../../entities/types';
-
+import {dummyProfile} from '@shared/assets/images';
 interface ChatRoomItemProps {
   room: ChatRoom;
   onPress: (roomId: string) => void;
@@ -14,24 +14,13 @@ const ChatRoomItem: React.FC<ChatRoomItemProps> = ({room, onPress}) => {
       style={styles.container}
       onPress={() => onPress(room.id)}
       activeOpacity={0.7}>
-      <Image
-        source={{
-          uri:
-            room.id === '1'
-              ? 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/cm1k26wd_expires_30_days.png'
-              : 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/1eld2fix_expires_30_days.png',
-        }}
-        resizeMode="cover"
-        style={styles.image}
-      />
+      <Image source={dummyProfile} resizeMode="cover" style={styles.image} />
       <View style={styles.infoContainer}>
         <View style={styles.header}>
           <View style={styles.titleGroup}>
             <Text style={styles.name}>{room.name}</Text>
             <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/r7i1neqo_expires_30_days.png',
-              }}
+              source={dummyProfile}
               resizeMode="contain"
               style={styles.dot}
             />
@@ -48,9 +37,7 @@ const ChatRoomItem: React.FC<ChatRoomItemProps> = ({room, onPress}) => {
           </Text>
           {room.unreadCount ? (
             <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/lkakza83_expires_30_days.png',
-              }}
+              source={dummyProfile}
               resizeMode="contain"
               style={styles.unreadIndicator}
             />

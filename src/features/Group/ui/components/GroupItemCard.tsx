@@ -3,6 +3,7 @@ import {View, Image, TouchableOpacity} from 'react-native';
 import {GroupItemProps} from '../../model/types';
 import {commonStyles, groupListStyles} from '../styles/groupStyles';
 import {Text} from '../../../../shared/ui/typography/Text';
+import {Eye, Heart, Users} from '@shared/assets/images';
 
 /**
  * 모임 아이템 카드 컴포넌트
@@ -28,13 +29,7 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
               </Text>
             </View>
             <View style={groupListStyles.likesContainer}>
-              <Image
-                source={{
-                  uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/vdl01404_expires_30_days.png',
-                }}
-                resizeMode={'stretch'}
-                style={groupListStyles.likeIcon}
-              />
+              <Eye style={groupListStyles.likeIcon} />
               <Text variant="body2" style={groupListStyles.likesText}>
                 {item.likes}
               </Text>
@@ -53,25 +48,13 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
               </Text>
               <View style={groupListStyles.metaContainer}>
                 <View style={groupListStyles.metaItem}>
-                  <Image
-                    source={{
-                      uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/mc8m30v3_expires_30_days.png',
-                    }}
-                    resizeMode={'stretch'}
-                    style={groupListStyles.metaIcon}
-                  />
+                  <Heart style={groupListStyles.metaIcon} />
                   <Text variant="caption" style={groupListStyles.metaText}>
                     {item.comments}
                   </Text>
                 </View>
                 <View style={groupListStyles.metaItem}>
-                  <Image
-                    source={{
-                      uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/11326jg7_expires_30_days.png',
-                    }}
-                    resizeMode={'stretch'}
-                    style={groupListStyles.metaIcon}
-                  />
+                  <Users style={groupListStyles.metaIcon} />
                   <Text variant="caption" style={groupListStyles.metaText}>
                     {item.participants}
                   </Text>
@@ -112,13 +95,7 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
               </Text>
             </View>
             <View style={groupListStyles.likesContainer}>
-              <Image
-                source={{
-                  uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/kmv9hhz2_expires_30_days.png',
-                }}
-                resizeMode={'stretch'}
-                style={groupListStyles.likeIcon}
-              />
+              <Eye style={groupListStyles.likeIcon} />
               <Text variant="body2" style={groupListStyles.likesText}>
                 {item.likes}
               </Text>
@@ -136,25 +113,13 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
             </Text>
             <View style={groupListStyles.metaContainer}>
               <View style={groupListStyles.metaItem}>
-                <Image
-                  source={{
-                    uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/dt299qz0_expires_30_days.png',
-                  }}
-                  resizeMode={'stretch'}
-                  style={groupListStyles.metaIcon}
-                />
+                <Heart style={groupListStyles.metaIcon} />
                 <Text variant="caption" style={groupListStyles.metaText}>
                   {item.comments}
                 </Text>
               </View>
               <View style={groupListStyles.metaItem}>
-                <Image
-                  source={{
-                    uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/428irf7x_expires_30_days.png',
-                  }}
-                  resizeMode={'stretch'}
-                  style={groupListStyles.metaIcon}
-                />
+                <Users style={groupListStyles.metaIcon} />
                 <Text variant="caption" style={groupListStyles.metaText}>
                   {item.participants}
                 </Text>

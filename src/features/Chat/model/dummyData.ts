@@ -1,5 +1,4 @@
 import {ChatRoom, ChatDetails, ChatUser, ChatMessage} from '../entities/types';
-
 export const dummyChatRooms: ChatRoom[] = [
   {
     id: '1',
@@ -18,53 +17,51 @@ export const dummyChatRooms: ChatRoom[] = [
     memberCount: 5,
   },
 ];
-
+const dummyProfile =
+  'https://mblogthumb-phinf.pstatic.net/MjAyNDA2MTJfMTYy/MDAxNzE4MTQ0NTg3NDg4.SG1k_pRTayyUW6hqG78tGZJFRZlRJz8uLIp4Lk4CVnAg.d8hxl6ErJlLY3bJeL4laCTBEaRx3mVKJBAvocA1FTl0g.JPEG/31db0e1e70d1b273f0146516a784723a.jpg?type=w800';
 export const dummyUsers: ChatUser[] = [
   {
     id: 'user1',
     name: '이글루',
     isHost: true,
     isOnline: true,
-    profileImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/lsk3xr36_expires_30_days.png',
+    profileImage: dummyProfile,
   },
   {
     id: 'user2',
     name: '김글루',
     isOnline: true,
-    profileImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/zfvhxvph_expires_30_days.png',
+    profileImage: dummyProfile,
   },
   {
     id: 'user3',
     name: '신왕구',
-    profileImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/cm1k26wd_expires_30_days.png',
+    profileImage: dummyProfile,
   },
   {
     id: 'user4',
     name: '한유리',
-    profileImage: 'https://ui-avatars.com/api/?name=한유리&background=random',
+    profileImage: dummyProfile,
   },
   {
     id: 'user5',
     name: '맹구',
-    profileImage: 'https://ui-avatars.com/api/?name=맹구&background=random',
+    profileImage: dummyProfile,
   },
   {
     id: 'user6',
     name: '김철수',
-    profileImage: 'https://ui-avatars.com/api/?name=김철수&background=random',
+    profileImage: dummyProfile,
   },
   {
     id: 'user7',
     name: '이훈이',
-    profileImage: 'https://ui-avatars.com/api/?name=이훈이&background=random',
+    profileImage: dummyProfile,
   },
   {
     id: 'user8',
     name: '원장쌤',
-    profileImage: 'https://ui-avatars.com/api/?name=원장쌤&background=random',
+    profileImage: dummyProfile,
   },
 ];
 
@@ -100,8 +97,7 @@ export const dummyMessages: ChatMessage[] = [
 export const dummyChatDetails: ChatDetails = {
   id: '1',
   name: 'Maratang Warriors',
-  roomIcon:
-    'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/lsk3xr36_expires_30_days.png',
+  roomIcon: dummyProfile,
   memberCount: 8,
   users: dummyUsers,
   messages: dummyMessages,

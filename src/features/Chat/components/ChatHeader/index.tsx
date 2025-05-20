@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, Image, TouchableOpacity} from 'react-native';
 import {styles} from './styles';
-
+import {ChevronLeft, Menu} from '@shared/assets/images';
 interface ChatHeaderProps {
   title: string;
   memberCount: number;
@@ -18,25 +18,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onBackPress}>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/asb22nxh_expires_30_days.png',
-          }}
-          resizeMode="contain"
-          style={styles.backButton}
-        />
+        <ChevronLeft style={styles.backButton} />
       </TouchableOpacity>
 
       <Text style={styles.title}>{`${title}  ${memberCount}`}</Text>
 
       <TouchableOpacity onPress={onMenuPress}>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/lxrs4xgg_expires_30_days.png',
-          }}
-          resizeMode="contain"
-          style={styles.menuButton}
-        />
+        <Menu style={styles.menuButton} />
       </TouchableOpacity>
     </View>
   );

@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Image, StyleSheet} from 'react-native';
 import {MeetingCardProps} from '../../model/types';
 import {Text} from '../../../../shared/ui/typography/Text';
+import {Eye, Heart, Users} from '@shared/assets/images';
 
 const MeetingCard = ({
   category,
@@ -50,13 +51,7 @@ const MeetingCard = ({
         </View>
         <View style={styles.flex1}></View>
         <View style={styles.viewCountContainer}>
-          <Image
-            source={{
-              uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/7fndag3l_expires_30_days.png',
-            }}
-            resizeMode={'stretch'}
-            style={styles.smallIcon}
-          />
+          <Eye style={styles.smallIcon} />
           <Text variant="caption" color="#9DA2AF" style={styles.metaText}>
             {viewCount}
           </Text>
@@ -77,25 +72,13 @@ const MeetingCard = ({
         </View>
         <View style={styles.cardFooter}>
           <View style={styles.footerItem}>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/4hkcj7y0_expires_30_days.png',
-              }}
-              resizeMode={'stretch'}
-              style={styles.smallIcon}
-            />
+            <Heart style={styles.smallIcon} />
             <Text variant="caption" color="#384050" style={styles.metaInfoText}>
               {likeCount}
             </Text>
           </View>
           <View style={styles.footerItem}>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/ba28r6db_expires_30_days.png',
-              }}
-              resizeMode={'stretch'}
-              style={styles.smallIcon}
-            />
+            <Users style={styles.smallIcon} />
             <Text variant="caption" color="#384050" style={styles.metaInfoText}>
               {memberCount}
             </Text>

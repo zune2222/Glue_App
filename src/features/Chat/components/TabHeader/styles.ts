@@ -12,16 +12,21 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 1,
-    marginRight: 19,
   },
   inactiveTab: {
     color: '#D2D5DB',
     fontSize: 20,
     fontWeight: 'bold',
   },
+  tabButton: {
+    alignItems: 'center',
+    marginRight: 19,
+  },
   indicator: {
-    width: 52,
-    height: 1,
-    marginBottom: 22,
+    width: 48,
+    height: 2,
+    backgroundColor: '#394050',
+    marginTop: 5,
+    borderRadius: 10,
   },
 });

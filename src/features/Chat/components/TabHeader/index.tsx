@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Image} from 'react-native';
+import {View, Text, TouchableOpacity} from 'react-native';
 import {styles} from './styles';
 
 interface TabHeaderProps {
@@ -7,30 +7,35 @@ interface TabHeaderProps {
   onTabChange?: (tab: 'chat' | 'message') => void;
 }
 
-const TabHeader: React.FC<TabHeaderProps> = ({activeTab}) => {
+const TabHeader: React.FC<TabHeaderProps> = ({activeTab, onTabChange}) => {
   return (
-    <>
+    <View>
       <View style={styles.container}>
-        <Text
-          style={activeTab === 'chat' ? styles.activeTab : styles.inactiveTab}>
-          모임톡
-        </Text>
-        <Text
-          style={
-            activeTab === 'message' ? styles.activeTab : styles.inactiveTab
-          }>
-          쪽지
-        </Text>
-      </View>
+        <TouchableOpacity
+          onPress={() => onTabChange && onTabChange('chat')}
+          style={styles.tabButton}>
+          <Text
+            style={
+              activeTab === 'chat' ? styles.activeTab : styles.inactiveTab
+            }>
+            모임톡
+          </Text>
+          {activeTab === 'chat' && <View style={styles.indicator} />}
+        </TouchableOpacity>
 
-      <Image
-        source={{
-          uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/cdl4n6ra_expires_30_days.png',
-        }}
-        resizeMode="stretch"
-        style={[styles.indicator, {marginLeft: activeTab === 'chat' ? 20 : 88}]}
-      />
-    </>
+        <TouchableOpacity
+          onPress={() => onTabChange && onTabChange('message')}
+          style={styles.tabButton}>
+          <Text
+            style={
+              activeTab === 'message' ? styles.activeTab : styles.inactiveTab
+            }>
+            쪽지
+          </Text>
+          {activeTab === 'message' && <View style={styles.indicator} />}
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 

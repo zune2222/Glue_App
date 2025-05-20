@@ -50,10 +50,13 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false, // 시작부터 모든 터치를 가로채지 않음
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        // 오른쪽으로 스와이프할 때만 반응
-        return gestureState.dx > 5;
+        // 가로 이동이 세로 이동보다 크고 최소 10px 이상일 때만 반응
+        return (
+          gestureState.dx > 10 &&
+          Math.abs(gestureState.dx) > Math.abs(gestureState.dy)
+        );
       },
       onPanResponderMove: (_, gestureState) => {
         // 오른쪽으로 드래그하는 거리만큼 애니메이션 값 조정

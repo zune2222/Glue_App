@@ -1,6 +1,8 @@
 import {MeetingCardProps} from './types';
 
 // 더미 데이터
+const dummyProfile =
+  'https://mblogthumb-phinf.pstatic.net/MjAyNDA2MTJfMTYy/MDAxNzE4MTQ0NTg3NDg4.SG1k_pRTayyUW6hqG78tGZJFRZlRJz8uLIp4Lk4CVnAg.d8hxl6ErJlLY3bJeL4laCTBEaRx3mVKJBAvocA1FTl0g.JPEG/31db0e1e70d1b273f0146516a784723a.jpg?type=w800';
 export const popularMeetings: MeetingCardProps[] = [
   {
     category: '공부',
@@ -8,8 +10,7 @@ export const popularMeetings: MeetingCardProps[] = [
     categoryBgColor: '#DEE9FC',
     date: '05/04 12:52',
     author: '김글루',
-    authorImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/0fc2p1ld_expires_30_days.png',
+    authorImage: dummyProfile,
     viewCount: '48',
     title: '영어 공부할 모임 모집합니다',
     description: '같이 영어 공부할 사람 모집해요! 솔직히 저도 잘...',
@@ -22,8 +23,7 @@ export const popularMeetings: MeetingCardProps[] = [
     categoryBgColor: '#DEE9FC',
     date: '05/04 12:52',
     author: '김글루',
-    authorImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/x6qf5oed_expires_30_days.png',
+    authorImage: dummyProfile,
     viewCount: '48',
     title: '영어 공부할 모임 모집합니다',
     description: '같이 영어 공부할 사람 모집해요! 솔직히 저도 잘...',
@@ -39,8 +39,7 @@ export const koreanMeetings: MeetingCardProps[] = [
     categoryBgColor: '#DEE9FC',
     date: '05/04 12:52',
     author: '김글루',
-    authorImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/01clc2d0_expires_30_days.png',
+    authorImage: dummyProfile,
     viewCount: '48',
     title: '영어 공부할 모임 모집합니다',
     description: '같이 영어 공부할 사람 모집해요! 솔직히 저도 잘...',
@@ -53,8 +52,7 @@ export const koreanMeetings: MeetingCardProps[] = [
     categoryBgColor: '#E2FBE8',
     date: '05/04 12:52',
     author: '김글루',
-    authorImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/kzc5lzc0_expires_30_days.png',
+    authorImage: dummyProfile,
     viewCount: '48',
     title: '영어 공부할 모임 모집합니다',
     description: '같이 영어 공부할 사람 모집해요! 솔직히 저도 잘...',
@@ -70,8 +68,7 @@ export const englishMeetings: MeetingCardProps[] = [
     categoryBgColor: '#DEE9FC',
     date: '05/04 12:52',
     author: '김글루',
-    authorImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/yz0au59l_expires_30_days.png',
+    authorImage: dummyProfile,
     viewCount: '48',
     title: '영어 공부할 모임 모집합니다',
     description: '같이 영어 공부할 사람 모집해요! 솔직히 저도 잘...',
@@ -84,8 +81,7 @@ export const englishMeetings: MeetingCardProps[] = [
     categoryBgColor: '#DEE9FC',
     date: '05/04 12:52',
     author: '김글루',
-    authorImage:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/yekoxgkx_expires_30_days.png',
+    authorImage: dummyProfile,
     viewCount: '48',
     title: '영어 공부할 모임 모집합니다',
     description: '같이 영어 공부할 사람 모집해요! 솔직히 저도 잘...',

@@ -1,6 +1,8 @@
 import {GroupItem} from './types';
 
 // 가상 데이터 - 모임 목록
+const dummyProfile =
+  'https://mblogthumb-phinf.pstatic.net/MjAyNDA2MTJfMTYy/MDAxNzE4MTQ0NTg3NDg4.SG1k_pRTayyUW6hqG78tGZJFRZlRJz8uLIp4Lk4CVnAg.d8hxl6ErJlLY3bJeL4laCTBEaRx3mVKJBAvocA1FTl0g.JPEG/31db0e1e70d1b273f0146516a784723a.jpg?type=w800';
 export const MOCK_GROUPS: GroupItem[] = [
   {
     id: '1',
@@ -13,8 +15,7 @@ export const MOCK_GROUPS: GroupItem[] = [
     participants: '8/10',
     time: '1분 전',
     likes: 48,
-    image:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/mcj0eckv_expires_30_days.png',
+    image: dummyProfile,
   },
   {
     id: '2',
@@ -28,8 +29,7 @@ export const MOCK_GROUPS: GroupItem[] = [
     participants: '8/10',
     time: '1시간 전',
     likes: 48,
-    image:
-      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/o4biwraj_expires_30_days.png',
+    image: dummyProfile,
   },
   {
     id: '3',
@@ -42,7 +42,7 @@ export const MOCK_GROUPS: GroupItem[] = [
     participants: '8/10',
     time: '1시간 전',
     likes: 48,
-    image: '',
+    image: dummyProfile,
   },
   {
     id: '4',
@@ -55,6 +55,6 @@ export const MOCK_GROUPS: GroupItem[] = [
     participants: '8/10',
     time: '1시간 전',
     likes: 48,
-    image: '',
+    image: dummyProfile,
   },
 ];

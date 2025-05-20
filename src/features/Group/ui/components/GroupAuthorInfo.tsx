@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Image} from 'react-native';
 import {groupDetailStyles} from '../styles/groupDetailStyles';
 import {Text} from '../../../../shared/ui/typography/Text';
+import {Eye} from '@shared/assets/images';
 
 interface GroupAuthorInfoProps {
   category: string;
@@ -49,13 +50,7 @@ const GroupAuthorInfo: React.FC<GroupAuthorInfoProps> = ({
           </Text>
         </View>
         <View style={groupDetailStyles.likeContainer}>
-          <Image
-            source={{
-              uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/iy1a5bp3_expires_30_days.png',
-            }}
-            resizeMode={'stretch'}
-            style={groupDetailStyles.likeIcon}
-          />
+          <Eye style={groupDetailStyles.likeIcon} />
           <Text variant="body2" style={groupDetailStyles.likeCount}>
             {likeCount}
           </Text>

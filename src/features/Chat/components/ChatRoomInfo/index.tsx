@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   View,
@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
+  Switch,
 } from 'react-native';
 import {Text} from '../../../../shared/ui/typography/Text';
+import {Bell, Exit, Mail, Mine, Pen} from '@shared/assets/images';
 
 interface ChatRoomInfoProps {
   roomName: string;
@@ -50,24 +52,7 @@ const MemberItem: React.FC<MemberItemProps> = ({member}) => (
       </Text>
     </View>
     <View style={styles.memberBadges}>
-      {member.isHost && (
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/errvmxs9_expires_30_days.png',
-          }}
-          resizeMode={'contain'}
-          style={styles.hostBadge}
-        />
-      )}
-      {member.isOnline && (
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/hmd54r24_expires_30_days.png',
-          }}
-          resizeMode={'contain'}
-          style={styles.onlineBadge}
-        />
-      )}
+      {member.isHost && <Mine style={styles.hostBadge} />}
     </View>
   </View>
 );
@@ -83,6 +68,12 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   onClose,
   onLeaveRoom,
 }) => {
+  const [isNotificationEnabled, setIsNotificationEnabled] = useState(true);
+
+  const handleToggleNotification = () => {
+    setIsNotificationEnabled(previousState => !previousState);
+  };
+
   const handleLeaveRoom = () => {
     Alert.alert(
       '모임톡 나가기',
@@ -104,7 +95,9 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}>
         <TouchableOpacity style={styles.categoryButton} onPress={() => {}}>
           <Text variant="body1" weight="bold" color="#263FA9">
             공부
@@ -129,35 +122,21 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
 
         <View style={styles.menuContainer}>
           <View style={styles.menuItem}>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/e5rf1ad3_expires_30_days.png',
-              }}
-              resizeMode={'stretch'}
-              style={styles.menuIcon}
-            />
+            <Bell style={styles.menuIcon} />
             <Text variant="body2" color="#303030" style={styles.menuText}>
               쪽지 알림
             </Text>
-            <View style={styles.toggleContainer}>
-              <Image
-                source={{
-                  uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/viiajgiz_expires_30_days.png',
-                }}
-                resizeMode={'stretch'}
-                style={styles.toggleIcon}
-              />
-            </View>
+            <Switch
+              trackColor={{false: '#D1D5DB', true: '#1CBFDC'}}
+              thumbColor={'#FFFFFF'}
+              ios_backgroundColor="#D1D5DB"
+              onValueChange={handleToggleNotification}
+              value={isNotificationEnabled}
+            />
           </View>
 
           <View style={styles.menuItem}>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/cw29e2bo_expires_30_days.png',
-              }}
-              resizeMode={'stretch'}
-              style={styles.menuIcon}
-            />
+            <Mail style={styles.menuIcon} />
             <Text variant="body2" color="#303030" style={styles.menuText}>
               모임 초대하기
             </Text>
@@ -169,13 +148,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
           </View>
 
           <View style={styles.menuItem}>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/c49ivanr_expires_30_days.png',
-              }}
-              resizeMode={'stretch'}
-              style={styles.menuIcon}
-            />
+            <Pen style={styles.menuIcon} />
             <Text variant="body2" color="#303030" style={styles.menuText}>
               게시글 수정하기
             </Text>
@@ -201,13 +174,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.leaveButton} onPress={handleLeaveRoom}>
-          <Image
-            source={{
-              uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/5km9sg0f_expires_30_days.png',
-            }}
-            style={styles.leaveIcon}
-            resizeMode="contain"
-          />
+          <Exit style={styles.leaveIcon} />
           <Text variant="body2" weight="medium" color="#111827">
             쪽지 나가기
           </Text>
@@ -279,15 +246,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   toggleContainer: {
-    backgroundColor: '#1CBFDC',
-    borderRadius: 999,
-    paddingVertical: 2,
-    paddingLeft: 21,
-    paddingRight: 3,
+    // 이 스타일이 더 이상 필요하지 않을 수 있습니다
   },
   toggleIcon: {
-    width: 20,
-    height: 20,
+    // 이 스타일이 더 이상 필요하지 않을 수 있습니다
   },
   inviteButton: {
     backgroundColor: '#1CBFDC',

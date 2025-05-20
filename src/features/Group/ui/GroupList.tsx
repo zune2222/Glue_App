@@ -6,6 +6,7 @@ import {GroupItemCard} from './components/GroupItemCard';
 import {FloatingButton} from './components/FloatingButton';
 import {commonStyles} from './styles/groupStyles';
 import {Text} from '../../../shared/ui/typography/Text';
+import {Bell, ChevronDown, Search} from '@shared/assets/images';
 
 /**
  * 모임 목록 화면 컴포넌트
@@ -34,28 +35,10 @@ const GroupList: React.FC<GroupListProps> = ({navigation}) => {
           style={commonStyles.subHeaderTitle}>
           {'전체'}
         </Text>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/7y63nh4b_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={commonStyles.iconSmall}
-        />
+        <ChevronDown style={commonStyles.iconSmall} />
         <View style={commonStyles.flexFill} />
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/oeybkq5v_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={[commonStyles.iconSmall, commonStyles.iconRight]}
-        />
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/1h2q0fzg_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={commonStyles.iconSmall}
-        />
+        <Search style={[commonStyles.iconSmall, commonStyles.iconRight]} />
+        <Bell style={commonStyles.iconSmall} />
       </View>
 
       <View style={commonStyles.divider} />
