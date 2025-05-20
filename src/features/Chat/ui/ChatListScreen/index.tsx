@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Alert} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import EmptyChatScreen from '../EmptyChatScreen';
 import ChatRoomListScreen from '../ChatRoomListScreen';
 import {fetchChatRooms} from '../../model';
@@ -10,6 +11,7 @@ interface ChatListScreenProps {
 }
 
 const ChatListScreen: React.FC<ChatListScreenProps> = ({navigation}) => {
+  const {t} = useTranslation();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -19,18 +21,18 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({navigation}) => {
         const rooms = await fetchChatRooms();
         setChatRooms(rooms);
       } catch (error) {
-        console.error('채팅방 목록을 불러오는데 실패했습니다:', error);
+        console.error(t('messages.failedToLoad'), error);
       } finally {
         setLoading(false);
       }
     };
 
     loadChatRooms();
-  }, []);
+  }, [t]);
 
   const handleExplorePress = () => {
     // 모임 둘러보기 화면으로 이동하는 로직
-    Alert.alert('모임 둘러보기', '모임 둘러보기 화면으로 이동합니다.');
+    Alert.alert(t('messages.browseGroups'), t('messages.browseGroups'));
   };
 
   const handleChatRoomPress = (roomId: string) => {

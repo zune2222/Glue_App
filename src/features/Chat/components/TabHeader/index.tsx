@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {styles} from './styles';
 
 interface TabHeaderProps {
@@ -8,6 +9,8 @@ interface TabHeaderProps {
 }
 
 const TabHeader: React.FC<TabHeaderProps> = ({activeTab, onTabChange}) => {
+  const {t} = useTranslation();
+
   return (
     <View>
       <View style={styles.container}>
@@ -18,7 +21,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({activeTab, onTabChange}) => {
             style={
               activeTab === 'chat' ? styles.activeTab : styles.inactiveTab
             }>
-            모임톡
+            {t('messages.groupChat')}
           </Text>
           {activeTab === 'chat' && <View style={styles.indicator} />}
         </TouchableOpacity>
@@ -30,7 +33,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({activeTab, onTabChange}) => {
             style={
               activeTab === 'message' ? styles.activeTab : styles.inactiveTab
             }>
-            쪽지
+            {t('messages.directMessage')}
           </Text>
           {activeTab === 'message' && <View style={styles.indicator} />}
         </TouchableOpacity>

@@ -128,6 +128,22 @@
       "title": "학과를 알려주세요",
       "placeholder": "학과를 선택해주세요",
       "search": "학과 검색"
+    },
+    "complete": {
+      "welcome": "{{nickname}} 님,\nGLUE에 오신 것을 환영합니다!",
+      "feature1": {
+        "title": "같은 학교 학생끼리니까,",
+        "description": "더욱 안전하게 교류할 수 있어요."
+      },
+      "feature2": {
+        "title": "다양한 나라의 친구들과",
+        "description": "소통하면서 언어 능력을 향상시킬 수 있어요."
+      },
+      "feature3": {
+        "title": "모임을 형성하여",
+        "description": "원하는 친구들과 교류를 이어나갈 수 있어요."
+      },
+      "startButton": "지금 바로 시작하기"
     }
   },
   "profile": {
@@ -177,7 +193,12 @@
       "sent": "전송됨",
       "delivered": "전달됨",
       "read": "읽음"
-    }
+    },
+    "groupChat": "모임톡",
+    "directMessage": "쪽지",
+    "noGroupChats": "참여하고 있는 모임톡이 없습니다.",
+    "browseGroups": "모임 둘러보기",
+    "failedToLoad": "채팅방 목록을 불러오는데 실패했습니다"
   },
   "settings": {
     "title": "설정",
@@ -222,6 +243,8 @@
     }
   },
   "group": {
+    "title": "모임글",
+    "create": "모임 만들기",
     "detail": {
       "study": "공부",
       "meeting_info": "모임 정보",

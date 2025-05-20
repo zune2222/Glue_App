@@ -2,6 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 // 홈/게시판 화면 컴포넌트 임포트
 import {HomeScreen} from '@features/Home';
 
@@ -98,23 +99,27 @@ const MessagesNavigator = () => (
 );
 
 // 프로필 스택 네비게이터
-const ProfileNavigator = () => (
-  <ProfileStack.Navigator screenOptions={commonHeaderOptions}>
-    <ProfileStack.Screen
-      name="ProfileMain"
-      component={ProfileMainScreen}
-      options={{headerShown: false}}
-    />
-    <ProfileStack.Screen
-      name="ProfileEdit"
-      component={ProfileEditScreen}
-      options={{
-        title: '프로필 수정',
-        headerBackTitle: '취소',
-      }}
-    />
-  </ProfileStack.Navigator>
-);
+const ProfileNavigator = () => {
+  const {t} = useTranslation();
+
+  return (
+    <ProfileStack.Navigator screenOptions={commonHeaderOptions}>
+      <ProfileStack.Screen
+        name="ProfileMain"
+        component={ProfileMainScreen}
+        options={{headerShown: false}}
+      />
+      <ProfileStack.Screen
+        name="ProfileEdit"
+        component={ProfileEditScreen}
+        options={{
+          title: t('profile.edit'),
+          headerBackTitle: t('common.cancel'),
+        }}
+      />
+    </ProfileStack.Navigator>
+  );
+};
 
 // 인증 스택 네비게이터
 const AuthNavigator = () => (
@@ -130,28 +135,32 @@ const AuthNavigator = () => (
 );
 
 // 모임글 스택 네비게이터
-const GroupNavigator = () => (
-  <GroupStack.Navigator screenOptions={commonHeaderOptions}>
-    <GroupStack.Screen
-      name="GroupList"
-      component={GroupList}
-      options={{headerShown: false}}
-    />
-    <GroupStack.Screen
-      name="GroupDetail"
-      component={GroupDetail}
-      options={{headerShown: false}}
-    />
-    <GroupStack.Screen
-      name="CreateGroup"
-      component={GroupList} // 임시로 동일한 컴포넌트 사용, 추후 변경 필요
-      options={{
-        title: '모임 만들기',
-        headerBackTitle: '취소',
-      }}
-    />
-  </GroupStack.Navigator>
-);
+const GroupNavigator = () => {
+  const {t} = useTranslation();
+
+  return (
+    <GroupStack.Navigator screenOptions={commonHeaderOptions}>
+      <GroupStack.Screen
+        name="GroupList"
+        component={GroupList}
+        options={{headerShown: false}}
+      />
+      <GroupStack.Screen
+        name="GroupDetail"
+        component={GroupDetail}
+        options={{headerShown: false}}
+      />
+      <GroupStack.Screen
+        name="CreateGroup"
+        component={GroupList} // 임시로 동일한 컴포넌트 사용, 추후 변경 필요
+        options={{
+          title: t('group.create'),
+          headerBackTitle: t('common.cancel'),
+        }}
+      />
+    </GroupStack.Navigator>
+  );
+};
 
 // 탭 아이콘 컴포넌트 (렌더링 함수 밖에서 정의)
 const renderHomeIcon = ({color}: {color: string}) => (
@@ -174,6 +183,7 @@ const renderHeader = (props: any) => <Header {...props} theme={navTheme} />;
 const MainTabNavigator = () => {
   // SafeArea 하단 여백 가져오기
   const insets = useSafeAreaInsets();
+  const {t} = useTranslation();
 
   return (
     <MainTab.Navigator
@@ -194,7 +204,7 @@ const MainTabNavigator = () => {
         name="Board"
         component={BoardNavigator}
         options={{
-          tabBarLabel: '홈',
+          tabBarLabel: t('home.title'),
           tabBarIcon: renderHomeIcon,
         }}
       />
@@ -202,7 +212,7 @@ const MainTabNavigator = () => {
         name="Group"
         component={GroupNavigator}
         options={{
-          tabBarLabel: '모임글',
+          tabBarLabel: t('group.title'),
           tabBarIcon: renderGroupIcon,
         }}
       />
@@ -210,7 +220,7 @@ const MainTabNavigator = () => {
         name="Messages"
         component={MessagesNavigator}
         options={{
-          tabBarLabel: '채팅',
+          tabBarLabel: t('messages.title'),
           tabBarIcon: renderChatIcon,
         }}
       />
@@ -218,7 +228,7 @@ const MainTabNavigator = () => {
         name="Profile"
         component={ProfileNavigator}
         options={{
-          tabBarLabel: '마이',
+          tabBarLabel: t('profile.title'),
           tabBarIcon: renderProfileIcon,
         }}
       />

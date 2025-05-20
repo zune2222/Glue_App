@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {styles} from './styles';
 import TabHeader from '../../components/TabHeader';
 import {Chat} from '@shared/assets/images';
@@ -15,6 +16,8 @@ interface EmptyChatScreenProps {
 }
 
 const EmptyChatScreen: React.FC<EmptyChatScreenProps> = ({onExplorePress}) => {
+  const {t} = useTranslation();
+
   return (
     <SafeAreaView style={styles.container}>
       <TabHeader activeTab="chat" />
@@ -27,14 +30,16 @@ const EmptyChatScreen: React.FC<EmptyChatScreenProps> = ({onExplorePress}) => {
             <Chat style={styles.emptyIcon} />
           </View>
 
-          <Text style={styles.emptyText}>참여하고 있는 모임톡이 없습니다.</Text>
+          <Text style={styles.emptyText}>{t('messages.noGroupChats')}</Text>
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
               onPress={onExplorePress}
               activeOpacity={0.8}>
-              <Text style={styles.buttonText}>모임 둘러보기</Text>
+              <Text style={styles.buttonText}>
+                {t('messages.browseGroups')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
