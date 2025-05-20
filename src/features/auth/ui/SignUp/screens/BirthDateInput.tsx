@@ -88,7 +88,7 @@ const BirthDateInput = ({
       {Platform.OS === 'ios' ? (
         <Modal
           transparent
-          animationType="slide"
+          animationType="fade"
           visible={modalVisible}
           onRequestClose={closeDatePicker}>
           <View style={styles.modalContainer}>
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   modalButton: {
     padding: 8,
   },
-  modalButtonText: {},
+  modalButtonText: {fontSize: 18},
   confirmButton: {},
   modalTitle: {},
   dateTimePicker: {
