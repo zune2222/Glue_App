@@ -146,20 +146,20 @@
       "startButton": "지금 바로 시작하기"
     }
   },
-"profile": {
-  "mypage": "마이페이지",
-  "languageSettings": "언어 설정",
-  "myInfo": "내 정보",
-  "myGroupsHistory": "내 모임 히스토리",
-  "myLikes": "내 좋아요 목록",
-  "myGuestbook": "내 방명록",
-  "privacySettings": "공개범위 설정",
-  "edit": "수정",
-  "myLanguage": "나의 언어",
-  "exchangeLanguage": "교환 언어",
-  "level":  "수준"
-}
-,
+  "profile": {
+    "mypage": "마이페이지",
+    "languageSettings": "언어 설정",
+    "myInfo": "내 정보",
+    "myGroupsHistory": "내 모임 히스토리",
+    "myLikes": "내 좋아요 목록",
+    "myGuestbook": "내 방명록",
+    "privacySettings": "공개범위 설정",
+    "edit": "수정",
+    "myLanguage": "나의 언어",
+    "exchangeLanguage": "교환 언어",
+    "level": "수준",
+    "title": "마이"
+  },
   "board": {
     "title": "게시판",
     "create": "글쓰기",

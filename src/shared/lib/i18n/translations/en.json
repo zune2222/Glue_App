@@ -146,19 +146,20 @@
       "startButton": "Start Now"
     }
   },
-"profile": {
-  "mypage": "My Page",
-  "languageSettings": "Language Settings",
-  "myInfo": "My Info",
-  "myGroupsHistory": "My Groups History",
-  "myLikes": "My Likes",
-  "myGuestbook": "My Guestbook",
-  "privacySettings": "Privacy Settings",
-  "edit": "Edit",
-  "myLanguage": "My Language",
-  "exchangeLanguage": "Exchange Language",
-  "level" : "Level"
-},
+  "profile": {
+    "mypage": "My Page",
+    "languageSettings": "Language Settings",
+    "myInfo": "My Info",
+    "myGroupsHistory": "My Groups History",
+    "myLikes": "My Likes",
+    "myGuestbook": "My Guestbook",
+    "privacySettings": "Privacy Settings",
+    "edit": "Edit",
+    "myLanguage": "My Language",
+    "exchangeLanguage": "Exchange Language",
+    "level": "Level",
+    "title": "My"
+  },
   "board": {
     "title": "Board",
     "create": "Create Post",
