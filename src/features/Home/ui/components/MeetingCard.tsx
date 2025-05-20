@@ -138,6 +138,9 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     marginRight: 6,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#D3D5DB',
   },
   authorName: {
     fontSize: 12,

@@ -19,11 +19,7 @@ const ChatRoomItem: React.FC<ChatRoomItemProps> = ({room, onPress}) => {
         <View style={styles.header}>
           <View style={styles.titleGroup}>
             <Text style={styles.name}>{room.name}</Text>
-            <Image
-              source={dummyProfile}
-              resizeMode="contain"
-              style={styles.dot}
-            />
+            <View style={styles.dot} />
             <Text style={styles.memberCount}>8</Text>
           </View>
           <Text style={styles.timestamp}>{room.lastMessageTime}</Text>
@@ -36,12 +32,15 @@ const ChatRoomItem: React.FC<ChatRoomItemProps> = ({room, onPress}) => {
             {room.lastMessage}
           </Text>
           {room.unreadCount ? (
-            <Image
-              source={dummyProfile}
-              resizeMode="contain"
-              style={styles.unreadIndicator}
+            <View
+              style={[
+                styles.unreadIndicator,
+                {backgroundColor: '#1CBFDC', borderRadius: 4.5},
+              ]}
             />
-          ) : null}
+          ) : (
+            <> </>
+          )}
         </View>
       </View>
     </TouchableOpacity>

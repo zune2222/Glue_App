@@ -5,6 +5,7 @@ import ChatInput from './ChatInput';
 import ChatHeader from './ChatHeader';
 import DateDivider from './DateDivider';
 import ChatRoomInfo from './ChatRoomInfo';
+import MessageFilter from './MessageFilter';
 
 export {
   ChatRoomItem,
@@ -14,4 +15,5 @@ export {
   ChatHeader,
   DateDivider,
   ChatRoomInfo,
+  MessageFilter,
 };

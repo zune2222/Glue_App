@@ -21,7 +21,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({activeTab, onTabChange}) => {
             style={
               activeTab === 'chat' ? styles.activeTab : styles.inactiveTab
             }>
-            {t('messages.groupChat')}
+            {t('messages.groupChat', '모임톡')}
           </Text>
           {activeTab === 'chat' && <View style={styles.indicator} />}
         </TouchableOpacity>
@@ -33,7 +33,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({activeTab, onTabChange}) => {
             style={
               activeTab === 'message' ? styles.activeTab : styles.inactiveTab
             }>
-            {t('messages.directMessage')}
+            {t('messages.directMessage', '쪽지')}
           </Text>
           {activeTab === 'message' && <View style={styles.indicator} />}
         </TouchableOpacity>

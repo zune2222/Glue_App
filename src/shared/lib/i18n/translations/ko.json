@@ -182,6 +182,9 @@
     "deleteError": "게시글 삭제에 실패했습니다"
   },
   "messages": {
+    "host": "호스트",
+    "guest": "게스트",
+    "all": "전체",
     "title": "메시지",
     "newMessage": "새 메시지",
     "empty": "메시지가 없습니다",

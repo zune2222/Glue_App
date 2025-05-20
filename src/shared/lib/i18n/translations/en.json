@@ -183,6 +183,9 @@
   },
   "messages": {
     "title": "Messages",
+    "host": "Host",
+    "guest": "Guest",
+    "all": "All",
     "newMessage": "New Message",
     "empty": "No messages",
     "chat": "Chat",

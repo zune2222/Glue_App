@@ -7,6 +7,7 @@ export const dummyChatRooms: ChatRoom[] = [
     lastMessageTime: '18:41',
     unreadCount: 1,
     memberCount: 8,
+    type: 'group', // 모임톡
   },
   {
     id: '2',
@@ -15,6 +16,23 @@ export const dummyChatRooms: ChatRoom[] = [
     lastMessageTime: '15:22',
     unreadCount: 0,
     memberCount: 5,
+    type: 'group', // 모임톡
+  },
+  {
+    id: '3',
+    name: '김글루',
+    lastMessage: '네 알겠습니다!',
+    lastMessageTime: '09:15',
+    unreadCount: 0,
+    type: 'direct', // 쪽지
+  },
+  {
+    id: '4',
+    name: '신왕구',
+    lastMessage: '모임 날짜 변경 가능할까요?',
+    lastMessageTime: '어제',
+    unreadCount: 2,
+    type: 'direct', // 쪽지
   },
 ];
 const dummyProfile =

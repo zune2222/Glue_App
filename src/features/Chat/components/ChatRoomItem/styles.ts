@@ -43,6 +43,8 @@ export const styles = StyleSheet.create({
     width: 3,
     height: 3,
     marginRight: 6,
+    backgroundColor: '#384050',
+    borderRadius: 1.5,
   },
   memberCount: {
     color: '#384050',
