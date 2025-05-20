@@ -39,7 +39,7 @@ const ChatRoomItem: React.FC<ChatRoomItemProps> = ({room, onPress}) => {
               ]}
             />
           ) : (
-            <> </>
+            <View />
           )}
         </View>
       </View>

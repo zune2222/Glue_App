@@ -80,9 +80,7 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
         </View>
         <View style={styles.messageTimeContainer}>
           <Text style={styles.messageTime}>{room.lastMessageTime}</Text>
-          {room.unreadCount && room.unreadCount > 0 && (
-            <View style={styles.unreadIndicator} />
-          )}
+          {room?.unreadCount > 0 && <View style={styles.unreadIndicator} />}
         </View>
       </TouchableOpacity>
     );
