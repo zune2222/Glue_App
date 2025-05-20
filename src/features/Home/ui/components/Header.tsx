@@ -6,8 +6,15 @@ import {useNavigation} from '@react-navigation/native';
 const Header = () => {
   const navigation = useNavigation<any>();
 
+  // 터치 영역 확장 설정
+  const touchHitSlop = {top: 20, right: 20, bottom: 20, left: 20};
+
   const handleBellPress = () => {
     navigation.navigate('NotificationsScreen');
+  };
+
+  const handleSearchPress = () => {
+    navigation.navigate('GroupSearch');
   };
 
   return (
@@ -16,10 +23,10 @@ const Header = () => {
         <Image source={logo} resizeMode={'stretch'} style={styles.logo} />
       </View>
       <View style={styles.flex1}></View>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={handleSearchPress} hitSlop={touchHitSlop}>
         <Search style={styles.navbarIcon} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleBellPress}>
+      <TouchableOpacity onPress={handleBellPress} hitSlop={touchHitSlop}>
         <Bell style={[styles.navbarIcon, styles.marginLeft0]} />
       </TouchableOpacity>
     </View>

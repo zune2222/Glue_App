@@ -54,6 +54,11 @@ export const commonStyles = StyleSheet.create({
   flexFill: {
     flex: 1,
   },
+  // 카테고리 선택기 스타일
+  categorySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });
 
 // 그룹 목록 아이템 관련 스타일

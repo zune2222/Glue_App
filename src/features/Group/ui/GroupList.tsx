@@ -8,13 +8,13 @@ import {
   StyleSheet,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
-import {GroupListProps} from '../model/types';
 import {MOCK_GROUPS} from '../model/mockData';
 import {GroupItemCard} from './components/GroupItemCard';
 import {FloatingButton} from './components/FloatingButton';
 import {commonStyles} from './styles/groupStyles';
 import {Text} from '../../../shared/ui/typography/Text';
-import {Bell, ChevronDown, Search} from '@shared/assets/images';
+import {useNavigation} from '@react-navigation/native';
+import GroupListHeader from './components/GroupListHeader';
 
 // 카테고리 타입
 type CategoryType = 'all' | 'study' | 'social' | 'help';
@@ -22,7 +22,8 @@ type CategoryType = 'all' | 'study' | 'social' | 'help';
 /**
  * 모임 목록 화면 컴포넌트
  */
-const GroupList: React.FC<GroupListProps> = ({navigation}) => {
+const GroupList: React.FC = () => {
+  const navigation = useNavigation<any>();
   const {t} = useTranslation();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
@@ -60,11 +61,6 @@ const GroupList: React.FC<GroupListProps> = ({navigation}) => {
     navigation.navigate('CreateGroup');
   };
 
-  // 검색 버튼 클릭 핸들러
-  const handleSearchPress = () => {
-    navigation.navigate('GroupSearch');
-  };
-
   // 카테고리 변경 핸들러
   const handleCategorySelect = (category: CategoryType) => {
     setSelectedCategory(category);
@@ -87,29 +83,11 @@ const GroupList: React.FC<GroupListProps> = ({navigation}) => {
 
   return (
     <SafeAreaView style={commonStyles.container}>
-      {/* 상단 상태바 */}
-
-      {/* 서브 헤더 */}
-      <View style={commonStyles.subHeader}>
-        <TouchableOpacity
-          style={styles.categorySelector}
-          onPress={() => setIsDropdownVisible(true)}>
-          <Text
-            variant="subtitle1"
-            weight="medium"
-            style={commonStyles.subHeaderTitle}>
-            {getCategoryDisplayText()}
-          </Text>
-          <ChevronDown style={commonStyles.iconSmall} />
-        </TouchableOpacity>
-        <View style={commonStyles.flexFill} />
-        <TouchableOpacity onPress={handleSearchPress}>
-          <Search style={[commonStyles.iconSmall, commonStyles.iconRight]} />
-        </TouchableOpacity>
-        <Bell style={commonStyles.iconSmall} />
-      </View>
-
-      <View style={commonStyles.divider} />
+      {/* 헤더 컴포넌트 */}
+      <GroupListHeader
+        categoryText={getCategoryDisplayText()}
+        onCategoryPress={() => setIsDropdownVisible(true)}
+      />
 
       {/* 모임 목록 */}
       <FlatList
