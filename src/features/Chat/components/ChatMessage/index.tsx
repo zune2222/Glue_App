@@ -157,13 +157,13 @@ const ChatMessage: React.FC<MessageProps> = ({
         </View>
       </View>
 
-      {isMine && (
-        <Image
-          source={{uri: sender.profileImage}}
-          resizeMode="cover"
-          style={styles.profileImage}
-        />
-      )}
+      {/* {isMine && (
+        // <Image
+        //   source={{uri: sender.profileImage}}
+        //   resizeMode="cover"
+        //   style={styles.profileImage}
+        // />
+      )} */}
     </View>
   );
 };

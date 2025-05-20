@@ -198,7 +198,20 @@
     "directMessage": "쪽지",
     "noGroupChats": "참여하고 있는 모임톡이 없습니다.",
     "browseGroups": "모임 둘러보기",
-    "failedToLoad": "채팅방 목록을 불러오는데 실패했습니다"
+    "failedToLoad": "채팅방 목록을 불러오는데 실패했습니다",
+    "chatInfo": {
+      "goToPost": "게시글 바로가기",
+      "notification": "쪽지 알림",
+      "invite": "모임 초대하기",
+      "inviteButton": "초대",
+      "editPost": "게시글 수정하기",
+      "participants": "쪽지 참여자",
+      "leave": "쪽지 나가기",
+      "leaveChat": "모임톡 나가기",
+      "leaveConfirm": "정말로 이 모임톡방을 나가시겠습니까?",
+      "cancel": "취소",
+      "confirm": "나가기"
+    }
   },
   "settings": {
     "title": "설정",
@@ -245,6 +258,19 @@
   "group": {
     "title": "모임글",
     "create": "모임 만들기",
+    "all": "전체",
+    "write": "글쓰기",
+    "categories": {
+      "study": "공부",
+      "social": "친목",
+      "help": "도움"
+    },
+    "search": {
+      "placeholder": "제목, 모임 카테고리, 내용 검색",
+      "recentSearches": "최근 검색어",
+      "clearAll": "전체삭제",
+      "noResults": "검색 결과가 없습니다"
+    },
     "detail": {
       "study": "공부",
       "meeting_info": "모임 정보",

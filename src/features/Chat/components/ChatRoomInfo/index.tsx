@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Switch,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {Text} from '../../../../shared/ui/typography/Text';
 import {Bell, Exit, Mail, Mine, Pen} from '@shared/assets/images';
 
@@ -16,6 +17,8 @@ interface ChatRoomInfoProps {
   roomName: string;
   roomIcon?: string;
   memberCount: number;
+  category?: string; // 예: "공부"
+  postTitle?: string; // 예: "영어 공부할 모임 모집합니다"
   members: Array<{
     id: string;
     name: string;
@@ -63,11 +66,14 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   roomIcon,
   memberCount,
+  category = '공부', // 기본값 설정
+  postTitle = '영어 공부할 모임 모집합니다', // 기본값 설정
   members,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onClose,
   onLeaveRoom,
 }) => {
+  const {t} = useTranslation();
   const [isNotificationEnabled, setIsNotificationEnabled] = useState(true);
 
   const handleToggleNotification = () => {
@@ -76,15 +82,15 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
 
   const handleLeaveRoom = () => {
     Alert.alert(
-      '모임톡 나가기',
-      '정말로 이 모임톡방을 나가시겠습니까?',
+      t('messages.chatInfo.leaveChat'),
+      t('messages.chatInfo.leaveConfirm'),
       [
         {
-          text: '취소',
+          text: t('messages.chatInfo.cancel'),
           style: 'cancel',
         },
         {
-          text: '나가기',
+          text: t('messages.chatInfo.confirm'),
           onPress: onLeaveRoom,
           style: 'destructive',
         },
@@ -100,7 +106,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
         showsVerticalScrollIndicator={false}>
         <TouchableOpacity style={styles.categoryButton} onPress={() => {}}>
           <Text variant="body1" weight="bold" color="#263FA9">
-            공부
+            {category}
           </Text>
         </TouchableOpacity>
 
@@ -109,12 +115,12 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
           weight="bold"
           color="#303030"
           style={styles.titleText}>
-          영어 공부할 모임 모집합니다
+          {postTitle}
         </Text>
 
         <TouchableOpacity style={styles.postButton} onPress={() => {}}>
           <Text variant="body1" weight="bold" color="#9DA2AF">
-            게시글 바로가기
+            {t('messages.chatInfo.goToPost')}
           </Text>
         </TouchableOpacity>
 
@@ -124,7 +130,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
           <View style={styles.menuItem}>
             <Bell style={styles.menuIcon} />
             <Text variant="body2" color="#303030" style={styles.menuText}>
-              쪽지 알림
+              {t('messages.chatInfo.notification')}
             </Text>
             <Switch
               trackColor={{false: '#D1D5DB', true: '#1CBFDC'}}
@@ -138,11 +144,11 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
           <View style={styles.menuItem}>
             <Mail style={styles.menuIcon} />
             <Text variant="body2" color="#303030" style={styles.menuText}>
-              모임 초대하기
+              {t('messages.chatInfo.invite')}
             </Text>
             <TouchableOpacity style={styles.inviteButton} onPress={() => {}}>
               <Text variant="caption" weight="bold" color="#F9FAFB">
-                초대
+                {t('messages.chatInfo.inviteButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -150,7 +156,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
           <View style={styles.menuItem}>
             <Pen style={styles.menuIcon} />
             <Text variant="body2" color="#303030" style={styles.menuText}>
-              게시글 수정하기
+              {t('messages.chatInfo.editPost')}
             </Text>
           </View>
         </View>
@@ -162,7 +168,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
           weight="bold"
           color="#303030"
           style={styles.sectionTitle}>
-          쪽지 참여자 {memberCount}
+          {t('messages.chatInfo.participants')} {memberCount}
         </Text>
 
         <View style={styles.membersList}>
@@ -176,7 +182,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
         <TouchableOpacity style={styles.leaveButton} onPress={handleLeaveRoom}>
           <Exit style={styles.leaveIcon} />
           <Text variant="body2" weight="medium" color="#111827">
-            쪽지 나가기
+            {t('messages.chatInfo.leave')}
           </Text>
         </TouchableOpacity>
       </View>

@@ -21,13 +21,16 @@ export {default as Users} from './users.svg';
 export {default as Global} from './global.svg';
 export {default as Exchange} from './exchange.svg';
 export {default as Calendar} from './calendar.svg';
+export {default as BackArrow} from './backArrow.svg';
 
 export {default as Heart} from './heart.svg';
 export {default as HeartFill} from './fill-heart.svg';
+export {default as X} from './x.svg';
 
 export {default as ChevronDown} from './chevron-down.svg';
 export {default as ChevronLeft} from './chevron-left.svg';
 export {default as Menu} from './ic_round-menu.svg';
+export {default as Logo} from './logo.svg';
 // 이미지 파일들
 export const logo = require('./logo.png');
 export const dummyProfile = require('./dummy-profile.png');

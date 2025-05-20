@@ -1,8 +1,15 @@
 import React from 'react';
 import {View, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {Bell, logo, Search} from '@shared/assets/images';
+import {useNavigation} from '@react-navigation/native';
 
 const Header = () => {
+  const navigation = useNavigation<any>();
+
+  const handleBellPress = () => {
+    navigation.navigate('NotificationsScreen');
+  };
+
   return (
     <View style={styles.navbar}>
       <View style={styles.logoContainer}>
@@ -12,7 +19,7 @@ const Header = () => {
       <TouchableOpacity>
         <Search style={styles.navbarIcon} />
       </TouchableOpacity>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={handleBellPress}>
         <Bell style={[styles.navbarIcon, styles.marginLeft0]} />
       </TouchableOpacity>
     </View>

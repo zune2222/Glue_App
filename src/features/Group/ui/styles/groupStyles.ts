@@ -269,7 +269,7 @@ export const navigationStyles = StyleSheet.create({
   floatingButton: {
     position: 'absolute',
     right: 20,
-    bottom: 80,
+    bottom: 30,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
@@ -290,6 +290,7 @@ export const navigationStyles = StyleSheet.create({
   floatingButtonIcon: {
     width: 20,
     height: 20,
+    marginRight: 8,
   },
   floatingButtonTextContainer: {},
   floatingButtonText: {

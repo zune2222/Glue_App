@@ -7,7 +7,7 @@ import {useTranslation} from 'react-i18next';
 import {HomeScreen} from '@features/Home';
 
 // 모임글 화면 컴포넌트 임포트
-import {GroupList, GroupDetail} from '@features/Group';
+import {GroupList, GroupDetail, GroupSearch} from '@features/Group';
 
 // 채팅 화면 컴포넌트 임포트
 import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
@@ -26,7 +26,7 @@ import {
 import {Header} from '@widgets/header';
 
 // 알림 패널 임포트
-import {NotificationsPanel} from '@widgets/notifications';
+import {NotificationsScreen} from '@features/notifications';
 
 // SVG 아이콘 컴포넌트 임포트
 import {
@@ -158,6 +158,11 @@ const GroupNavigator = () => {
           headerBackTitle: t('common.cancel'),
         }}
       />
+      <GroupStack.Screen
+        name="GroupSearch"
+        component={GroupSearch}
+        options={{headerShown: false}}
+      />
     </GroupStack.Navigator>
   );
 };
@@ -236,19 +241,16 @@ const MainTabNavigator = () => {
   );
 };
 
-// 메인 네비게이터 (인증 후 진입, 모달 포함)
+// 메인 네비게이터 (인증 후 진입)
 const MainNavigator = () => (
   <MainStack.Navigator
     screenOptions={{headerShown: false}}
     initialRouteName="MainTabs">
     <MainStack.Screen name="MainTabs" component={MainTabNavigator} />
-    {/* 알림 패널을 모달로 표시 */}
-    <MainStack.Group screenOptions={{presentation: 'modal'}}>
-      <MainStack.Screen
-        name="NotificationsPanel"
-        component={NotificationsPanel}
-      />
-    </MainStack.Group>
+    <MainStack.Screen
+      name="NotificationsScreen"
+      component={NotificationsScreen}
+    />
   </MainStack.Navigator>
 );
 
