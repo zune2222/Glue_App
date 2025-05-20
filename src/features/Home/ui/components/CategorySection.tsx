@@ -1,14 +1,9 @@
 import React from 'react';
-import {
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {CategorySectionProps} from '../../model/types';
 import MeetingCard from './MeetingCard';
+import {Text} from '../../../../shared/ui/typography/Text';
 
 const CategorySection = ({title, cards}: CategorySectionProps) => {
   const {t} = useTranslation();
@@ -16,9 +11,17 @@ const CategorySection = ({title, cards}: CategorySectionProps) => {
   return (
     <>
       <View style={styles.titleContainer}>
-        <Text style={styles.sectionTitle}>{title}</Text>
+        <Text
+          variant="subtitle1"
+          weight="bold"
+          color="#384050"
+          style={styles.sectionTitle}>
+          {title}
+        </Text>
         <TouchableOpacity>
-          <Text style={styles.seeAllText}>{t('home.seeAll')}</Text>
+          <Text variant="body2" color="#9DA2AF" style={styles.seeAllText}>
+            {t('home.seeAll')}
+          </Text>
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -30,7 +33,9 @@ const CategorySection = ({title, cards}: CategorySectionProps) => {
           cards.map((card, index) => <MeetingCard key={index} {...card} />)
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>{t('home.emptyState')}</Text>
+            <Text variant="body2" color="#9DA2AF" style={styles.emptyText}>
+              {t('home.emptyState')}
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -47,12 +52,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 19,
   },
   sectionTitle: {
-    color: '#384050',
     fontSize: 18,
-    fontWeight: 'bold',
   },
   seeAllText: {
-    color: '#9DA2AF',
     fontSize: 14,
   },
   horizontalScroll: {
@@ -72,7 +74,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   emptyText: {
-    color: '#9DA2AF',
     fontSize: 14,
   },
 });

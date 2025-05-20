@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Text} from '../../../shared/ui/typography';
+import {useTranslation} from 'react-i18next';
 
 interface HeaderProps {
   route: {
@@ -21,17 +22,20 @@ interface HeaderProps {
 
 export const Header = (props: HeaderProps) => {
   const {theme} = props;
+  const {t} = useTranslation();
 
   const getTitle = () => {
     switch (props.route.name) {
       case 'Board':
-        return '홈';
+        return t('board.title');
       case 'Messages':
-        return '채팅';
+        return t('messages.title');
       case 'Profile':
-        return '프로필';
+        return t('profile.title');
       case 'Settings':
-        return '설정';
+        return t('settings.title');
+      case 'Home':
+        return t('home.title');
       default:
         return props.route.name;
     }

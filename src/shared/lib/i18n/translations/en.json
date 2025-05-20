@@ -128,6 +128,22 @@
       "title": "Please select your department",
       "placeholder": "Select your department",
       "search": "Search department"
+    },
+    "complete": {
+      "welcome": "Welcome to GLUE, {{nickname}}!",
+      "feature1": {
+        "title": "Since we're students from the same school,",
+        "description": "we can interact more safely."
+      },
+      "feature2": {
+        "title": "With friends from various countries,",
+        "description": "you can improve your language skills through communication."
+      },
+      "feature3": {
+        "title": "By forming groups,",
+        "description": "you can continue to interact with the friends you want."
+      },
+      "startButton": "Start Now"
     }
   },
 "profile": {
@@ -166,6 +182,9 @@
   },
   "messages": {
     "title": "Messages",
+    "host": "Host",
+    "guest": "Guest",
+    "all": "All",
     "newMessage": "New Message",
     "empty": "No messages",
     "chat": "Chat",
@@ -176,6 +195,24 @@
       "sent": "Sent",
       "delivered": "Delivered",
       "read": "Read"
+    },
+    "groupChat": "Group Chat",
+    "directMessage": "Direct Message",
+    "noGroupChats": "You're not participating in any group chats.",
+    "browseGroups": "Browse Groups",
+    "failedToLoad": "Failed to load chat rooms",
+    "chatInfo": {
+      "goToPost": "View Original Post",
+      "notification": "Chat Notifications",
+      "invite": "Invite Members",
+      "inviteButton": "Invite",
+      "editPost": "Edit Post",
+      "participants": "Participants",
+      "leave": "Leave Chat",
+      "leaveChat": "Leave Group Chat",
+      "leaveConfirm": "Are you sure you want to leave this chat room?",
+      "cancel": "Cancel",
+      "confirm": "Leave"
     }
   },
   "settings": {
@@ -221,6 +258,21 @@
     }
   },
   "group": {
+    "title": "Groups",
+    "create": "Create Group",
+    "all": "All",
+    "write": "Write",
+    "categories": {
+      "study": "Study",
+      "social": "Social",
+      "help": "Help"
+    },
+    "search": {
+      "placeholder": "Search title, category, or content",
+      "recentSearches": "Recent Searches",
+      "clearAll": "Clear All",
+      "noResults": "No search results found"
+    },
     "detail": {
       "study": "Study",
       "meeting_info": "Meeting Information",

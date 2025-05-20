@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -10,7 +9,6 @@ import {
   Alert,
 } from 'react-native';
 import {colors} from '@app/styles/colors';
-import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
 import {
   launchImageLibrary,
@@ -24,9 +22,11 @@ import {
   request,
   check,
   Permission,
+  openSettings,
 } from 'react-native-permissions';
 import CameraIcon from '@shared/assets/icons/CameraIcon';
 import PlusIcon from '@shared/assets/icons/PlusIcon';
+import {Text} from '@shared/ui/typography/Text';
 
 type ProfilePhotoInputProps = {
   onPhotoSelect: (uri: string | null) => void;
@@ -69,15 +69,10 @@ const ProfilePhotoInput = ({
       let permission: Permission;
 
       if (type === 'camera') {
-        permission =
-          Platform.OS === 'ios'
-            ? PERMISSIONS.IOS.CAMERA
-            : PERMISSIONS.ANDROID.CAMERA;
+        permission = PERMISSIONS.IOS.CAMERA;
       } else {
-        permission =
-          Platform.OS === 'ios'
-            ? PERMISSIONS.IOS.PHOTO_LIBRARY
-            : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+        // iOS의 경우 추가 전용 권한 먼저 시도
+        permission = PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY;
       }
 
       const result = await check(permission);
@@ -91,6 +86,10 @@ const ProfilePhotoInput = ({
           if (requestResult === RESULTS.GRANTED) {
             type === 'camera' ? openCamera() : openGallery();
           }
+          break;
+        case RESULTS.LIMITED:
+          // iOS 14+에서 사진 라이브러리에 제한된 접근이 허용된 경우
+          type === 'camera' ? openCamera() : openGallery();
           break;
         case RESULTS.GRANTED:
           type === 'camera' ? openCamera() : openGallery();
@@ -107,8 +106,12 @@ const ProfilePhotoInput = ({
               {
                 text: t('signup.profilePhoto.goToSettings'),
                 onPress: () => {
-                  // 여기서 설정으로 이동하는 코드 추가
-                  // (react-native-permissions의 openSettings 함수 사용)
+                  openSettings().catch(() =>
+                    Alert.alert(
+                      t('common.error'),
+                      t('signup.profilePhoto.settingsError'),
+                    ),
+                  );
                 },
               },
             ],
@@ -117,6 +120,7 @@ const ProfilePhotoInput = ({
       }
     } catch (error) {
       console.log('권한 확인 중 오류 발생:', error);
+      Alert.alert(t('common.error'), t('signup.profilePhoto.generalError'));
     }
   };
 
@@ -173,8 +177,12 @@ const ProfilePhotoInput = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{t('signup.profilePhoto.title')}</Text>
-        <Text style={styles.subtitle}>{t('signup.profilePhoto.subtitle')}</Text>
+        <Text variant="h2" color={colors.richBlack} style={styles.title}>
+          {t('signup.profilePhoto.title')}
+        </Text>
+        <Text variant="body2" color={colors.charcoal} style={styles.subtitle}>
+          {t('signup.profilePhoto.subtitle')}
+        </Text>
       </View>
 
       <View style={styles.photoContainer}>
@@ -218,13 +226,10 @@ const styles = StyleSheet.create({
     marginBottom: 64,
   },
   title: {
-    ...typography.h2,
-    color: colors.richBlack,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 12,
-    color: colors.charcoal,
   },
   photoContainer: {
     alignItems: 'center',

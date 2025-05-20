@@ -1,16 +1,15 @@
 import React, {useState} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Modal,
   Platform,
 } from 'react-native';
 import {colors} from '@app/styles/colors';
-import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import {Text} from '@shared/ui/typography/Text';
 
 type BirthDateInputProps = {
   onBirthDateChange: (date: Date) => void;
@@ -65,12 +64,18 @@ const BirthDateInput = ({
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{t('signup.birthdate.title')}</Text>
+        <Text variant="h2" color={colors.richBlack} style={styles.title}>
+          {t('signup.birthdate.title')}
+        </Text>
       </View>
 
       <View style={styles.inputContainer}>
         <TouchableOpacity style={styles.dateInput} onPress={openDatePicker}>
-          <Text style={[styles.dateText, !birthDate && styles.placeholderText]}>
+          <Text
+            variant="body1"
+            weight="bold"
+            color={!birthDate ? colors.auroMetalSaurus : colors.richBlack}
+            style={styles.dateText}>
             {birthDate
               ? formatDate(birthDate)
               : t('signup.birthdate.placeholder')}
@@ -83,7 +88,7 @@ const BirthDateInput = ({
       {Platform.OS === 'ios' ? (
         <Modal
           transparent
-          animationType="slide"
+          animationType="fade"
           visible={modalVisible}
           onRequestClose={closeDatePicker}>
           <View style={styles.modalContainer}>
@@ -92,17 +97,27 @@ const BirthDateInput = ({
                 <TouchableOpacity
                   onPress={closeDatePicker}
                   style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>
+                  <Text
+                    variant="button"
+                    color={colors.batteryChargedBlue}
+                    style={styles.modalButtonText}>
                     {t('common.cancel')}
                   </Text>
                 </TouchableOpacity>
-                <Text style={styles.modalTitle}>
+                <Text
+                  variant="h4"
+                  color={colors.richBlack}
+                  style={styles.modalTitle}>
                   {t('signup.birthdate.selectDate')}
                 </Text>
                 <TouchableOpacity
                   onPress={confirmIOSDate}
                   style={styles.modalButton}>
-                  <Text style={[styles.modalButtonText, styles.confirmButton]}>
+                  <Text
+                    variant="button"
+                    weight="semiBold"
+                    color={colors.batteryChargedBlue}
+                    style={styles.modalButtonText}>
                     {t('common.ok')}
                   </Text>
                 </TouchableOpacity>
@@ -147,8 +162,6 @@ const styles = StyleSheet.create({
     marginBottom: 64,
   },
   title: {
-    ...typography.h2,
-    color: colors.richBlack,
     marginBottom: 20,
   },
   inputContainer: {
@@ -158,13 +171,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   dateText: {
-    ...typography.body1,
-    color: colors.richBlack,
-    fontWeight: 'bold',
     fontSize: 18,
-  },
-  placeholderText: {
-    color: colors.auroMetalSaurus,
   },
   inputBorder: {
     height: 1,
@@ -199,17 +206,9 @@ const styles = StyleSheet.create({
   modalButton: {
     padding: 8,
   },
-  modalButtonText: {
-    ...typography.button,
-    color: colors.batteryChargedBlue,
-  },
-  confirmButton: {
-    fontWeight: '600',
-  },
-  modalTitle: {
-    ...typography.h4,
-    color: colors.richBlack,
-  },
+  modalButtonText: {fontSize: 18},
+  confirmButton: {},
+  modalTitle: {},
   dateTimePicker: {
     height: 200,
     width: '100%',

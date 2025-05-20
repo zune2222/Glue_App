@@ -1,39 +1,33 @@
 import React from 'react';
-import {View, Image, StyleSheet, TouchableOpacity, Text} from 'react-native';
-import {useTranslation} from 'react-i18next';
+import {View, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {Bell, logo, Search} from '@shared/assets/images';
+import {useNavigation} from '@react-navigation/native';
 
 const Header = () => {
-  const {t} = useTranslation();
+  const navigation = useNavigation<any>();
+
+  // 터치 영역 확장 설정
+  const touchHitSlop = {top: 20, right: 20, bottom: 20, left: 20};
+
+  const handleBellPress = () => {
+    navigation.navigate('NotificationsScreen');
+  };
+
+  const handleSearchPress = () => {
+    navigation.navigate('GroupSearch');
+  };
 
   return (
     <View style={styles.navbar}>
       <View style={styles.logoContainer}>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/y30cgyqd_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={styles.logo}
-        />
+        <Image source={logo} resizeMode={'stretch'} style={styles.logo} />
       </View>
       <View style={styles.flex1}></View>
-      <TouchableOpacity>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/b7z391og_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={styles.navbarIcon}
-        />
+      <TouchableOpacity onPress={handleSearchPress} hitSlop={touchHitSlop}>
+        <Search style={styles.navbarIcon} />
       </TouchableOpacity>
-      <TouchableOpacity>
-        <Image
-          source={{
-            uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/n1po82jh_expires_30_days.png',
-          }}
-          resizeMode={'stretch'}
-          style={[styles.navbarIcon, styles.marginLeft0]}
-        />
+      <TouchableOpacity onPress={handleBellPress} hitSlop={touchHitSlop}>
+        <Bell style={[styles.navbarIcon, styles.marginLeft0]} />
       </TouchableOpacity>
     </View>
   );
@@ -46,7 +40,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingVertical: 13,
     paddingHorizontal: 19,
-    marginBottom: 19,
   },
   logoContainer: {
     flexDirection: 'row',
@@ -54,13 +47,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 35,
-    height: 25,
+    height: 35,
     marginRight: 8,
-  },
-  logoText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#384050',
   },
   navbarIcon: {
     width: 24,

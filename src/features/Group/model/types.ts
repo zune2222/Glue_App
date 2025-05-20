@@ -87,6 +87,7 @@ export type GroupStackParamList = {
   GroupList: undefined;
   GroupDetail: {groupId: string};
   CreateGroup: undefined;
+  GroupSearch: undefined;
 };
 
 export type GroupListNavigationProp = StackNavigationProp<GroupStackParamList>;

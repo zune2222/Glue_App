@@ -2,11 +2,12 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 // 홈/게시판 화면 컴포넌트 임포트
 import {HomeScreen} from '@features/Home';
 
 // 모임글 화면 컴포넌트 임포트
-import {GroupList, GroupDetail} from '@features/Group';
+import {GroupList, GroupDetail, GroupSearch} from '@features/Group';
 
 // 채팅 화면 컴포넌트 임포트
 import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
@@ -32,7 +33,7 @@ import {Header} from '@widgets/header';
 import CustomHeader from '@widgets/header/ui/CustomHeader';
 
 // 알림 패널 임포트
-import {NotificationsPanel} from '@widgets/notifications';
+import {NotificationsScreen} from '@features/notifications';
 
 // SVG 아이콘 컴포넌트 임포트
 import {
@@ -102,12 +103,9 @@ const MessagesNavigator = () => (
       options={{headerShown: false}}
     />
     <MessagesStack.Screen
-      name="Chat"
+      name="ChatRoom"
       component={ChatRoomScreen}
-      options={({route}: any) => ({
-        title: route.params?.chatName || '채팅방',
-        headerBackTitle: '목록',
-      })}
+      options={{headerShown: false}}
     />
   </MessagesStack.Navigator>
 );
@@ -145,28 +143,37 @@ const AuthNavigator = () => (
 );
 
 // 모임글 스택 네비게이터
-const GroupNavigator = () => (
-  <GroupStack.Navigator screenOptions={commonHeaderOptions}>
-    <GroupStack.Screen
-      name="GroupList"
-      component={GroupList}
-      options={{headerShown: false}}
-    />
-    <GroupStack.Screen
-      name="GroupDetail"
-      component={GroupDetail}
-      options={{headerShown: false}}
-    />
-    <GroupStack.Screen
-      name="CreateGroup"
-      component={GroupList} // 임시로 동일한 컴포넌트 사용, 추후 변경 필요
-      options={{
-        title: '모임 만들기',
-        headerBackTitle: '취소',
-      }}
-    />
-  </GroupStack.Navigator>
-);
+const GroupNavigator = () => {
+  const {t} = useTranslation();
+
+  return (
+    <GroupStack.Navigator screenOptions={commonHeaderOptions}>
+      <GroupStack.Screen
+        name="GroupList"
+        component={GroupList}
+        options={{headerShown: false}}
+      />
+      <GroupStack.Screen
+        name="GroupDetail"
+        component={GroupDetail}
+        options={{headerShown: false}}
+      />
+      <GroupStack.Screen
+        name="CreateGroup"
+        component={GroupList} // 임시로 동일한 컴포넌트 사용, 추후 변경 필요
+        options={{
+          title: t('group.create'),
+          headerBackTitle: t('common.cancel'),
+        }}
+      />
+      <GroupStack.Screen
+        name="GroupSearch"
+        component={GroupSearch}
+        options={{headerShown: false}}
+      />
+    </GroupStack.Navigator>
+  );
+};
 
 // 탭 아이콘 컴포넌트 (렌더링 함수 밖에서 정의)
 const renderHomeIcon = ({color}: {color: string}) => (
@@ -184,42 +191,42 @@ const renderProfileIcon = ({color}: {color: string}) => (
 
 // 커스텀 헤더 랜더러
 const renderHeader = (props: any) => <Header {...props} theme={navTheme} />;
- const ProfileNavigator = () => (
-   <ProfileStack.Navigator
-     initialRouteName="MyPage"                // ← 여기 추가!
-     screenOptions={{
+const ProfileNavigator = () => (
+  <ProfileStack.Navigator
+    initialRouteName="MyPage" // ← 여기 추가!
+    screenOptions={{
       headerShown: true,
-      header: () => <CustomHeader title="마이페이지" />,}}
-   >
+      header: () => <CustomHeader title="마이페이지" />,
+    }}>
     <ProfileStack.Screen
       name="ProfileMain"
       component={ProfileMainScreen}
-      options={{ headerShown: false }}
+      options={{headerShown: false}}
     />
     <ProfileStack.Screen
       name="MyPage"
       component={MyPageScreen}
-      options={{ headerShown: false }} 
+      options={{headerShown: false}}
     />
     <ProfileStack.Screen
       name="ProfileDetail"
       component={MyProfileDetailScreen}
-      options={{ title: '내 프로필 상세', headerBackTitle: '뒤로' }}
+      options={{title: '내 프로필 상세', headerBackTitle: '뒤로'}}
     />
     <ProfileStack.Screen
       name="GroupHistory"
       component={GroupHistoryScreen}
-      options={{ title: '모임 히스토리', headerBackTitle: '뒤로' }}
+      options={{title: '모임 히스토리', headerBackTitle: '뒤로'}}
     />
     <ProfileStack.Screen
       name="LikedGroups"
       component={LikedGroupsScreen}
-      options={{ title: '좋아요 목록', headerBackTitle: '뒤로' }}
+      options={{title: '좋아요 목록', headerBackTitle: '뒤로'}}
     />
     <ProfileStack.Screen
       name="ProfileEdit"
       component={ProfileEditScreen}
-      options={{ title: '프로필 수정', headerBackTitle: '취소' }}
+      options={{title: '프로필 수정', headerBackTitle: '취소'}}
     />
   </ProfileStack.Navigator>
 );
@@ -227,6 +234,7 @@ const renderHeader = (props: any) => <Header {...props} theme={navTheme} />;
 const MainTabNavigator = () => {
   // SafeArea 하단 여백 가져오기
   const insets = useSafeAreaInsets();
+  const {t} = useTranslation();
 
   return (
     <MainTab.Navigator
@@ -247,7 +255,7 @@ const MainTabNavigator = () => {
         name="Board"
         component={BoardNavigator}
         options={{
-          tabBarLabel: '홈',
+          tabBarLabel: t('home.title'),
           tabBarIcon: renderHomeIcon,
         }}
       />
@@ -255,7 +263,7 @@ const MainTabNavigator = () => {
         name="Group"
         component={GroupNavigator}
         options={{
-          tabBarLabel: '모임글',
+          tabBarLabel: t('group.title'),
           tabBarIcon: renderGroupIcon,
         }}
       />
@@ -263,7 +271,7 @@ const MainTabNavigator = () => {
         name="Messages"
         component={MessagesNavigator}
         options={{
-          tabBarLabel: '채팅',
+          tabBarLabel: t('messages.title'),
           tabBarIcon: renderChatIcon,
         }}
       />
@@ -271,7 +279,7 @@ const MainTabNavigator = () => {
         name="Profile"
         component={ProfileNavigator}
         options={{
-          tabBarLabel: '마이',
+          tabBarLabel: t('profile.title'),
           tabBarIcon: renderProfileIcon,
         }}
       />
@@ -279,19 +287,16 @@ const MainTabNavigator = () => {
   );
 };
 
-// 메인 네비게이터 (인증 후 진입, 모달 포함)
+// 메인 네비게이터 (인증 후 진입)
 const MainNavigator = () => (
   <MainStack.Navigator
     screenOptions={{headerShown: false}}
     initialRouteName="MainTabs">
     <MainStack.Screen name="MainTabs" component={MainTabNavigator} />
-    {/* 알림 패널을 모달로 표시 */}
-    <MainStack.Group screenOptions={{presentation: 'modal'}}>
-      <MainStack.Screen
-        name="NotificationsPanel"
-        component={NotificationsPanel}
-      />
-    </MainStack.Group>
+    <MainStack.Screen
+      name="NotificationsScreen"
+      component={NotificationsScreen}
+    />
   </MainStack.Navigator>
 );
 

@@ -1,7 +1,9 @@
 import React from 'react';
-import {View, Text, Image, StyleSheet} from 'react-native';
+import {View, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {MeetingCardProps} from '../../model/types';
-
+import {Text} from '../../../../shared/ui/typography/Text';
+import {Eye, Heart, Users} from '@shared/assets/images';
+import {useNavigation} from '@react-navigation/native';
 const MeetingCard = ({
   category,
   categoryColor,
@@ -15,16 +17,34 @@ const MeetingCard = ({
   likeCount,
   memberCount,
 }: MeetingCardProps) => {
+  const navigation = useNavigation();
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() =>
+        navigation.navigate('Group', {
+          screen: 'GroupDetail',
+          params: {
+            // id: card.id,
+            // title: card.title,
+            // data: card,
+          },
+        })
+      }>
       <View style={styles.cardHeader}>
         <View style={[styles.categoryTag, {backgroundColor: categoryBgColor}]}>
-          <Text style={[styles.categoryText, {color: categoryColor}]}>
+          <Text
+            variant="caption"
+            color={categoryColor}
+            weight="bold"
+            style={styles.categoryText}>
             {category}
           </Text>
         </View>
         <View style={styles.flex1}></View>
-        <Text style={styles.dateText}>{date}</Text>
+        <Text variant="caption" color="#9DA2AF" style={styles.dateText}>
+          {date}
+        </Text>
       </View>
       <View style={styles.authorRow}>
         <View style={styles.authorInfo}>
@@ -33,49 +53,51 @@ const MeetingCard = ({
             resizeMode={'stretch'}
             style={styles.authorImage}
           />
-          <Text style={styles.authorName}>{author}</Text>
+          <Text
+            variant="caption"
+            color="#384050"
+            weight="bold"
+            style={styles.authorName}>
+            {author}
+          </Text>
         </View>
         <View style={styles.flex1}></View>
         <View style={styles.viewCountContainer}>
-          <Image
-            source={{
-              uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/7fndag3l_expires_30_days.png',
-            }}
-            resizeMode={'stretch'}
-            style={styles.smallIcon}
-          />
-          <Text style={styles.metaText}>{viewCount}</Text>
+          <Eye style={styles.smallIcon} />
+          <Text variant="caption" color="#9DA2AF" style={styles.metaText}>
+            {viewCount}
+          </Text>
         </View>
       </View>
       <View style={styles.cardContent}>
         <View style={styles.cardTextContainer}>
-          <Text style={styles.cardTitle}>{title}</Text>
-          <Text style={styles.cardDescription}>{description}</Text>
+          <Text
+            variant="subtitle1"
+            color="#303030"
+            weight="bold"
+            style={styles.cardTitle}>
+            {title}
+          </Text>
+          <Text variant="body2" color="#303030" style={styles.cardDescription}>
+            {description}
+          </Text>
         </View>
         <View style={styles.cardFooter}>
           <View style={styles.footerItem}>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/4hkcj7y0_expires_30_days.png',
-              }}
-              resizeMode={'stretch'}
-              style={styles.smallIcon}
-            />
-            <Text style={styles.metaInfoText}>{likeCount}</Text>
+            <Heart style={styles.smallIcon} />
+            <Text variant="caption" color="#384050" style={styles.metaInfoText}>
+              {likeCount}
+            </Text>
           </View>
           <View style={styles.footerItem}>
-            <Image
-              source={{
-                uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/ba28r6db_expires_30_days.png',
-              }}
-              resizeMode={'stretch'}
-              style={styles.smallIcon}
-            />
-            <Text style={styles.metaInfoText}>{memberCount}</Text>
+            <Users style={styles.smallIcon} />
+            <Text variant="caption" color="#384050" style={styles.metaInfoText}>
+              {memberCount}
+            </Text>
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -110,10 +132,8 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 12,
-    fontWeight: 'bold',
   },
   dateText: {
-    color: '#9DA2AF',
     fontSize: 12,
   },
   authorRow: {
@@ -130,11 +150,12 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     marginRight: 6,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#D3D5DB',
   },
   authorName: {
-    color: '#384050',
     fontSize: 12,
-    fontWeight: 'bold',
   },
   viewCountContainer: {
     flexDirection: 'row',
@@ -146,7 +167,6 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   metaText: {
-    color: '#9DA2AF',
     fontSize: 12,
   },
   cardContent: {
@@ -158,13 +178,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   cardTitle: {
-    color: '#303030',
     fontSize: 16,
-    fontWeight: 'bold',
     marginBottom: 4,
   },
   cardDescription: {
-    color: '#303030',
     fontSize: 14,
   },
   cardFooter: {
@@ -179,7 +196,6 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   metaInfoText: {
-    color: '#384050',
     fontSize: 12,
   },
   flex1: {

@@ -25,7 +25,7 @@ export const commonStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    paddingVertical: 13,
+    paddingVertical: 18.5,
     paddingHorizontal: 19,
   },
   subHeaderTitle: {
@@ -53,6 +53,11 @@ export const commonStyles = StyleSheet.create({
   },
   flexFill: {
     flex: 1,
+  },
+  // 카테고리 선택기 스타일
+  categorySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 
@@ -269,7 +274,7 @@ export const navigationStyles = StyleSheet.create({
   floatingButton: {
     position: 'absolute',
     right: 20,
-    bottom: 80,
+    bottom: 30,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
@@ -290,6 +295,7 @@ export const navigationStyles = StyleSheet.create({
   floatingButtonIcon: {
     width: 20,
     height: 20,
+    marginRight: 8,
   },
   floatingButtonTextContainer: {},
   floatingButtonText: {

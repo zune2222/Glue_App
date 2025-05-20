@@ -37,7 +37,7 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   );
   const [name, setName] = useState('');
   const [gender, setGender] = useState<string | null>(null);
-  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [birthDate, setBirthDate] = useState<Date | null>(new Date());
   const [nativeLanguage, setNativeLanguage] = useState<string | null>(null);
   const [languageLevel, setLanguageLevel] = useState<string | null>(null);
   const [university, setUniversity] = useState<string | null>(null);

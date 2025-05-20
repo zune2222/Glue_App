@@ -42,17 +42,16 @@ export const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  const getTextStyle = () => {
-    if (disabled)
-      return [styles.buttonText, styles.disabledButtonText, textStyle];
+  const getTextColor = () => {
+    if (disabled) return 'white';
 
     switch (variant) {
       case 'primary':
-        return [styles.buttonText, styles.primaryButtonText, textStyle];
+        return 'white';
       case 'secondary':
-        return [styles.buttonText, styles.secondaryButtonText, textStyle];
+        return 'white';
       default:
-        return [styles.buttonText, styles.primaryButtonText, textStyle];
+        return 'white';
     }
   };
 
@@ -65,7 +64,13 @@ export const Button: React.FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator size="small" color="#fff" />
       ) : (
-        <Text style={getTextStyle()}>{label}</Text>
+        <Text
+          variant="button"
+          weight="semiBold"
+          color={getTextColor()}
+          style={textStyle}>
+          {label}
+        </Text>
       )}
     </TouchableOpacity>
   );

@@ -1,9 +1,9 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {colors} from '@app/styles/colors';
-import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
 import LevelButton from '@shared/ui/LevelButton';
+import {Text} from '@shared/ui/typography/Text';
 
 type LanguageLevelSelectionProps = {
   selectedLevel: string | null;
@@ -59,12 +59,12 @@ const LanguageLevelSelection = ({
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>
+        <Text variant="h2" color={colors.richBlack} style={styles.title}>
           {t('signup.languageLevel.title', {
             language: getNativeLanguageName(),
           })}
         </Text>
-        <Text style={styles.subtitle}>
+        <Text variant="body2" color={colors.charcoal} style={styles.subtitle}>
           {t('signup.languageLevel.subtitle')}
         </Text>
       </View>
@@ -92,14 +92,9 @@ const styles = StyleSheet.create({
     marginBottom: 64,
   },
   title: {
-    ...typography.h2,
-    color: colors.richBlack,
     marginBottom: 10,
   },
-  subtitle: {
-    ...typography.body2,
-    color: colors.charcoal,
-  },
+  subtitle: {},
   optionsContainer: {
     marginBottom: 30,
   },

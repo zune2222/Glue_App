@@ -1,10 +1,11 @@
 import React from 'react';
-import {View, StyleSheet, TouchableOpacity, Text} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {theme} from '@app/styles/theme';
 import {AppLogo, TitleSection, SocialLoginSection} from '@widgets/auth/welcome';
 import {useTranslation} from 'react-i18next';
 import {changeLanguage, Language} from '@shared/lib/i18n';
 import {SafeArea} from '@shared/ui';
+import {Text} from '@shared/ui/typography/Text';
 
 const WelcomeScreen = () => {
   const {i18n} = useTranslation();
@@ -20,7 +21,11 @@ const WelcomeScreen = () => {
     <View style={styles.background}>
       <SafeArea style={styles.container}>
         <TouchableOpacity style={styles.langButton} onPress={toggleLanguage}>
-          <Text style={styles.langButtonText}>
+          <Text
+            variant="body2"
+            weight="medium"
+            color="#4F4F4F"
+            style={styles.langButtonText}>
             {i18n.language === Language.KOREAN ? 'English' : '한국어'}
           </Text>
         </TouchableOpacity>
@@ -62,8 +67,6 @@ const styles = StyleSheet.create({
   },
   langButtonText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#4F4F4F',
   },
 });
 

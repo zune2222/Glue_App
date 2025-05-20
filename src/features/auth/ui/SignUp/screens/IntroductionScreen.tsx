@@ -27,10 +27,14 @@ const IntroductionScreen: React.FC<IntroductionScreenProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.headerSection}>
-        <Text style={styles.title}>
+        <Text
+          variant="h2"
+          weight="bold"
+          color={colors.richBlack}
+          style={styles.title}>
           {t('signup.introduction.title', '본인을 한 줄로 소개해보세요 :)')}
         </Text>
-        <Text style={styles.subtitle}>
+        <Text variant="caption" color={colors.charcoal} style={styles.subtitle}>
           {t(
             'signup.introduction.subtitle',
             '공백 포함 {{maxLength}}자까지 입력 가능해요.',
@@ -73,15 +77,9 @@ const styles = StyleSheet.create({
     marginBottom: 59,
   },
   title: {
-    color: colors.richBlack,
-    fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 10,
   },
-  subtitle: {
-    color: colors.charcoal,
-    fontSize: 12,
-  },
+  subtitle: {},
   inputSection: {},
   label: {
     color: colors.auroMetalSaurus,

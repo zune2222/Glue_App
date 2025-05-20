@@ -1,7 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -10,9 +9,9 @@ import {
   Pressable,
 } from 'react-native';
 import {colors} from '@app/styles/colors';
-import {typography} from '@app/styles/typography';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-toast-message';
+import {Text} from '@shared/ui/typography';
 
 type VerificationCodeInputProps = {
   onVerificationComplete: (code: string) => void;
@@ -91,7 +90,9 @@ const VerificationCodeInput = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{t('signup.verification.title')}</Text>
+        <Text variant="h2" color={colors.richBlack} style={styles.title}>
+          {t('signup.verification.title')}
+        </Text>
       </View>
 
       {/* 숨겨진 실제 입력 필드 */}
@@ -116,16 +117,28 @@ const VerificationCodeInput = ({
               focusedIndex === index ? styles.focusedCodeBox : {},
             ]}
             onPress={() => hiddenInputRef.current?.focus()}>
-            <Text style={styles.codeText}>{code[index]}</Text>
+            <Text
+              variant="body1"
+              weight="bold"
+              color={colors.richBlack}
+              style={styles.codeText}>
+              {code[index]}
+            </Text>
           </Pressable>
         ))}
       </View>
 
       {/* 인증번호 재전송 */}
       <TouchableOpacity onPress={handleResendCode} disabled={isCounting}>
-        <Text style={styles.resendText}>
+        <Text
+          variant="caption"
+          color={colors.richBlack}
+          style={styles.resendText}>
           {t('signup.verification.didNotReceive')}
-          <Text style={styles.resendLink}>
+          <Text
+            variant="caption"
+            color={colors.batteryChargedBlue}
+            style={styles.resendLink}>
             {' '}
             {t('signup.verification.resend')}
             {isCounting ? `(${resendCountdown}s)` : ''}
@@ -144,8 +157,6 @@ const styles = StyleSheet.create({
     marginBottom: 64,
   },
   title: {
-    ...typography.h2,
-    color: colors.richBlack,
     marginBottom: 10,
   },
   hiddenInput: {
@@ -177,18 +188,11 @@ const styles = StyleSheet.create({
   },
   codeText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.richBlack,
   },
   resendText: {
-    fontSize: 12,
-    color: colors.richBlack,
     marginLeft: 5,
   },
-  resendLink: {
-    color: colors.batteryChargedBlue,
-    fontSize: 12,
-  },
+  resendLink: {},
 });
 
 export default VerificationCodeInput;

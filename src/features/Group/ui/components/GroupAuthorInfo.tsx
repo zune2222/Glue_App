@@ -1,6 +1,8 @@
 import React from 'react';
-import {View, Text, Image} from 'react-native';
+import {View, Image} from 'react-native';
 import {groupDetailStyles} from '../styles/groupDetailStyles';
+import {Text} from '../../../../shared/ui/typography/Text';
+import {Eye} from '@shared/assets/images';
 
 interface GroupAuthorInfoProps {
   category: string;
@@ -23,7 +25,9 @@ const GroupAuthorInfo: React.FC<GroupAuthorInfoProps> = ({
   return (
     <View style={groupDetailStyles.authorContainer}>
       <View style={groupDetailStyles.categoryBadge}>
-        <Text style={groupDetailStyles.categoryText}>{category}</Text>
+        <Text variant="caption" style={groupDetailStyles.categoryText}>
+          {category}
+        </Text>
       </View>
       <View style={groupDetailStyles.authorInfoContainer}>
         <Image
@@ -32,18 +36,24 @@ const GroupAuthorInfo: React.FC<GroupAuthorInfoProps> = ({
           style={groupDetailStyles.authorAvatar}
         />
         <View style={groupDetailStyles.authorTextContainer}>
-          <Text style={groupDetailStyles.authorName}>{authorName}</Text>
-          <Text style={groupDetailStyles.authorDate}>{date}</Text>
+          <Text
+            variant="subtitle2"
+            weight="medium"
+            style={groupDetailStyles.authorName}>
+            {authorName}
+          </Text>
+          <Text
+            variant="caption"
+            color="#757575"
+            style={groupDetailStyles.authorDate}>
+            {date}
+          </Text>
         </View>
         <View style={groupDetailStyles.likeContainer}>
-          <Image
-            source={{
-              uri: 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/ClJObT75BN/iy1a5bp3_expires_30_days.png',
-            }}
-            resizeMode={'stretch'}
-            style={groupDetailStyles.likeIcon}
-          />
-          <Text style={groupDetailStyles.likeCount}>{likeCount}</Text>
+          <Eye style={groupDetailStyles.likeIcon} />
+          <Text variant="body2" style={groupDetailStyles.likeCount}>
+            {likeCount}
+          </Text>
         </View>
       </View>
     </View>
