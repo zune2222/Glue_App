@@ -25,7 +25,7 @@ export const commonStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    paddingVertical: 13,
+    paddingVertical: 18.5,
     paddingHorizontal: 19,
   },
   subHeaderTitle: {

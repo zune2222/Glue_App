@@ -26,7 +26,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingVertical: 13,
     paddingHorizontal: 19,
-    marginBottom: 19,
   },
   logoContainer: {
     flexDirection: 'row',
@@ -34,7 +33,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 35,
-    height: 25,
+    height: 35,
     marginRight: 8,
   },
   navbarIcon: {
