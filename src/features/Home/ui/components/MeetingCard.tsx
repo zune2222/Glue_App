@@ -1,9 +1,9 @@
 import React from 'react';
-import {View, Image, StyleSheet} from 'react-native';
+import {View, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {MeetingCardProps} from '../../model/types';
 import {Text} from '../../../../shared/ui/typography/Text';
 import {Eye, Heart, Users} from '@shared/assets/images';
-
+import {useNavigation} from '@react-navigation/native';
 const MeetingCard = ({
   category,
   categoryColor,
@@ -17,8 +17,20 @@ const MeetingCard = ({
   likeCount,
   memberCount,
 }: MeetingCardProps) => {
+  const navigation = useNavigation();
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() =>
+        navigation.navigate('Group', {
+          screen: 'GroupDetail',
+          params: {
+            // id: card.id,
+            // title: card.title,
+            // data: card,
+          },
+        })
+      }>
       <View style={styles.cardHeader}>
         <View style={[styles.categoryTag, {backgroundColor: categoryBgColor}]}>
           <Text
@@ -85,7 +97,7 @@ const MeetingCard = ({
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
