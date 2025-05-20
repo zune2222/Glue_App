@@ -120,4 +120,5 @@ export const dummyChatDetails: ChatDetails = {
   users: dummyUsers,
   messages: dummyMessages,
   currentUserId: 'user1',
+  type: 'group', // 모임톡(그룹)
 };

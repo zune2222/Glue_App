@@ -19,6 +19,7 @@ interface ChatRoomInfoProps {
   memberCount: number;
   category?: string; // 예: "공부"
   postTitle?: string; // 예: "영어 공부할 모임 모집합니다"
+  isDirectMessage?: boolean; // 개인 채팅인지 여부
   members: Array<{
     id: string;
     name: string;
@@ -104,12 +105,14 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}>
+        {/* 모든 채팅방에서 카테고리 표시 */}
         <TouchableOpacity style={styles.categoryButton} onPress={() => {}}>
           <Text variant="body1" weight="bold" color="#263FA9">
             {category}
           </Text>
         </TouchableOpacity>
 
+        {/* 모든 채팅방에서 제목 표시 */}
         <Text
           variant="body1"
           weight="bold"
@@ -118,6 +121,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
           {postTitle}
         </Text>
 
+        {/* 모든 채팅방에서 게시글 이동 버튼 표시 */}
         <TouchableOpacity style={styles.postButton} onPress={() => {}}>
           <Text variant="body1" weight="bold" color="#9DA2AF">
             {t('messages.chatInfo.goToPost')}
@@ -141,6 +145,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
             />
           </View>
 
+          {/* 모든 채팅방에서 초대 메뉴 표시 */}
           <View style={styles.menuItem}>
             <Mail style={styles.menuIcon} />
             <Text variant="body2" color="#303030" style={styles.menuText}>
@@ -153,6 +158,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
             </TouchableOpacity>
           </View>
 
+          {/* 모든 채팅방에서 수정 메뉴 표시 */}
           <View style={styles.menuItem}>
             <Pen style={styles.menuIcon} />
             <Text variant="body2" color="#303030" style={styles.menuText}>

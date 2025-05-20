@@ -39,4 +39,5 @@ export interface ChatDetails {
   users: ChatUser[];
   messages: ChatMessage[];
   currentUserId: string;
+  type?: 'group' | 'direct'; // 채팅방 타입: 모임톡(그룹) 또는 쪽지(개인)
 }

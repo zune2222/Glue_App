@@ -95,6 +95,11 @@ const MessagesNavigator = () => (
       component={ChatListScreen}
       options={{headerShown: false}}
     />
+    <MessagesStack.Screen
+      name="ChatRoom"
+      component={ChatRoomScreen}
+      options={{headerShown: false}}
+    />
   </MessagesStack.Navigator>
 );
 
@@ -260,7 +265,6 @@ export const AppNavigator = () => {
     <RootStack.Navigator screenOptions={{headerShown: false}}>
       <RootStack.Screen name="Auth" component={AuthNavigator} />
       <RootStack.Screen name="Main" component={MainNavigator} />
-      <RootStack.Screen name="Chat" component={ChatRoomScreen} />
     </RootStack.Navigator>
   );
 };

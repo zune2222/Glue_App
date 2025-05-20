@@ -38,7 +38,7 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({navigation}) => {
   const handleChatRoomPress = (roomId: string) => {
     // 채팅방 상세 화면으로 이동하는 로직
     if (navigation) {
-      navigation.navigate('Chat', {roomId});
+      navigation.navigate('ChatRoom', {roomId});
     }
   };
 

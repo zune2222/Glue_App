@@ -9,6 +9,8 @@ import {
   PanResponder,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  Text as RNText,
 } from 'react-native';
 import {styles} from './styles';
 import {
@@ -39,13 +41,15 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   const [chatDetails, setChatDetails] = useState<ChatDetails | null>(null);
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showRoomInfo, setShowRoomInfo] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const roomId = route?.params?.roomId || '1'; // 기본값 제공
+  // route.params.roomId가 없으면 기본값이 아니라 에러 처리
+  const roomId = route?.params?.roomId;
 
   // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
   const panResponder = useRef(
@@ -121,14 +125,26 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   useEffect(() => {
     const loadChatDetails = async () => {
+      if (!roomId) {
+        setError('채팅방 ID가 제공되지 않았습니다.');
+        setLoading(false);
+        return;
+      }
+
       try {
+        setLoading(true);
+        setError(null);
         const details = await fetchChatDetails(roomId);
+
         if (details) {
           setChatDetails(details);
           setMessages(details.messages);
+        } else {
+          setError(`채팅방 정보를 찾을 수 없습니다: ${roomId}`);
         }
       } catch (error) {
         console.error('채팅방 정보를 불러오는데 실패했습니다:', error);
+        setError('채팅방 정보를 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }
@@ -138,9 +154,11 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   }, [roomId]);
 
   const handleSendMessage = async (text: string) => {
+    if (!chatDetails || !roomId) return;
+
     try {
       const newMessage = await sendMessage(roomId, text);
-      if (newMessage && chatDetails) {
+      if (newMessage) {
         setMessages(prevMessages => [...prevMessages, newMessage]);
 
         // 스크롤을 맨 아래로 이동
@@ -180,8 +198,46 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }, 300);
   };
 
-  if (loading || !chatDetails) {
-    return null; // 로딩 컴포넌트를 추가할 수 있음
+  // 로딩 중일 때 로딩 인디케이터 표시
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          {justifyContent: 'center', alignItems: 'center'},
+        ]}>
+        <ActivityIndicator size="large" color="#1CBFDC" />
+        <RNText style={{marginTop: 10, color: '#666'}}>
+          채팅방 정보를 불러오는 중...
+        </RNText>
+      </SafeAreaView>
+    );
+  }
+
+  // 에러가 있을 때 에러 메시지 표시
+  if (error || !chatDetails) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          {justifyContent: 'center', alignItems: 'center'},
+        ]}>
+        <RNText style={{fontSize: 16, color: '#ff0000', marginBottom: 20}}>
+          {error || '채팅방 정보를 찾을 수 없습니다.'}
+        </RNText>
+        <TouchableWithoutFeedback onPress={handleBackPress}>
+          <View
+            style={{
+              backgroundColor: '#1CBFDC',
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+              borderRadius: 5,
+            }}>
+            <RNText style={{color: '#fff'}}>뒤로 가기</RNText>
+          </View>
+        </TouchableWithoutFeedback>
+      </SafeAreaView>
+    );
   }
 
   const getUserById = (userId: string) => {
@@ -209,22 +265,36 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           onContentSizeChange={() =>
             scrollViewRef.current?.scrollToEnd({animated: false})
           }>
-          {messages.map(message => {
-            const user = getUserById(message.senderId);
-            if (!user) return null;
+          {messages.length === 0 ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingVertical: 50,
+              }}>
+              <RNText style={{color: '#999'}}>
+                아직 메시지가 없습니다. 첫 메시지를 보내보세요!
+              </RNText>
+            </View>
+          ) : (
+            messages.map(message => {
+              const user = getUserById(message.senderId);
+              if (!user) return null;
 
-            return (
-              <ChatMessage
-                key={message.id}
-                id={message.id}
-                text={message.text}
-                timestamp={message.timestamp}
-                readCount={message.readCount}
-                isMine={message.senderId === chatDetails.currentUserId}
-                sender={user}
-              />
-            );
-          })}
+              return (
+                <ChatMessage
+                  key={message.id}
+                  id={message.id}
+                  text={message.text}
+                  timestamp={message.timestamp}
+                  readCount={message.readCount}
+                  isMine={message.senderId === chatDetails.currentUserId}
+                  sender={user}
+                />
+              );
+            })
+          )}
         </ScrollView>
 
         <ChatInput onSend={handleSendMessage} />
@@ -254,6 +324,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
               roomName={chatDetails.name}
               roomIcon={chatDetails.roomIcon}
               memberCount={chatDetails.memberCount}
+              isDirectMessage={chatDetails.type === 'direct'}
               members={chatDetails.users.map(user => ({
                 id: user.id,
                 name: user.name,
