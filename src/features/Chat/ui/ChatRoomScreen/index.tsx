@@ -7,6 +7,8 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   PanResponder,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {styles} from './styles';
 import {
@@ -184,81 +186,85 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ChatHeader
-        title={chatDetails.name}
-        memberCount={chatDetails.memberCount}
-        onBackPress={handleBackPress}
-        onMenuPress={handleMenuPress}
-      />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <ChatHeader
+          title={chatDetails.name}
+          memberCount={chatDetails.memberCount}
+          onBackPress={handleBackPress}
+          onMenuPress={handleMenuPress}
+        />
 
-      <DateDivider date="2025년 04월 12일" />
+        <DateDivider date="2025년 04월 12일" />
 
-      <ScrollView
-        ref={scrollViewRef}
-        style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
-        onContentSizeChange={() =>
-          scrollViewRef.current?.scrollToEnd({animated: false})
-        }>
-        {messages.map(message => {
-          const user = getUserById(message.senderId);
-          if (!user) return null;
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.scrollView}
+          contentContainerStyle={styles.contentContainer}
+          onContentSizeChange={() =>
+            scrollViewRef.current?.scrollToEnd({animated: false})
+          }>
+          {messages.map(message => {
+            const user = getUserById(message.senderId);
+            if (!user) return null;
 
-          return (
-            <ChatMessage
-              key={message.id}
-              id={message.id}
-              text={message.text}
-              timestamp={message.timestamp}
-              readCount={message.readCount}
-              isMine={message.senderId === chatDetails.currentUserId}
-              sender={user}
-            />
-          );
-        })}
-      </ScrollView>
+            return (
+              <ChatMessage
+                key={message.id}
+                id={message.id}
+                text={message.text}
+                timestamp={message.timestamp}
+                readCount={message.readCount}
+                isMine={message.senderId === chatDetails.currentUserId}
+                sender={user}
+              />
+            );
+          })}
+        </ScrollView>
 
-      <ChatInput onSend={handleSendMessage} />
+        <ChatInput onSend={handleSendMessage} />
 
-      {/* 채팅방 정보 - 우측에서 슬라이드 */}
-      <Animated.View
-        style={[
-          styles.modalOverlay,
-          {
-            opacity: fadeAnim,
-            display: showRoomInfo || isClosing ? 'flex' : 'none',
-          },
-        ]}>
-        <TouchableWithoutFeedback onPress={closeRoomInfo}>
-          <View style={styles.overlayTouchable} />
-        </TouchableWithoutFeedback>
-
+        {/* 채팅방 정보 - 우측에서 슬라이드 */}
         <Animated.View
-          {...panResponder.panHandlers}
           style={[
-            styles.sidePanel,
+            styles.modalOverlay,
             {
-              transform: [{translateX: slideAnim}],
+              opacity: fadeAnim,
+              display: showRoomInfo || isClosing ? 'flex' : 'none',
             },
           ]}>
-          <ChatRoomInfo
-            roomName={chatDetails.name}
-            roomIcon={chatDetails.roomIcon}
-            memberCount={chatDetails.memberCount}
-            members={chatDetails.users.map(user => ({
-              id: user.id,
-              name: user.name,
-              profileImage: user.profileImage,
-              isHost: user.isHost,
-              isOnline: user.isOnline,
-            }))}
-            onClose={closeRoomInfo}
-            onLeaveRoom={handleLeaveRoom}
-          />
+          <TouchableWithoutFeedback onPress={closeRoomInfo}>
+            <View style={styles.overlayTouchable} />
+          </TouchableWithoutFeedback>
+
+          <Animated.View
+            {...panResponder.panHandlers}
+            style={[
+              styles.sidePanel,
+              {
+                transform: [{translateX: slideAnim}],
+              },
+            ]}>
+            <ChatRoomInfo
+              roomName={chatDetails.name}
+              roomIcon={chatDetails.roomIcon}
+              memberCount={chatDetails.memberCount}
+              members={chatDetails.users.map(user => ({
+                id: user.id,
+                name: user.name,
+                profileImage: user.profileImage,
+                isHost: user.isHost,
+                isOnline: user.isOnline,
+              }))}
+              onClose={closeRoomInfo}
+              onLeaveRoom={handleLeaveRoom}
+            />
+          </Animated.View>
         </Animated.View>
-      </Animated.View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
