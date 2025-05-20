@@ -12,8 +12,14 @@ import {GroupList, GroupDetail} from '@features/Group';
 import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
 
 // 프로필 화면 컴포넌트 임포트
-import {ProfileMainScreen, ProfileEditScreen} from '@features/Profile';
-
+import {
+  ProfileMainScreen,
+  ProfileEditScreen,
+  MyPageScreen,
+  MyProfileDetailScreen,
+  GroupHistoryScreen,
+  LikedGroupsScreen,
+} from '@features/Profile';
 // 인증 화면 임포트
 import {
   WelcomeScreen,
@@ -23,6 +29,7 @@ import {
 
 // 헤더 컴포넌트 임포트
 import {Header} from '@widgets/header';
+import CustomHeader from '@widgets/header/ui/CustomHeader';
 
 // 알림 패널 임포트
 import {NotificationsPanel} from '@widgets/notifications';
@@ -106,23 +113,23 @@ const MessagesNavigator = () => (
 );
 
 // 프로필 스택 네비게이터
-const ProfileNavigator = () => (
-  <ProfileStack.Navigator screenOptions={commonHeaderOptions}>
-    <ProfileStack.Screen
-      name="ProfileMain"
-      component={ProfileMainScreen}
-      options={{headerShown: false}}
-    />
-    <ProfileStack.Screen
-      name="ProfileEdit"
-      component={ProfileEditScreen}
-      options={{
-        title: '프로필 수정',
-        headerBackTitle: '취소',
-      }}
-    />
-  </ProfileStack.Navigator>
-);
+// const ProfileNavigator = () => (
+//   <ProfileStack.Navigator screenOptions={commonHeaderOptions}>
+//     <ProfileStack.Screen
+//       name="ProfileMain"
+//       component={ProfileMainScreen}
+//       options={{headerShown: false}}
+//     />
+//     <ProfileStack.Screen
+//       name="ProfileEdit"
+//       component={ProfileEditScreen}
+//       options={{
+//         title: '프로필 수정',
+//         headerBackTitle: '취소',
+//       }}
+//     />
+//   </ProfileStack.Navigator>
+// );
 
 // 인증 스택 네비게이터
 const AuthNavigator = () => (
@@ -177,7 +184,45 @@ const renderProfileIcon = ({color}: {color: string}) => (
 
 // 커스텀 헤더 랜더러
 const renderHeader = (props: any) => <Header {...props} theme={navTheme} />;
-
+ const ProfileNavigator = () => (
+   <ProfileStack.Navigator
+     initialRouteName="MyPage"                // ← 여기 추가!
+     screenOptions={{
+      headerShown: true,
+      header: () => <CustomHeader title="마이페이지" />,}}
+   >
+    <ProfileStack.Screen
+      name="ProfileMain"
+      component={ProfileMainScreen}
+      options={{ headerShown: false }}
+    />
+    <ProfileStack.Screen
+      name="MyPage"
+      component={MyPageScreen}
+      options={{ headerShown: false }} 
+    />
+    <ProfileStack.Screen
+      name="ProfileDetail"
+      component={MyProfileDetailScreen}
+      options={{ title: '내 프로필 상세', headerBackTitle: '뒤로' }}
+    />
+    <ProfileStack.Screen
+      name="GroupHistory"
+      component={GroupHistoryScreen}
+      options={{ title: '모임 히스토리', headerBackTitle: '뒤로' }}
+    />
+    <ProfileStack.Screen
+      name="LikedGroups"
+      component={LikedGroupsScreen}
+      options={{ title: '좋아요 목록', headerBackTitle: '뒤로' }}
+    />
+    <ProfileStack.Screen
+      name="ProfileEdit"
+      component={ProfileEditScreen}
+      options={{ title: '프로필 수정', headerBackTitle: '취소' }}
+    />
+  </ProfileStack.Navigator>
+);
 // 메인 탭 네비게이터
 const MainTabNavigator = () => {
   // SafeArea 하단 여백 가져오기
