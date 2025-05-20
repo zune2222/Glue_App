@@ -318,8 +318,9 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.zuraft.glue;
 				PRODUCT_NAME = GlueApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "ios/GlueApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -348,6 +349,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.zuraft.glue;
 				PRODUCT_NAME = GlueApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "ios/GlueApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

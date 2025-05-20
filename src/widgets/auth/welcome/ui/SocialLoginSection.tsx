@@ -2,6 +2,7 @@ import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {SocialLoginButton} from '@features/auth/social-login-button';
+import {login} from '@react-native-seoul/kakao-login';
 
 // 전체 내비게이션 타입 정의
 type RootStackParamList = {
@@ -28,6 +29,14 @@ export const SocialLoginSection = () => {
 
     // 회원 정보가 없다고 가정하고 회원가입 화면으로 이동
     if (provider === 'Kakao') {
+      try {
+        console.log('시작!@#$');
+        const token = await login();
+        console.log(token, '끝!@#$');
+      } catch (error) {
+        console.error(error);
+      }
+
       navigation.navigate('Auth', {
         screen: 'SignUp',
       });
