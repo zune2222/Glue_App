@@ -4,43 +4,102 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {SocialLoginButton} from '@features/auth/social-login-button';
 import {login} from '@react-native-seoul/kakao-login';
 import {appleAuth} from '@invertase/react-native-apple-authentication';
+import {useKakaoSignin} from '@/features/auth/api';
+import {secureStorage} from '@/shared/lib/security';
+import Toast from 'react-native-toast-message';
+import {useTranslation} from 'react-i18next';
 
 // 전체 내비게이션 타입 정의
 type RootStackParamList = {
   Auth: {
-    screen?: string;
-    params?: {
-      screen?: string;
-    };
+    screen: string;
+    params?: Record<string, any>;
   };
   Main: {
     screen?: string;
-    params?: {
-      screen?: string;
-    };
+    params?: Record<string, any>;
   };
 };
 
 export const SocialLoginSection = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const kakaoSignin = useKakaoSignin();
+  const {t} = useTranslation();
 
-  // 소셜 로그인 핸들러 - 백엔드 연결 전, 바로 회원가입 화면으로 이동
+  // 소셜 로그인 핸들러
   const handleSocialLogin = async (provider: string) => {
     console.log(`${provider} 로그인 시도`);
 
-    // 회원 정보가 없다고 가정하고 회원가입 화면으로 이동
     if (provider === 'Kakao') {
       try {
-        console.log('시작!@#$');
-        const token = await login();
-        console.log(token, '끝!@#$');
-      } catch (error) {
-        console.error(error);
-      }
+        console.log('카카오 로그인 시작');
+        const tokenInfo = await login();
+        console.log('카카오 토큰 획득:', tokenInfo.accessToken);
 
-      navigation.navigate('Auth', {
-        screen: 'SignUp',
-      });
+        // 카카오 토큰으로 서버에 로그인 시도
+        Toast.show({
+          type: 'info',
+          text1: t('auth.kakaoLoginProcessing'),
+          position: 'bottom',
+        });
+
+        try {
+          const response = await kakaoSignin.mutateAsync({
+            kakaoToken: tokenInfo.accessToken,
+          });
+
+          if (response.success) {
+            // 응답 확인
+            console.log('카카오 로그인 응답:', response.data);
+
+            // accessToken 저장
+            if (response.data && response.data.accessToken) {
+              await secureStorage.saveToken(response.data.accessToken);
+
+              Toast.show({
+                type: 'success',
+                text1: t('auth.loginSuccess'),
+                position: 'bottom',
+              });
+
+              // 메인 화면으로 이동
+              navigation.navigate('Main', {});
+            } else {
+              console.error('토큰이 응답에 없습니다:', response);
+              throw new Error('로그인은 성공했으나 토큰이 없습니다.');
+            }
+          } else {
+            throw new Error(response.message || '로그인에 실패했습니다.');
+          }
+        } catch (apiError) {
+          if (apiError == 'Error: 존재하지 않는 사용자입니다') {
+            // 회원가입 화면으로 이동하면서 카카오 토큰 전달
+            Toast.show({
+              type: 'info',
+              text1: t('auth.newUserRegistration'),
+              position: 'bottom',
+            });
+
+            navigation.navigate('Auth', {
+              screen: 'SignUp',
+              params: {
+                kakaoToken: tokenInfo.accessToken,
+              },
+            });
+          } else {
+            // 그 외 API 에러는 재던지기
+            throw apiError;
+          }
+        }
+      } catch (error) {
+        console.error('카카오 로그인 에러:', error);
+        Toast.show({
+          type: 'error',
+          text1: t('auth.loginError'),
+          text2: (error as Error).message,
+          position: 'bottom',
+        });
+      }
     } else if (provider === 'Google') {
       navigation.navigate('Auth', {
         screen: 'SignUp',

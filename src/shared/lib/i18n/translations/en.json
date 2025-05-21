@@ -34,6 +34,8 @@
     "requiredField": "This field is required",
     "invalidEmail": "Invalid email format",
     "invalidPassword": "Password must be at least 6 characters",
+    "kakaoLoginProcessing": "Processing Kakao login...",
+    "newUserRegistration": "Please register your account information",
     "welcome": {
       "title": "GLUE",
       "subtitle": "For stronger language exchange connections",
@@ -129,6 +131,26 @@
       "advanced": "Advanced",
       "proficient": "Proficient"
     },
+    "exchangeLanguage": {
+      "title": "Please select the language\nyou want to exchange",
+      "subtitle": "Please select the language you want to exchange.",
+      "korean": "Korean",
+      "english": "English",
+      "japanese": "Japanese",
+      "chinese": "Chinese",
+      "german": "German",
+      "french": "French",
+      "spanish": "Spanish"
+    },
+    "exchangeLanguageLevel": {
+      "title": "Please set your proficiency level\nfor the selected exchange language",
+      "subtitle": "Exchange language proficiency level can be changed at any time.",
+      "beginner": "Beginner",
+      "elementary": "Elementary",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "proficient": "Proficient"
+    },
     "university": {
       "title": "Please select your\nuniversity",
       "label": "University",
@@ -155,7 +177,10 @@
         "description": "you can continue to interact with the friends you want."
       },
       "startButton": "Start Now"
-    }
+    },
+    "error": "An error occurred during signup",
+    "success": "Signup completed successfully",
+    "processingSignup": "Processing signup..."
   },
   "profile": {
     "mypage": "My Page",

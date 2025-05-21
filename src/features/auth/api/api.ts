@@ -8,6 +8,167 @@ export const apiClient = axios.create({
   timeout: config.API_TIMEOUT,
 });
 
+// 서버 응답에 맞게 수정된 응답 인터페이스
+export interface ApiResponseDto<T> {
+  httpStatus: string;
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: T;
+}
+
+// 카카오 로그인 API
+export interface KakaoSigninRequest {
+  kakaoToken: string;
+  fcmToken?: string;
+}
+
+// 서버 응답 구조에 맞게 수정된 응답 인터페이스
+export interface KakaoSigninResponse {
+  accessToken: string;
+}
+
+// 사용자 등록 여부 확인을 위한 커스텀 에러
+export class NotRegisteredError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotRegisteredError';
+  }
+}
+
+export const signinWithKakao = async (
+  kakaoToken: string,
+  fcmToken?: string,
+): Promise<ApiResponse<KakaoSigninResponse>> => {
+  const endpoint = '/api/auth/kakao/signin';
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 카카오 로그인: ${url}`, {kakaoToken, fcmToken});
+
+  try {
+    const response = await apiClient.post(endpoint, {
+      kakaoToken,
+      fcmToken,
+    });
+
+    console.log('카카오 로그인 서버 응답:', response.data);
+
+    // 서버 응답 구조에 맞게 처리
+    return {
+      data: response.data.result,
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      if (error.response.data.message === '존재하지 않는 사용자입니다') {
+        return {
+          data: {accessToken: ''},
+          success: false,
+          message: '존재하지 않는 사용자입니다',
+        };
+      }
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error('잘못된 요청입니다. 카카오 토큰을 확인해주세요.');
+      } else if (status === 401) {
+        throw new Error('유효하지 않은 카카오 토큰입니다.');
+      } else if (status === 404) {
+        // 사용자가 등록되어 있지 않은 경우
+        throw new NotRegisteredError('등록되지 않은 사용자입니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '카카오 로그인에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};
+
+// 카카오 회원가입 API
+export interface KakaoSignupRequest {
+  oauthId: string;
+  nickname: string;
+  gender: number;
+  birthDate: string;
+  description: string;
+  major: number;
+  majorVisibility: number;
+  email: string;
+  school: number;
+  profileImageUrl?: string;
+  systemLanguage: number;
+  languageMain: number;
+  languageMainLevel: number;
+  languageLearn: number;
+  languageLearnLevel: number;
+  meetingVisibility: number;
+  likeVisibility: number;
+  guestbooksVisibility: number;
+}
+
+// 서버 응답 구조에 맞게 수정된 응답 인터페이스
+export interface KakaoSignupResponse {
+  accessToken: string;
+}
+
+export const signupWithKakao = async (
+  data: KakaoSignupRequest,
+): Promise<ApiResponse<KakaoSignupResponse>> => {
+  const endpoint = '/api/auth/kakao/signup';
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 카카오 회원가입: ${url}`, data);
+
+  try {
+    const response = await apiClient.post(endpoint, data);
+
+    console.log('카카오 회원가입 서버 응답:', response.data);
+
+    // 서버 응답 구조에 맞게 처리
+    return {
+      data: response.data.result,
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error('잘못된 요청입니다. 입력 정보를 확인해주세요.');
+      } else if (status === 409) {
+        throw new Error('이미 가입된 사용자입니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '회원가입에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};
+
 // 이메일 인증 코드 전송 API
 export const sendVerificationCode = async (
   email: string,
