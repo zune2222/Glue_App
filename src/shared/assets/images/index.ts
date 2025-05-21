@@ -37,3 +37,6 @@ export const dummyProfile = require('./dummy-profile.png');
 
 // PNG 파일이 없어서 오류 발생 - 삭제
 // 소셜 로그인은 SVG 파일만 사용
+export { default as BellIcon     } from './bell.svg';
+export { default as SettingsIcon } from './settings.svg';
+export { default as RightArrowIcon } from './right-arrow.svg';

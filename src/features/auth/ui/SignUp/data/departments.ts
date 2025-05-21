@@ -250,12 +250,6 @@ export const departments: Department[] = [
     kedi: 'U04100100133',
   },
   {
-    ko: '건설융합학부',
-    en: 'School of Construction Convergence',
-    code: '0041216',
-    kedi: 'U04010200092',
-  },
-  {
     ko: '화공생명.환경공학부 화공생명공학전공',
     en: 'Major in Environmental Engineering',
     code: '0041257',

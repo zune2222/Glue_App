@@ -15,7 +15,8 @@
     "search": "Search",
     "send": "Send",
     "select": "Select",
-    "permission": "Permission Required"
+    "permission": "Permission Required",
+    "sending": "Sending..."
   },
   "auth": {
     "login": "Log in",
@@ -33,6 +34,8 @@
     "requiredField": "This field is required",
     "invalidEmail": "Invalid email format",
     "invalidPassword": "Password must be at least 6 characters",
+    "kakaoLoginProcessing": "Processing Kakao login...",
+    "newUserRegistration": "Please register your account information",
     "welcome": {
       "title": "GLUE",
       "subtitle": "For stronger language exchange connections",
@@ -68,13 +71,23 @@
       "title": "Please enter your university\nweb mail ID",
       "subtitle": "We will send a verification code to the ID you entered.",
       "label": "Web mail ID",
-      "placeholder": "Enter your web mail ID"
+      "placeholder": "Enter your web mail ID",
+      "invalidEmail": "Invalid email format",
+      "sendingVerification": "Sending verification code...",
+      "verificationSent": "Verification code has been sent",
+      "sendFailed": "Failed to send verification code",
+      "nextButtonNotice": "Verification code will be sent when you click Next"
     },
     "verification": {
       "title": "Please enter the code\nwe sent you",
       "didNotReceive": "Didn't receive the email?",
       "resend": "Resend",
-      "resendSuccess": "Verification code has been resent"
+      "resendSuccess": "Verification code has been resent",
+      "emailRequired": "Email information is required",
+      "verifying": "Verifying code...",
+      "verificationSuccess": "Verification successful",
+      "verificationFailed": "Verification failed",
+      "resendFailed": "Failed to resend verification code"
     },
     "nickname": {
       "title": "Please enter the nickname\nyou want to use on GLUE",
@@ -118,6 +131,26 @@
       "advanced": "Advanced",
       "proficient": "Proficient"
     },
+    "exchangeLanguage": {
+      "title": "Please select the language\nyou want to exchange",
+      "subtitle": "Please select the language you want to exchange.",
+      "korean": "Korean",
+      "english": "English",
+      "japanese": "Japanese",
+      "chinese": "Chinese",
+      "german": "German",
+      "french": "French",
+      "spanish": "Spanish"
+    },
+    "exchangeLanguageLevel": {
+      "title": "Please set your proficiency level\nfor the selected exchange language",
+      "subtitle": "Exchange language proficiency level can be changed at any time.",
+      "beginner": "Beginner",
+      "elementary": "Elementary",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "proficient": "Proficient"
+    },
     "university": {
       "title": "Please select your\nuniversity",
       "label": "University",
@@ -144,21 +177,24 @@
         "description": "you can continue to interact with the friends you want."
       },
       "startButton": "Start Now"
-    }
+    },
+    "error": "An error occurred during signup",
+    "success": "Signup completed successfully",
+    "processingSignup": "Processing signup..."
   },
   "profile": {
-    "title": "Profile",
-    "edit": "Edit Profile",
-    "name": "Name",
-    "bio": "Bio",
-    "phone": "Phone",
-    "website": "Website",
-    "location": "Location",
-    "guestbook": "Guestbook",
-    "guestbookEmpty": "Guestbook is empty",
-    "writeGuestbook": "Write in guestbook",
-    "updateSuccess": "Profile updated successfully",
-    "updateError": "Failed to update profile"
+    "mypage": "My Page",
+    "languageSettings": "Language Settings",
+    "myInfo": "My Info",
+    "myGroupsHistory": "My Groups History",
+    "myLikes": "My Likes",
+    "myGuestbook": "My Guestbook",
+    "privacySettings": "Privacy Settings",
+    "edit": "Edit",
+    "myLanguage": "My Language",
+    "exchangeLanguage": "Exchange Language",
+    "level": "Level",
+    "title": "My"
   },
   "board": {
     "title": "Board",
@@ -250,12 +286,13 @@
     "modal": {
       "showAlert": "Alert Modal",
       "showConfirm": "Confirm Modal",
+      "showCustom": "Custom Modal",
       "alertTitle": "Alert",
-      "alertMessage": "Please confirm this important information.",
+      "alertMessage": "There is an important alert.",
       "confirmTitle": "Confirm",
-      "confirmMessage": "Are you sure you want to perform this action?",
-      "confirmButtonPressed": "Confirm button was pressed.",
-      "cancelButtonPressed": "Cancel button was pressed."
+      "confirmMessage": "Do you want to proceed with this action?",
+      "customTitle": "Custom Modal",
+      "customMessage": "Enter your desired content."
     }
   },
   "group": {
