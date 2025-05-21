@@ -4,7 +4,7 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {SocialLoginButton} from '@features/auth/social-login-button';
 import {login} from '@react-native-seoul/kakao-login';
 import {appleAuth} from '@invertase/react-native-apple-authentication';
-import {useKakaoSignin} from '@/features/auth/api';
+import {useKakaoSignin, useAppleSignin} from '@features/auth/api';
 import {secureStorage} from '@/shared/lib/security';
 import Toast from 'react-native-toast-message';
 import {useTranslation} from 'react-i18next';
@@ -26,7 +26,20 @@ type RootStackParamList = {
 export const SocialLoginSection = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const kakaoSignin = useKakaoSignin();
+  const appleSignin = useAppleSignin();
   const {t} = useTranslation();
+
+  // FCM 토큰을 안전하게 가져오는 함수
+  const getFcmTokenSafely = async (): Promise<string | undefined> => {
+    try {
+      const token = await fcmService.getToken();
+      console.log('FCM 토큰 획득 성공:', token);
+      return token || undefined;
+    } catch (error) {
+      console.warn('FCM 토큰 획득 실패:', error);
+      return undefined;
+    }
+  };
 
   // 소셜 로그인 핸들러
   const handleSocialLogin = async (provider: string) => {
@@ -46,9 +59,8 @@ export const SocialLoginSection = () => {
           console.log('카카오 OAuth ID =', oauthId); // 회원번호(고유식별자) 출력
         }
 
-        // FCM 토큰 가져오기
-        const fcmToken = await fcmService.getToken();
-        console.log('FCM 토큰:', fcmToken);
+        // FCM 토큰 가져오기 (실패해도 계속 진행)
+        const fcmToken = await getFcmTokenSafely();
 
         // 카카오 토큰으로 서버에 로그인 시도
         Toast.show({
@@ -60,7 +72,7 @@ export const SocialLoginSection = () => {
         try {
           const response = await kakaoSignin.mutateAsync({
             kakaoToken: tokenInfo.accessToken,
-            fcmToken: fcmToken || undefined,
+            fcmToken,
           });
 
           if (response.success) {
@@ -81,10 +93,10 @@ export const SocialLoginSection = () => {
               navigation.navigate('Main', {});
             } else {
               console.error('토큰이 응답에 없습니다:', response);
-              throw new Error('로그인은 성공했으나 토큰이 없습니다.');
+              throw new Error(t('auth.noTokenError'));
             }
           } else {
-            throw new Error(response.message || '로그인에 실패했습니다.');
+            throw new Error(response.message || t('auth.loginFailed'));
           }
         } catch (apiError) {
           if (apiError == 'Error: 존재하지 않는 사용자입니다') {
@@ -92,7 +104,7 @@ export const SocialLoginSection = () => {
             if (!oauthId) {
               Toast.show({
                 type: 'error',
-                text1: '카카오 계정에서 ID를 가져올 수 없습니다.',
+                text1: t('auth.kakaoNoIdError'),
                 position: 'bottom',
               });
               return;
@@ -109,6 +121,7 @@ export const SocialLoginSection = () => {
               screen: 'SignUp',
               params: {
                 kakaoOAuthId: oauthId,
+                fcmToken: fcmToken,
               },
             });
           } else {
@@ -140,29 +153,105 @@ export const SocialLoginSection = () => {
           });
 
           // 인증 상태 확인
-          const {identityToken, nonce, fullName, email} =
+          const {identityToken, authorizationCode, fullName, email} =
             appleAuthRequestResponse;
 
-          // FCM 토큰 가져오기
-          const fcmToken = await fcmService.getToken();
-          console.log('FCM 토큰:', fcmToken);
+          // FCM 토큰 가져오기 (실패해도 계속 진행)
+          const fcmToken = await getFcmTokenSafely();
 
-          // 여기서 사용자 정보 처리 (서버로 전송하거나 로컬에 저장)
-          console.log('Apple 로그인 성공: ', {
+          // 로깅
+          console.log('Apple 로그인 정보: ', {
             identityToken,
-            nonce,
+            authorizationCode,
             fullName,
             email,
             fcmToken,
           });
 
-          // 인증 완료 후 홈 화면으로 이동
-          // navigation.navigate('Main', {
-          //   screen: 'Home',
-          // });
+          if (!authorizationCode) {
+            throw new Error(t('auth.appleNoAuthCodeError'));
+          }
+
+          // 토스트 메시지
+          Toast.show({
+            type: 'info',
+            text1: t('auth.appleLoginProcessing'),
+            position: 'bottom',
+          });
+
+          try {
+            // 애플 인증 코드로 서버에 로그인 시도
+            const response = await appleSignin.mutateAsync({
+              authorizationCode,
+              fcmToken,
+            });
+
+            if (response.success) {
+              // 응답 확인
+              console.log('애플 로그인 응답:', response.data);
+
+              // accessToken 저장
+              if (response.data && response.data.accessToken) {
+                await secureStorage.saveToken(response.data.accessToken);
+
+                Toast.show({
+                  type: 'success',
+                  text1: t('auth.loginSuccess'),
+                  position: 'bottom',
+                });
+
+                // 메인 화면으로 이동
+                navigation.navigate('Main', {});
+              } else {
+                console.error('토큰이 응답에 없습니다:', response);
+                throw new Error(t('auth.noTokenError'));
+              }
+            } else {
+              throw new Error(response.message || t('auth.loginFailed'));
+            }
+          } catch (apiError) {
+            if (apiError == 'Error: 등록되지 않은 사용자입니다.') {
+              // 회원가입 화면으로 이동하면서 애플 인증 코드 전달
+              Toast.show({
+                type: 'info',
+                text1: t('auth.newUserRegistration'),
+                position: 'bottom',
+              });
+
+              // 애플은 fullName이 { familyName, givenName, middleName, namePrefix, nameSuffix } 구조
+              const userName = fullName
+                ? `${fullName.givenName || ''} ${
+                    fullName.familyName || ''
+                  }`.trim()
+                : '';
+
+              navigation.navigate('Auth', {
+                screen: 'SignUp',
+                params: {
+                  // 서버에서 요구하는 필드명과 일치하게 파라미터 전달
+                  authorizationCode, // 애플 인증 코드
+                  email, // 이메일
+                  userName, // 사용자 이름
+                  fcmToken, // FCM 토큰 추가
+
+                  // 나머지 필드는 회원가입 페이지에서 사용자가 입력해야 함
+                  isAppleSignUp: true, // 애플 회원가입임을 표시
+                },
+              });
+            } else {
+              // 그 외 API 에러는 재던지기
+              throw apiError;
+            }
+          }
         }
       } catch (error) {
         console.error('Apple 로그인 실패: ', error);
+        Toast.show({
+          type: 'error',
+          text1: t('auth.loginError'),
+          text2: (error as Error).message,
+          position: 'bottom',
+        });
       }
     }
   };

@@ -17,18 +17,28 @@ import NicknameInput from './screens/NicknameInput';
 import ProfilePhotoInput from './screens/ProfilePhotoInput';
 import IntroductionScreen from './screens/IntroductionScreen';
 import SignupCompleteScreen from './screens/SignupCompleteScreen';
-import {useSendVerificationCode, useKakaoSignup} from '../../api';
+import {
+  useSendVerificationCode,
+  useKakaoSignup,
+  useAppleSignup,
+} from '../../api';
 import Toast from 'react-native-toast-message';
 import {useTranslation} from 'react-i18next';
 import ExchangeLanguageSelection from './screens/ExchangeLanguageSelection';
 import ExchangeLanguageLevelSelection from './screens/ExchangeLanguageLevelSelection';
 import {secureStorage} from '@/shared/lib/security';
+import {Department} from './data/departments';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
   Welcome: undefined;
   SignUp: {
     kakaoOAuthId?: string;
+    authorizationCode?: string;
+    email?: string;
+    userName?: string;
+    isAppleSignUp?: boolean;
+    fcmToken?: string; // FCM 토큰 추가
   };
   Main: undefined;
 };
@@ -38,6 +48,11 @@ type SignUpScreenProps = {
   route: {
     params?: {
       kakaoOAuthId?: string;
+      authorizationCode?: string;
+      email?: string;
+      userName?: string;
+      isAppleSignUp?: boolean;
+      fcmToken?: string; // FCM 토큰 추가
     };
   };
 };
@@ -54,7 +69,7 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
   const [nativeLanguage, setNativeLanguage] = useState<string | null>(null);
   const [languageLevel, setLanguageLevel] = useState<string | null>(null);
   const [university, setUniversity] = useState<string | null>(null);
-  const [department, setDepartment] = useState<string | null>(null);
+  const [department, setDepartment] = useState<Department | null>(null);
   const [email, setEmail] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false); // 이메일 유효성 상태 추가
   const [verificationCode, setVerificationCode] = useState('');
@@ -221,7 +236,7 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
     setUniversity(univ);
   };
 
-  const handleDepartmentSelect = (dept: string) => {
+  const handleDepartmentSelect = (dept: Department) => {
     setDepartment(dept);
   };
 
@@ -267,6 +282,22 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
 
   // i18n hook
   const {t} = useTranslation();
+
+  // 초기값 설정 (애플 로그인에서 전달받은 값이 있으면 사용)
+  useEffect(() => {
+    if (route.params?.isAppleSignUp) {
+      // 이름 설정
+      if (route.params.userName) {
+        setName(route.params.userName);
+      }
+
+      // 이메일 설정
+      if (route.params.email) {
+        setEmail(route.params.email);
+        // 이메일 유효성은 실제 입력폼에서 검증할 예정이므로 여기서는 자동 설정하지 않음
+      }
+    }
+  }, [route.params]);
 
   // 현재 단계에 따라 다른 화면 렌더링
   const renderScreen = () => {
@@ -439,19 +470,14 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
 
   // handleSignup 함수 추가
   const kakaoSignup = useKakaoSignup();
+  const appleSignup = useAppleSignup();
+
   const handleSignup = async () => {
     Toast.show({
       type: 'info',
       text1: t('signup.processingSignup'),
       position: 'bottom',
     });
-
-    // 카카오 로그인에서 전달받은 ID를 oauthId로 사용
-    const oauthId = route.params?.kakaoOAuthId || `temp_${Date.now()}`;
-
-    if (!route.params?.kakaoOAuthId) {
-      console.warn('카카오 OAuth ID가 없습니다. 임시 ID를 사용합니다.');
-    }
 
     // 성별 변환 (문자열에서 숫자로)
     const genderValue = gender === 'male' ? 1 : 2;
@@ -499,8 +525,8 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
     // 학교 ID (예시)
     const schoolId = 272; // 부산대학교
 
-    // 전공 ID (예시)
-    const majorId = 1;
+    // 전공 코드 (학과 객체에서 추출)
+    const majorId = department ? parseInt(department.code) : 1;
 
     // 가시성 설정 (기본값 1: 전체 공개)
     const visibility = 1;
@@ -508,52 +534,113 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
     // 시스템 언어 설정
     const systemLanguageValue = selectedLanguage === 'korean' ? 1 : 2;
 
-    // 회원가입 요청 데이터 준비
-    const signupData = {
-      oauthId,
-      nickname,
-      gender: genderValue,
-      birthDate: birthDate ? birthDate.toISOString().split('T')[0] : '',
-      description: introduction,
-      major: majorId,
-      majorVisibility: visibility,
-      email,
-      school: schoolId,
-      profileImageUrl: profilePhotoUri || '',
-      systemLanguage: systemLanguageValue,
-      languageMain: getLanguageId(nativeLanguage),
-      languageMainLevel: getLevelId(languageLevel),
-      languageLearn: getLanguageId(exchangeLanguage),
-      languageLearnLevel: getLevelId(exchangeLanguageLevel),
-      meetingVisibility: visibility,
-      likeVisibility: visibility,
-      guestbooksVisibility: visibility,
-    };
-
     try {
-      // 회원가입 API 호출
-      const response = await kakaoSignup.mutateAsync(signupData);
+      // 카카오 로그인과 애플 로그인 구분
+      if (route.params?.isAppleSignUp && route.params?.authorizationCode) {
+        // 애플 회원가입 데이터 준비
+        const appleSignupData = {
+          authorizationCode: route.params.authorizationCode,
+          userName: name,
+          nickname: nickname,
+          gender: genderValue,
+          birthDate: birthDate ? birthDate.toISOString().split('T')[0] : '',
+          nation: 1, // 한국
+          description: introduction,
+          major: majorId,
+          majorVisibility: visibility,
+          email: email,
+          school: schoolId,
+          profileImageUrl: profilePhotoUri || '',
+          systemLanguage: systemLanguageValue,
+          languageMain: getLanguageId(nativeLanguage),
+          languageMainLevel: getLevelId(languageLevel),
+          languageLearn: getLanguageId(exchangeLanguage),
+          languageLearnLevel: getLevelId(exchangeLanguageLevel),
+          meetingVisibility: visibility,
+          likeVisibility: visibility,
+          guestbooksVisibility: visibility,
+          fcmToken: route.params?.fcmToken, // FCM 토큰 추가
+        };
 
-      if (response.success) {
-        // 토큰 저장 전 응답 확인
-        console.log('회원가입 응답:', response.data);
+        // 애플 회원가입 API 호출
+        const response = await appleSignup.mutateAsync(appleSignupData);
 
-        // accessToken 저장
-        if (response.data && response.data.accessToken) {
-          await secureStorage.saveToken(response.data.accessToken);
+        if (response.success) {
+          // 토큰 저장 전 응답 확인
+          console.log('애플 회원가입 응답:', response.data);
 
-          Toast.show({
-            type: 'success',
-            text1: t('signup.success'),
-            position: 'bottom',
-          });
-          return true;
+          // accessToken 저장
+          if (response.data && response.data.accessToken) {
+            await secureStorage.saveToken(response.data.accessToken);
+
+            Toast.show({
+              type: 'success',
+              text1: t('signup.success'),
+              position: 'bottom',
+            });
+            return true;
+          } else {
+            console.error('토큰이 응답에 없습니다:', response);
+            throw new Error(t('auth.noTokenError'));
+          }
         } else {
-          console.error('토큰이 응답에 없습니다:', response);
-          throw new Error('회원가입은 성공했으나 토큰이 없습니다.');
+          throw new Error(response.message || t('signup.error'));
         }
       } else {
-        throw new Error(response.message || t('signup.error'));
+        // 카카오 회원가입 데이터 준비
+        // 카카오 로그인에서 전달받은 ID를 oauthId로 사용
+        const oauthId = route.params?.kakaoOAuthId || `temp_${Date.now()}`;
+
+        if (!route.params?.kakaoOAuthId) {
+          console.warn('카카오 OAuth ID가 없습니다. 임시 ID를 사용합니다.');
+        }
+
+        const kakaoSignupData = {
+          oauthId,
+          nickname,
+          gender: genderValue,
+          birthDate: birthDate ? birthDate.toISOString().split('T')[0] : '',
+          description: introduction,
+          major: majorId,
+          majorVisibility: visibility,
+          email,
+          school: schoolId,
+          profileImageUrl: profilePhotoUri || '',
+          systemLanguage: systemLanguageValue,
+          languageMain: getLanguageId(nativeLanguage),
+          languageMainLevel: getLevelId(languageLevel),
+          languageLearn: getLanguageId(exchangeLanguage),
+          languageLearnLevel: getLevelId(exchangeLanguageLevel),
+          meetingVisibility: visibility,
+          likeVisibility: visibility,
+          guestbooksVisibility: visibility,
+          fcmToken: route.params?.fcmToken, // FCM 토큰 추가
+        };
+
+        // 카카오 회원가입 API 호출
+        const response = await kakaoSignup.mutateAsync(kakaoSignupData);
+
+        if (response.success) {
+          // 토큰 저장 전 응답 확인
+          console.log('카카오 회원가입 응답:', response.data);
+
+          // accessToken 저장
+          if (response.data && response.data.accessToken) {
+            await secureStorage.saveToken(response.data.accessToken);
+
+            Toast.show({
+              type: 'success',
+              text1: t('signup.success'),
+              position: 'bottom',
+            });
+            return true;
+          } else {
+            console.error('토큰이 응답에 없습니다:', response);
+            throw new Error(t('auth.noTokenError'));
+          }
+        } else {
+          throw new Error(response.message || t('signup.error'));
+        }
       }
     } catch (error) {
       console.error('회원가입 오류:', error);

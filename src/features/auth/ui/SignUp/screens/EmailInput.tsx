@@ -23,17 +23,25 @@ const EmailInput = ({
 }: EmailInputProps) => {
   const [email, setEmail] = useState(initialEmail);
   const [isFocused, setIsFocused] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const {t} = useTranslation();
 
-  // 이메일 유효성 검사
+  // 이메일 유효성 검사 - @pusan.ac.kr 도메인만 허용
   const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    const pusanEmailRegex = /^[^\s@]+@pusan\.ac\.kr$/;
+    return pusanEmailRegex.test(email);
   };
 
   const handleEmailChange = (text: string) => {
     setEmail(text);
     onEmailChange(text);
+
+    // 이메일이 비어있지 않고 pusan.ac.kr이 아닐 경우 에러 메시지 표시
+    if (text && !isValidEmail(text)) {
+      setErrorMessage('@pusan.ac.kr 이메일만 사용 가능합니다.');
+    } else {
+      setErrorMessage('');
+    }
 
     // 유효성 상태를 상위 컴포넌트에 전달
     if (onValidityChange) {
@@ -73,10 +81,21 @@ const EmailInput = ({
             {
               borderColor: isFocused
                 ? colors.batteryChargedBlue
+                : errorMessage
+                ? 'red'
                 : colors.lightSilver,
             },
           ]}
         />
+        {errorMessage ? (
+          <Text variant="body2" color={'red'} style={styles.errorText}>
+            {errorMessage}
+          </Text>
+        ) : (
+          <Text variant="body2" color={colors.charcoal} style={styles.notice}>
+            @pusan.ac.kr 이메일만 사용 가능합니다.
+          </Text>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
@@ -114,11 +133,15 @@ const styles = StyleSheet.create({
   inputBorder: {
     height: 1,
     backgroundColor: colors.lightSilver,
-    marginBottom: 20,
+    marginBottom: 8,
   },
   notice: {
-    marginTop: 10,
-    textAlign: 'center',
+    textAlign: 'left',
+    fontSize: 12,
+  },
+  errorText: {
+    textAlign: 'left',
+    fontSize: 12,
   },
 });
 

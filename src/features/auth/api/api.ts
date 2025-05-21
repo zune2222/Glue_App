@@ -259,3 +259,150 @@ export const verifyCode = async (
     throw error;
   }
 };
+
+// 애플 로그인 API
+export interface AppleSigninRequest {
+  authorizationCode: string;
+  fcmToken?: string;
+}
+
+// 애플 로그인 응답 인터페이스
+export interface AppleSigninResponse {
+  accessToken: string;
+}
+
+export const signinWithApple = async (
+  authorizationCode: string,
+  fcmToken?: string,
+): Promise<ApiResponse<AppleSigninResponse>> => {
+  const endpoint = '/api/auth/apple/signin';
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 애플 로그인: ${url}`, {authorizationCode, fcmToken});
+
+  try {
+    const response = await apiClient.post(endpoint, {
+      authorizationCode,
+      fcmToken,
+    });
+
+    console.log('애플 로그인 서버 응답:', response.data);
+
+    // 서버 응답 구조에 맞게 처리
+    return {
+      data: response.data.result,
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    console.log(error);
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      if (error.response.data.message === '존재하지 않는 사용자입니다') {
+        return {
+          data: {accessToken: ''},
+          success: false,
+          message: '존재하지 않는 사용자입니다',
+        };
+      }
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error('잘못된 요청입니다. 애플 인증 코드를 확인해주세요.');
+      } else if (status === 401) {
+        throw new Error('등록되지 않은 사용자입니다.');
+      } else if (status === 404) {
+        // 사용자가 등록되어 있지 않은 경우
+        throw new NotRegisteredError('등록되지 않은 사용자입니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '애플 로그인에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};
+
+// 애플 회원가입 API
+export interface AppleSignupRequest {
+  authorizationCode: string;
+  userName: string;
+  nickname: string;
+  gender: number;
+  birthDate: string;
+  nation: number;
+  description?: string;
+  major: number;
+  majorVisibility: number;
+  email: string;
+  school?: number;
+  profileImageUrl?: string;
+  systemLanguage?: number;
+  languageMain?: number;
+  languageMainLevel?: number;
+  languageLearn?: number;
+  languageLearnLevel?: number;
+  meetingVisibility?: number;
+  likeVisibility?: number;
+  guestbooksVisibility?: number;
+}
+
+// 애플 회원가입 응답 인터페이스
+export interface AppleSignupResponse {
+  accessToken: string;
+}
+
+export const signupWithApple = async (
+  data: AppleSignupRequest,
+): Promise<ApiResponse<AppleSignupResponse>> => {
+  const endpoint = '/api/auth/apple/signup';
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 애플 회원가입: ${url}`, data);
+
+  try {
+    const response = await apiClient.post(endpoint, data);
+
+    console.log('애플 회원가입 서버 응답:', response.data);
+
+    // 서버 응답 구조에 맞게 처리
+    return {
+      data: response.data.result,
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error('잘못된 요청입니다. 입력 정보를 확인해주세요.');
+      } else if (status === 409) {
+        throw new Error('이미 가입된 사용자입니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '회원가입에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};
