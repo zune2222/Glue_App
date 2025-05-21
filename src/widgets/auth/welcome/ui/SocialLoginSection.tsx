@@ -8,6 +8,8 @@ import {useKakaoSignin} from '@/features/auth/api';
 import {secureStorage} from '@/shared/lib/security';
 import Toast from 'react-native-toast-message';
 import {useTranslation} from 'react-i18next';
+import {jwtDecode} from 'jwt-decode';
+import {fcmService} from '@/shared/lib/firebase';
 
 // 전체 내비게이션 타입 정의
 type RootStackParamList = {
@@ -35,6 +37,18 @@ export const SocialLoginSection = () => {
         console.log('카카오 로그인 시작');
         const tokenInfo = await login();
         console.log('카카오 토큰 획득:', tokenInfo.accessToken);
+        console.log('카카오 토큰 획득:', tokenInfo);
+        // 카카오 OAuth ID 가져오기
+        let oauthId = '';
+        if (tokenInfo.idToken) {
+          const decoded = jwtDecode<{sub: string}>(tokenInfo.idToken);
+          oauthId = decoded.sub;
+          console.log('카카오 OAuth ID =', oauthId); // 회원번호(고유식별자) 출력
+        }
+
+        // FCM 토큰 가져오기
+        const fcmToken = await fcmService.getToken();
+        console.log('FCM 토큰:', fcmToken);
 
         // 카카오 토큰으로 서버에 로그인 시도
         Toast.show({
@@ -46,6 +60,7 @@ export const SocialLoginSection = () => {
         try {
           const response = await kakaoSignin.mutateAsync({
             kakaoToken: tokenInfo.accessToken,
+            fcmToken: fcmToken || undefined,
           });
 
           if (response.success) {
@@ -73,7 +88,17 @@ export const SocialLoginSection = () => {
           }
         } catch (apiError) {
           if (apiError == 'Error: 존재하지 않는 사용자입니다') {
-            // 회원가입 화면으로 이동하면서 카카오 토큰 전달
+            // OAuth ID가 없으면 에러 처리
+            if (!oauthId) {
+              Toast.show({
+                type: 'error',
+                text1: '카카오 계정에서 ID를 가져올 수 없습니다.',
+                position: 'bottom',
+              });
+              return;
+            }
+
+            // 회원가입 화면으로 이동하면서 카카오 OAuth ID 전달
             Toast.show({
               type: 'info',
               text1: t('auth.newUserRegistration'),
@@ -83,7 +108,7 @@ export const SocialLoginSection = () => {
             navigation.navigate('Auth', {
               screen: 'SignUp',
               params: {
-                kakaoToken: tokenInfo.accessToken,
+                kakaoOAuthId: oauthId,
               },
             });
           } else {
@@ -118,12 +143,17 @@ export const SocialLoginSection = () => {
           const {identityToken, nonce, fullName, email} =
             appleAuthRequestResponse;
 
+          // FCM 토큰 가져오기
+          const fcmToken = await fcmService.getToken();
+          console.log('FCM 토큰:', fcmToken);
+
           // 여기서 사용자 정보 처리 (서버로 전송하거나 로컬에 저장)
           console.log('Apple 로그인 성공: ', {
             identityToken,
             nonce,
             fullName,
             email,
+            fcmToken,
           });
 
           // 인증 완료 후 홈 화면으로 이동

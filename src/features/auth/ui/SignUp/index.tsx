@@ -28,7 +28,7 @@ import {secureStorage} from '@/shared/lib/security';
 type RootStackParamList = {
   Welcome: undefined;
   SignUp: {
-    kakaoToken?: string;
+    kakaoOAuthId?: string;
   };
   Main: undefined;
 };
@@ -37,7 +37,7 @@ type SignUpScreenProps = {
   navigation: NavigationProp<RootStackParamList>;
   route: {
     params?: {
-      kakaoToken?: string;
+      kakaoOAuthId?: string;
     };
   };
 };
@@ -446,11 +446,11 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
       position: 'bottom',
     });
 
-    // 카카오 로그인에서 전달받은 토큰을 oauthId로 사용
-    const oauthId = route.params?.kakaoToken || `temp_${Date.now()}`;
+    // 카카오 로그인에서 전달받은 ID를 oauthId로 사용
+    const oauthId = route.params?.kakaoOAuthId || `temp_${Date.now()}`;
 
-    if (!route.params?.kakaoToken) {
-      console.warn('카카오 토큰이 없습니다. 임시 ID를 사용합니다.');
+    if (!route.params?.kakaoOAuthId) {
+      console.warn('카카오 OAuth ID가 없습니다. 임시 ID를 사용합니다.');
     }
 
     // 성별 변환 (문자열에서 숫자로)
