@@ -80,3 +80,6 @@ yarn-error.log
 /android/app/google-services.json
 /ios/GlueApp/GoogleService-Info.plist
 /ios/GoogleService-Info.plist
+/ios/GlueApp/Info.plist
+/ios/GlueApp/InfoMy.plist
+
