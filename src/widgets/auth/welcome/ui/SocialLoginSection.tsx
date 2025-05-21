@@ -1,8 +1,9 @@
 import React from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, Platform} from 'react-native';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {SocialLoginButton} from '@features/auth/social-login-button';
 import {login} from '@react-native-seoul/kakao-login';
+import {appleAuth} from '@invertase/react-native-apple-authentication';
 
 // 전체 내비게이션 타입 정의
 type RootStackParamList = {
@@ -45,9 +46,35 @@ export const SocialLoginSection = () => {
         screen: 'SignUp',
       });
     } else if (provider === 'Apple') {
-      navigation.navigate('Main', {
-        screen: 'Home',
-      });
+      try {
+        // iOS Apple 로그인 처리
+        if (Platform.OS === 'ios') {
+          // 애플 로그인 요청
+          const appleAuthRequestResponse = await appleAuth.performRequest({
+            requestedOperation: 0, // appleAuth.Operation.LOGIN의 값은 0입니다
+            requestedScopes: [1, 0], // FULL_NAME(1), EMAIL(0)
+          });
+
+          // 인증 상태 확인
+          const {identityToken, nonce, fullName, email} =
+            appleAuthRequestResponse;
+
+          // 여기서 사용자 정보 처리 (서버로 전송하거나 로컬에 저장)
+          console.log('Apple 로그인 성공: ', {
+            identityToken,
+            nonce,
+            fullName,
+            email,
+          });
+
+          // 인증 완료 후 홈 화면으로 이동
+          navigation.navigate('Main', {
+            screen: 'Home',
+          });
+        }
+      } catch (error) {
+        console.error('Apple 로그인 실패: ', error);
+      }
     }
   };
 
@@ -63,10 +90,12 @@ export const SocialLoginSection = () => {
         onPress={() => handleSocialLogin('Google')}
       />
 
-      <SocialLoginButton
-        type="apple"
-        onPress={() => handleSocialLogin('Apple')}
-      />
+      {Platform.OS === 'ios' && (
+        <SocialLoginButton
+          type="apple"
+          onPress={() => handleSocialLogin('Apple')}
+        />
+      )}
     </View>
   );
 };
