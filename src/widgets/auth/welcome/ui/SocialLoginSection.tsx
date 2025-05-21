@@ -68,9 +68,9 @@ export const SocialLoginSection = () => {
           });
 
           // 인증 완료 후 홈 화면으로 이동
-          navigation.navigate('Main', {
-            screen: 'Home',
-          });
+          // navigation.navigate('Main', {
+          //   screen: 'Home',
+          // });
         }
       } catch (error) {
         console.error('Apple 로그인 실패: ', error);
@@ -85,10 +85,10 @@ export const SocialLoginSection = () => {
         onPress={() => handleSocialLogin('Kakao')}
       />
 
-      <SocialLoginButton
+      {/* <SocialLoginButton
         type="google"
         onPress={() => handleSocialLogin('Google')}
-      />
+      /> */}
 
       {Platform.OS === 'ios' && (
         <SocialLoginButton
