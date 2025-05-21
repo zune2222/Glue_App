@@ -17,6 +17,9 @@ import NicknameInput from './screens/NicknameInput';
 import ProfilePhotoInput from './screens/ProfilePhotoInput';
 import IntroductionScreen from './screens/IntroductionScreen';
 import SignupCompleteScreen from './screens/SignupCompleteScreen';
+import {useSendVerificationCode} from '../../api';
+import Toast from 'react-native-toast-message';
+import {useTranslation} from 'react-i18next';
 
 // 네비게이션 타입 정의
 type RootStackParamList = {
@@ -43,12 +46,16 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [university, setUniversity] = useState<string | null>(null);
   const [department, setDepartment] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [isEmailValid, setIsEmailValid] = useState(false); // 이메일 유효성 상태 추가
   const [verificationCode, setVerificationCode] = useState('');
   const [nickname, setNickname] = useState('');
   const [isNicknameDuplicate, setIsNicknameDuplicate] = useState(false);
   const [profilePhotoUri, setProfilePhotoUri] = useState<string | null>(null);
   const [introduction, setIntroduction] = useState(''); // 한 줄 소개 상태 추가
   const [isSignupComplete, setIsSignupComplete] = useState(false); // 회원가입 완료 상태 추가
+
+  // 이메일 인증 코드 발송 뮤테이션
+  const sendVerificationCode = useSendVerificationCode();
 
   // 애니메이션 값
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -97,7 +104,7 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isSignupComplete) {
       // 가입 완료 화면에서 시작하기 버튼 클릭
       navigation.navigate('Main');
@@ -108,6 +115,41 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     if (step === totalSteps) {
       // 여기서 실제 회원가입 API 호출 등의 로직을 수행할 수 있음
       setIsSignupComplete(true);
+      return;
+    }
+
+    // 이메일 화면에서 다음 버튼 클릭 시 인증 코드 발송
+    if (step === 9) {
+      try {
+        // 인증 코드 발송 중 알림
+        Toast.show({
+          type: 'info',
+          text1: t('signup.email.sendingVerification'),
+          position: 'bottom',
+        });
+
+        // 인증 코드 발송 API 호출
+        await sendVerificationCode.mutateAsync(email);
+
+        // 성공 알림
+        Toast.show({
+          type: 'success',
+          text1: t('signup.email.verificationSent'),
+          position: 'bottom',
+        });
+
+        // 다음 단계로 이동
+        setStep(step + 1);
+      } catch (error) {
+        // 오류 알림
+
+        setStep(step + 1);
+        Toast.show({
+          type: 'error',
+          text1: t('signup.email.sendFailed'),
+          position: 'bottom',
+        });
+      }
       return;
     }
 
@@ -155,6 +197,11 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
     setEmail(email);
   };
 
+  // 이메일 유효성 상태 처리 함수
+  const handleEmailValidityChange = (isValid: boolean) => {
+    setIsEmailValid(isValid);
+  };
+
   const handleVerificationComplete = (code: string) => {
     setVerificationCode(code);
   };
@@ -185,6 +232,9 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const handleStartApp = () => {
     navigation.navigate('Main');
   };
+
+  // i18n hook
+  const {t} = useTranslation();
 
   // 현재 단계에 따라 다른 화면 렌더링
   const renderScreen = () => {
@@ -251,12 +301,17 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         );
       case 9:
         return (
-          <EmailInput onEmailChange={handleEmailChange} initialEmail={email} />
+          <EmailInput
+            onEmailChange={handleEmailChange}
+            initialEmail={email}
+            onValidityChange={handleEmailValidityChange}
+          />
         );
       case 10:
         return (
           <VerificationCodeInput
             onVerificationComplete={handleVerificationComplete}
+            email={email}
           />
         );
       case 11:
@@ -317,7 +372,7 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
       case 8:
         return !department;
       case 9:
-        return email.trim() === '';
+        return email.trim() === '' || !isEmailValid; // 이메일 유효성 검사 추가
       case 10:
         return verificationCode.length !== 6;
       case 11:
@@ -346,7 +401,8 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
       totalSteps={totalSteps}
       onNext={handleNext}
       onBack={handleGoBack}
-      isNextDisabled={isNextButtonDisabled()}>
+      isNextDisabled={isNextButtonDisabled()}
+      isLoading={step === 9 && sendVerificationCode.isPending}>
       <Animated.View style={{opacity: fadeAnim, flex: 1}}>
         {renderScreen()}
       </Animated.View>

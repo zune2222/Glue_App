@@ -13,16 +13,32 @@ import {Text} from '@shared/ui/typography/Text';
 type EmailInputProps = {
   onEmailChange: (email: string) => void;
   initialEmail?: string;
+  onValidityChange?: (isValid: boolean) => void;
 };
 
-const EmailInput = ({onEmailChange, initialEmail = ''}: EmailInputProps) => {
+const EmailInput = ({
+  onEmailChange,
+  initialEmail = '',
+  onValidityChange,
+}: EmailInputProps) => {
   const [email, setEmail] = useState(initialEmail);
   const [isFocused, setIsFocused] = useState(false);
   const {t} = useTranslation();
 
+  // 이메일 유효성 검사
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleEmailChange = (text: string) => {
     setEmail(text);
     onEmailChange(text);
+
+    // 유효성 상태를 상위 컴포넌트에 전달
+    if (onValidityChange) {
+      onValidityChange(isValidEmail(text));
+    }
   };
 
   return (
@@ -98,6 +114,11 @@ const styles = StyleSheet.create({
   inputBorder: {
     height: 1,
     backgroundColor: colors.lightSilver,
+    marginBottom: 20,
+  },
+  notice: {
+    marginTop: 10,
+    textAlign: 'center',
   },
 });
 

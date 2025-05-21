@@ -4,10 +4,13 @@ import {AppNavigator} from './providers/navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {View, ActivityIndicator, StyleSheet} from 'react-native';
 import * as RootNavigation from './navigation/RootNavigation';
+import {useTheme} from './providers/theme';
+import {AppToast} from '@/shared/ui/Toast';
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const {theme} = useTheme();
 
   useEffect(() => {
     // 인증 상태 확인
@@ -37,15 +40,18 @@ const App = () => {
   }, [isLoading, isLoggedIn]);
 
   return (
-    <AppProvider>
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#1CBFDC" />
-        </View>
-      ) : (
-        <AppNavigator />
-      )}
-    </AppProvider>
+    <>
+      <AppProvider>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#1CBFDC" />
+          </View>
+        ) : (
+          <AppNavigator />
+        )}
+      </AppProvider>
+      <AppToast theme={theme} />
+    </>
   );
 };
 

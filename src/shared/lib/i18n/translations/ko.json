@@ -15,7 +15,8 @@
     "search": "검색",
     "send": "보내기",
     "select": "선택",
-    "permission": "권한 필요"
+    "permission": "권한 필요",
+    "sending": "전송 중..."
   },
   "auth": {
     "login": "로그인",
@@ -68,13 +69,23 @@
       "title": "학교의 웹메일 아이디를\n입력해주세요",
       "subtitle": "입력하신 아이디로 인증 코드를 보내드릴게요.",
       "label": "웹메일 아이디",
-      "placeholder": "웹메일 아이디를 입력하세요"
+      "placeholder": "웹메일 아이디를 입력하세요",
+      "invalidEmail": "올바른 이메일 형식이 아닙니다",
+      "sendingVerification": "인증 코드를 전송 중입니다...",
+      "verificationSent": "인증 코드가 전송되었습니다",
+      "sendFailed": "인증 코드 전송에 실패했습니다",
+      "nextButtonNotice": "다음 버튼을 누르면 인증 코드가 발송됩니다"
     },
     "verification": {
       "title": "전송해드린 코드를\n입력해주세요",
       "didNotReceive": "메일을 받지 못하셨나요?",
       "resend": "재전송",
-      "resendSuccess": "인증 코드를 다시 전송해드렸어요"
+      "resendSuccess": "인증 코드를 다시 전송해드렸어요",
+      "emailRequired": "이메일 정보가 필요합니다",
+      "verifying": "인증 코드를 확인 중입니다...",
+      "verificationSuccess": "인증에 성공했습니다",
+      "verificationFailed": "인증에 실패했습니다",
+      "resendFailed": "인증 코드 재전송에 실패했습니다"
     },
     "nickname": {
       "title": "GLUE에서 사용할\n닉네임을 입력해주세요",
@@ -250,12 +261,13 @@
     "modal": {
       "showAlert": "알림 모달",
       "showConfirm": "확인 모달",
+      "showCustom": "커스텀 모달",
       "alertTitle": "알림",
-      "alertMessage": "중요한 정보를 확인하세요.",
+      "alertMessage": "중요한 알림이 있습니다.",
       "confirmTitle": "확인",
-      "confirmMessage": "정말로 이 작업을 수행하시겠습니까?",
-      "confirmButtonPressed": "확인 버튼이 눌렸습니다.",
-      "cancelButtonPressed": "취소 버튼이 눌렸습니다."
+      "confirmMessage": "이 작업을 진행하시겠습니까?",
+      "customTitle": "커스텀 모달",
+      "customMessage": "원하는 내용을 입력하세요."
     }
   },
   "group": {

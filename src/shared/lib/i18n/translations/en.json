@@ -15,7 +15,8 @@
     "search": "Search",
     "send": "Send",
     "select": "Select",
-    "permission": "Permission Required"
+    "permission": "Permission Required",
+    "sending": "Sending..."
   },
   "auth": {
     "login": "Log in",
@@ -68,13 +69,23 @@
       "title": "Please enter your university\nweb mail ID",
       "subtitle": "We will send a verification code to the ID you entered.",
       "label": "Web mail ID",
-      "placeholder": "Enter your web mail ID"
+      "placeholder": "Enter your web mail ID",
+      "invalidEmail": "Invalid email format",
+      "sendingVerification": "Sending verification code...",
+      "verificationSent": "Verification code has been sent",
+      "sendFailed": "Failed to send verification code",
+      "nextButtonNotice": "Verification code will be sent when you click Next"
     },
     "verification": {
       "title": "Please enter the code\nwe sent you",
       "didNotReceive": "Didn't receive the email?",
       "resend": "Resend",
-      "resendSuccess": "Verification code has been resent"
+      "resendSuccess": "Verification code has been resent",
+      "emailRequired": "Email information is required",
+      "verifying": "Verifying code...",
+      "verificationSuccess": "Verification successful",
+      "verificationFailed": "Verification failed",
+      "resendFailed": "Failed to resend verification code"
     },
     "nickname": {
       "title": "Please enter the nickname\nyou want to use on GLUE",
@@ -250,12 +261,13 @@
     "modal": {
       "showAlert": "Alert Modal",
       "showConfirm": "Confirm Modal",
+      "showCustom": "Custom Modal",
       "alertTitle": "Alert",
-      "alertMessage": "Please confirm this important information.",
+      "alertMessage": "There is an important alert.",
       "confirmTitle": "Confirm",
-      "confirmMessage": "Are you sure you want to perform this action?",
-      "confirmButtonPressed": "Confirm button was pressed.",
-      "cancelButtonPressed": "Cancel button was pressed."
+      "confirmMessage": "Do you want to proceed with this action?",
+      "customTitle": "Custom Modal",
+      "customMessage": "Enter your desired content."
     }
   },
   "group": {
