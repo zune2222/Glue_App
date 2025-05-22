@@ -76,6 +76,7 @@ export const groupListStyles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
     marginHorizontal: 4,
+    width: '100%',
   },
   categoryBadge: {
     borderRadius: 2,
@@ -90,6 +91,7 @@ export const groupListStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingRight: 2,
+    marginLeft: 'auto',
   },
   likeIcon: {
     width: 15,

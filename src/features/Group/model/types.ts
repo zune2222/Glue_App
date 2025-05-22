@@ -11,7 +11,7 @@ export interface GroupItem {
   categoryColor: string;
   categoryTextColor: string;
   likes: number;
-  comments: string;
+  viewCounts: number;
   participants: string;
   time: string;
   image?: string;
