@@ -133,7 +133,6 @@ export const groupDetailStyles = StyleSheet.create({
     color: '#303030',
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 16,
   },
   infoItemsContainer: {
     alignItems: 'flex-start',

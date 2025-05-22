@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   View,
@@ -6,7 +6,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import {GroupDetailProps, GroupDetail as GroupDetailType} from '../model/types';
+import {GroupDetailProps} from '../model/types';
 import {commonStyles, navigationStyles} from './styles/groupStyles';
 import {groupDetailStyles} from './styles/groupDetailStyles';
 import GroupHeader from './components/GroupHeader';
@@ -15,81 +15,106 @@ import GroupInfo from './components/GroupInfo';
 import GroupLikes from './components/GroupLikes';
 import {Button} from '@shared/ui';
 import {Text} from '@shared/ui/typography';
-import {mockGroupApi} from '../model/api';
 import {toastService} from '../../../shared/lib/notifications/toast';
+import {useGroupDetail, useJoinGroup} from '../api/hooks';
+import {useTranslation} from 'react-i18next';
 
 /**
  * 모임 상세 화면 컴포넌트
  */
-const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
+const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
+  const {t} = useTranslation();
   const {postId} = route.params;
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [groupDetail, setGroupDetail] = useState<GroupDetailType | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    const fetchGroupDetail = async () => {
-      try {
-        setIsLoading(true);
-        console.log(`모임 상세 정보 조회: postId=${postId}`);
+  // 모임 상세 정보 조회 훅 사용
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+  } = useGroupDetail(Number(postId));
 
-        // TODO: 실제 API가 구현되면 아래 코드로 대체
-        // const response = await getGroupDetail(postId);
+  // 모임 참여 훅 사용
+  const {mutate: joinGroupMutate} = useJoinGroup();
 
-        // 임시로 Mock API 사용
-        const response = await mockGroupApi.getGroupDetail(String(postId));
+  // 작성자 프로필로 이동하는 핸들러
+  const handleAuthorPress = (userId: number) => {
+    console.log('사용자 프로필로 이동:', userId);
+    navigation.navigate('UserProfile', {userId});
+  };
 
-        // API 응답을 GroupDetailType으로 변환
-        setGroupDetail({
-          id: response.id,
-          title: response.title,
-          description: response.description,
-          content: response.content || '',
-          category: response.category,
-          authorName: response.authorName,
-          authorDate: response.authorDate,
-          authorAvatarUrl: response.authorAvatarUrl,
-          likes: response.likes,
-          capacity: response.capacity,
-          language: response.language,
-          minForeigners: response.minForeigners,
-          meetingDate: response.meetingDate,
-          imageUrl: response.imageUrl,
-        });
-        setError(null);
-      } catch (err) {
-        setError('모임 정보를 불러오는 중 오류가 발생했습니다.');
-        console.error('Error fetching group detail:', err);
-        toastService.error(
-          '오류',
-          '모임 정보를 불러오는 중 오류가 발생했습니다.',
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // 카테고리 ID에서 텍스트로 변환
+  const getCategoryTextFromId = (categoryId: number): string => {
+    switch (categoryId) {
+      case 1:
+        return t('group.categories.study');
+      case 2:
+        return t('group.categories.social');
+      case 3:
+        return t('group.categories.help');
+      default:
+        return '';
+    }
+  };
 
-    fetchGroupDetail();
-  }, [postId]);
+  // 카테고리 ID에서 배경색으로 변환
+  const getCategoryColorFromId = (categoryId: number): string => {
+    switch (categoryId) {
+      case 1: // 공부
+        return '#DEE9FC';
+      case 2: // 친목
+        return '#E1FBE8';
+      case 3: // 도움
+        return '#FFF1BB';
+      default:
+        return '#DEE9FC'; // 기본 배경색
+    }
+  };
+
+  // 카테고리 ID에서 텍스트 색상으로 변환
+  const getCategoryTextColorFromId = (categoryId: number): string => {
+    switch (categoryId) {
+      case 1:
+        return '#263FA9';
+      case 2:
+        return '#306339';
+      case 3:
+        return '#A47C5E';
+      default:
+        return '#263FA9'; // 기본 텍스트 색상
+    }
+  };
 
   // 모임 참여 버튼 클릭 핸들러
   const handleJoinPress = async () => {
-    if (!groupDetail) return;
+    if (!response?.data?.meeting) return;
 
     try {
-      // TODO: 실제 API가 구현되면 아래 코드로 대체
-      // const response = await joinGroup(groupDetail.id);
-
-      // 임시로 Mock API 사용
-      const response = await mockGroupApi.joinGroup(groupDetail.id);
-
-      if (response.success) {
-        console.log(`모임 ${postId} 참여 신청 성공`);
-        toastService.success('성공', '모임 참여 신청이 완료되었습니다.');
-      }
-    } catch (err) {
+      setIsSubmitting(true);
+      joinGroupMutate(response.data.meeting.meetingId, {
+        onSuccess: () => {
+          console.log(`모임 ${response.data.meeting.meetingId} 참여 신청 성공`);
+          toastService.success(
+            t('common.success'),
+            t('group.detail.joinSuccess'),
+          );
+        },
+        onError: (err: any) => {
+          console.error('모임 참여 실패:', err.message);
+          toastService.error(
+            t('common.error'),
+            err.message || t('group.detail.joinError'),
+          );
+        },
+        onSettled: () => {
+          setIsSubmitting(false);
+        },
+      });
+    } catch (err: any) {
+      setIsSubmitting(false);
       console.error('Error joining group:', err);
-      toastService.error('오류', '모임 참여 신청 중 오류가 발생했습니다.');
+      toastService.error(t('common.error'), t('group.detail.joinError'));
     }
   };
 
@@ -106,7 +131,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
   }
 
   // 에러 표시
-  if (error || !groupDetail) {
+  if (isError || !response?.data) {
     return (
       <SafeAreaView style={commonStyles.container}>
         <GroupHeader />
@@ -118,38 +143,62 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
             padding: 20,
           }}>
           <Text variant="body1" color="#e74c3c" align="center">
-            {error || '모임 정보를 불러올 수 없습니다.'}
+            {error?.message || t('group.detail.loadError')}
           </Text>
         </View>
       </SafeAreaView>
     );
   }
 
+  // 데이터에서 필요한 정보 추출
+  const {meeting, post} = response.data;
+  const creator = meeting.creator;
+  const mainImageUrl =
+    post.postImageUrl.length > 0 ? post.postImageUrl[0].imageUrl : null;
+
+  // 카테고리 ID가 있으면 번역된 텍스트로 변환
+  const categoryText = meeting.categoryId
+    ? getCategoryTextFromId(meeting.categoryId)
+    : '';
+
+  // 카테고리 ID가 있으면 배경색과 텍스트 색상 계산
+  const categoryBgColor = meeting.categoryId
+    ? getCategoryColorFromId(meeting.categoryId)
+    : '#DEE9FC';
+
+  const categoryTextColor = meeting.categoryId
+    ? getCategoryTextColorFromId(meeting.categoryId)
+    : '#263FA9';
+
   return (
     <SafeAreaView style={commonStyles.container}>
-      <GroupHeader />
+      <GroupHeader creatorId={creator.userId} postId={post.postId} />
       <ScrollView style={commonStyles.container}>
         {/* 작성자 정보 */}
         <GroupAuthorInfo
-          category={groupDetail.category}
-          authorName={groupDetail.authorName}
-          date={groupDetail.authorDate}
-          likeCount={groupDetail.likes}
-          avatarUrl={groupDetail.authorAvatarUrl}
+          category={categoryText}
+          authorName={creator.userNickname}
+          date={meeting.createdAt}
+          viewCounts={post.viewCount}
+          avatarUrl={creator.profileImageUrl || null}
+          userId={creator.userId}
+          onAuthorPress={handleAuthorPress}
+          categoryBgColor={categoryBgColor}
+          categoryTextColor={categoryTextColor}
         />
 
         {/* 제목 및 내용 */}
         <Text variant="h4" weight="bold" style={groupDetailStyles.title}>
-          {groupDetail.title}
+          {post.title}
         </Text>
         <Text variant="body1" style={groupDetailStyles.content}>
-          {groupDetail.content}
+          {post.content}
         </Text>
 
         {/* 이미지 */}
-        {groupDetail.imageUrl && (
+        {mainImageUrl && (
           <Image
-            source={{uri: groupDetail.imageUrl}}
+            source={{uri: mainImageUrl}}
             resizeMode={'stretch'}
             style={groupDetailStyles.contentImage}
           />
@@ -157,21 +206,25 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
 
         {/* 모임 정보 */}
         <GroupInfo
-          capacity={groupDetail.capacity}
-          language={groupDetail.language}
-          minForeigners={groupDetail.minForeigners}
-          meetingDate={groupDetail.meetingDate}
+          capacity={meeting.maxParticipants}
+          currentParticipants={meeting.currentParticipants}
+          language={meeting.languageId}
+          minForeigners={0} // TODO: 백엔드 API에 추가 필요
+          meetingDate={meeting.meetingTime}
+          participants={meeting.participants}
+          onParticipantPress={handleAuthorPress}
         />
 
         {/* 좋아요 정보 */}
-        <GroupLikes likeCount={groupDetail.likes} />
+        <GroupLikes likeCount={post.likeCount} postId={post.postId} />
 
         {/* 하단 버튼 */}
         <Button
-          label="모임 참여하기"
+          label={t('group.detail.joinGroup')}
           onPress={handleJoinPress}
           style={navigationStyles.joinButton}
           textStyle={navigationStyles.joinButtonText}
+          disabled={isSubmitting}
         />
       </ScrollView>
     </SafeAreaView>

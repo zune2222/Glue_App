@@ -20,7 +20,18 @@
     "photo_permission_blocked": "사진 접근 권한이 차단되었습니다. 설정에서 권한을 허용해주세요.",
     "permission_check_error": "권한 확인 중 오류가 발생했습니다",
     "sending": "전송 중...",
-    "confirm": "확인"
+    "confirm": "확인",
+    "success": "성공"
+  },
+  "time": {
+    "am": "오전",
+    "pm": "오후",
+    "year": "년",
+    "month": "월",
+    "day": "일",
+    "hour": "시",
+    "minute": "분",
+    "dateTimeFormat": "{{year}}년 {{month}}월 {{day}}일 {{period}} {{hours}}시 {{minutes}}분"
   },
   "auth": {
     "login": "로그인",
@@ -382,10 +393,24 @@
       "meeting_info": "모임 정보",
       "capacity": "8/10",
       "language": "교환 희망 언어: 영어",
+      "language_prefix": "교환 희망 언어:",
       "minForeigners": "영어권 학생 최소 희망 인원: 2명",
       "meetingDate": "2025년 4월 12일 오후 6시 00분",
       "likesCount": "{{count}}명이 좋아합니다.",
-      "joinGroup": "쪽지 보내기"
+      "joinGroup": "쪽지 보내기",
+      "language_desc": "앞에 쓰인 언어가 작성자의 언어, 뒤에 쓰인 언어는 교환 언어입니다.",
+      "capacity_desc": "클릭 시 해당 모임에 누가 참여하고 있는지 확인할 수 있습니다.",
+      "minForeigners_desc": "정확한 모임 장소의 주소는 모임에 가입해야 알 수 있습니다.",
+      "menu": {
+        "edit": "수정하기",
+        "bump": "끌어올리기",
+        "delete": "삭제하기",
+        "deleteConfirm": "정말 삭제하시겠습니까?",
+        "bumpSuccess": "게시글이 끌어올려졌습니다.",
+        "deleteSuccess": "게시글이 삭제되었습니다.",
+        "cancel": "취소",
+        "confirm": "확인"
+      }
     },
     "author": {
       "name": "김글루",

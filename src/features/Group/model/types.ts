@@ -11,7 +11,7 @@ export interface GroupItem {
   categoryColor: string;
   categoryTextColor: string;
   likes: number;
-  comments: string;
+  viewCounts: number;
   participants: string;
   time: string;
   image?: string;
@@ -88,6 +88,7 @@ export type GroupStackParamList = {
   GroupDetail: {postId: string | number};
   CreateGroup: undefined;
   GroupSearch: undefined;
+  UserProfile: {userId: number};
 };
 
 export type GroupListNavigationProp = StackNavigationProp<GroupStackParamList>;

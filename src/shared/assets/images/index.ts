@@ -37,6 +37,7 @@ export {default as HelpIcon} from './help.svg';
 export {default as CameraIcon} from './camera.svg';
 export {default as ClockIcon} from './clock.svg';
 export {default as CalendarOpacityIcon} from './calendar-opacity.svg';
+export {default as InfoIcon} from './info.svg';
 // 이미지 파일들
 export const logo = require('./logo.png');
 export const dummyProfile = require('./dummy-profile.png');
