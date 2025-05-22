@@ -400,7 +400,17 @@
       "joinGroup": "쪽지 보내기",
       "language_desc": "앞에 쓰인 언어가 작성자의 언어, 뒤에 쓰인 언어는 교환 언어입니다.",
       "capacity_desc": "클릭 시 해당 모임에 누가 참여하고 있는지 확인할 수 있습니다.",
-      "minForeigners_desc": "정확한 모임 장소의 주소는 모임에 가입해야 알 수 있습니다."
+      "minForeigners_desc": "정확한 모임 장소의 주소는 모임에 가입해야 알 수 있습니다.",
+      "menu": {
+        "edit": "수정하기",
+        "bump": "끌어올리기",
+        "delete": "삭제하기",
+        "deleteConfirm": "정말 삭제하시겠습니까?",
+        "bumpSuccess": "게시글이 끌어올려졌습니다.",
+        "deleteSuccess": "게시글이 삭제되었습니다.",
+        "cancel": "취소",
+        "confirm": "확인"
+      }
     },
     "author": {
       "name": "김글루",

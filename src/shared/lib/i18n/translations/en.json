@@ -400,7 +400,17 @@
       "joinGroup": "Send a message",
       "language_desc": "The first language is the author's language, the second one is the exchange language.",
       "capacity_desc": "Click to see who is participating in this group.",
-      "minForeigners_desc": "The exact meeting location address is available after joining the group."
+      "minForeigners_desc": "The exact meeting location address is available after joining the group.",
+      "menu": {
+        "edit": "Edit",
+        "bump": "Bump",
+        "delete": "Delete",
+        "deleteConfirm": "Are you sure you want to delete?",
+        "bumpSuccess": "Post has been bumped.",
+        "deleteSuccess": "Post has been deleted.",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      }
     },
     "author": {
       "name": "Kim Glue",

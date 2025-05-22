@@ -172,7 +172,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
 
   return (
     <SafeAreaView style={commonStyles.container}>
-      <GroupHeader />
+      <GroupHeader creatorId={creator.userId} postId={post.postId} />
       <ScrollView style={commonStyles.container}>
         {/* 작성자 정보 */}
         <GroupAuthorInfo

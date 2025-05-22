@@ -433,3 +433,67 @@ export const toggleLike = async (
     throw error;
   }
 };
+
+/**
+ * 게시글을 끌어올리는 API 함수
+ * @param postId 게시글 ID
+ * @returns API 응답 데이터
+ */
+export const bumpPost = async (postId: number): Promise<ApiResponse<void>> => {
+  const endpoint = `/api/posts/${postId}/bump`;
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 게시글 끌어올리기: ${url}`);
+
+  try {
+    // JWT 토큰 가져오기
+    const token = await secureStorage.getToken();
+    if (!token) {
+      throw new Error('인증 토큰이 없습니다. 로그인이 필요합니다.');
+    }
+
+    // API 요청 보내기
+    const response = await apiClient.get(endpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('게시글 끌어올리기 응답:', response.data);
+
+    // 서버 응답 처리
+    return {
+      data: undefined,
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error('잘못된 요청입니다.');
+      } else if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 403) {
+        throw new Error('이 게시글을 끌어올릴 권한이 없습니다.');
+      } else if (status === 404) {
+        throw new Error('존재하지 않는 게시글입니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '게시글 끌어올리기에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};

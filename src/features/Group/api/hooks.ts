@@ -13,6 +13,7 @@ import {
   getGroupDetail,
   joinGroup,
   toggleLike,
+  bumpPost,
 } from './api';
 import {useQueryClient, InvalidateQueryFilters} from '@tanstack/react-query';
 
@@ -160,4 +161,35 @@ export const useToggleLike = (postId: number) => {
       } as InvalidateQueryFilters);
     },
   });
+};
+
+/**
+ * 게시글 끌어올리기를 위한 React Query 훅
+ * @returns useApiMutation 훅의 반환값
+ */
+export const useBumpPost = () => {
+  const queryClient = useQueryClient();
+
+  return useApiMutation<void, number>(
+    'bumpPost',
+    (postId: number) => bumpPost(postId),
+    {
+      onSuccess: (_, postId) => {
+        console.log('게시글 끌어올리기 성공:', postId);
+
+        // 모임 상세 정보 캐시 갱신
+        queryClient.invalidateQueries({
+          queryKey: ['groupDetail', String(postId)],
+        } as InvalidateQueryFilters);
+
+        // 모임 목록 캐시 갱신
+        queryClient.invalidateQueries({
+          queryKey: ['posts'],
+        } as InvalidateQueryFilters);
+      },
+      onError: (error, postId) => {
+        console.error(`게시글 ${postId} 끌어올리기 실패:`, error.message);
+      },
+    },
+  );
 };
