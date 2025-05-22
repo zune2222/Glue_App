@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   View,
@@ -16,8 +16,9 @@ import GroupLikes from './components/GroupLikes';
 import {Button} from '@shared/ui';
 import {Text} from '@shared/ui/typography';
 import {toastService} from '../../../shared/lib/notifications/toast';
-import {useGroupDetail, useJoinGroup} from '../api/hooks';
+import {useGroupDetail, useJoinGroup, useCreateDmChatRoom} from '../api/hooks';
 import {useTranslation} from 'react-i18next';
+import {secureStorage} from '@shared/lib/security';
 
 /**
  * 모임 상세 화면 컴포넌트
@@ -26,6 +27,8 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
   const {t} = useTranslation();
   const {postId} = route.params;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMyPost, setIsMyPost] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   // 모임 상세 정보 조회 훅 사용
   const {
@@ -38,11 +41,41 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
   // 모임 참여 훅 사용
   const {mutate: joinGroupMutate} = useJoinGroup();
 
+  // DM 채팅방 생성 훅 사용
+  const {mutate: createDmChatRoomMutate} = useCreateDmChatRoom();
+
   // 작성자 프로필로 이동하는 핸들러
   const handleAuthorPress = (userId: number) => {
     console.log('사용자 프로필로 이동:', userId);
     navigation.navigate('UserProfile', {userId});
   };
+
+  // 내가 작성한 글인지 확인
+  useEffect(() => {
+    const checkIsMyPost = async () => {
+      try {
+        if (response?.data?.meeting?.creator) {
+          const userId = await secureStorage.getUserId();
+          const creatorId = response.data.meeting.creator.userId;
+
+          setCurrentUserId(userId);
+          if (userId && creatorId === userId) {
+            console.log('내가 작성한 게시글입니다.');
+            setIsMyPost(true);
+          } else {
+            console.log('내가 작성한 게시글이 아닙니다.');
+            setIsMyPost(false);
+          }
+        }
+      } catch (error) {
+        console.error('사용자 정보 확인 오류:', error);
+      }
+    };
+
+    if (response?.data) {
+      checkIsMyPost();
+    }
+  }, [response]);
 
   // 카테고리 ID에서 텍스트로 변환
   const getCategoryTextFromId = (categoryId: number): string => {
@@ -115,6 +148,54 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
       setIsSubmitting(false);
       console.error('Error joining group:', err);
       toastService.error(t('common.error'), t('group.detail.joinError'));
+    }
+  };
+
+  // DM 채팅방 생성 버튼 클릭 핸들러
+  const handleSendDmPress = async () => {
+    if (!response?.data?.meeting || !currentUserId) return;
+
+    try {
+      setIsSubmitting(true);
+
+      // 내 아이디와 작성자 아이디를 userIds 배열에 포함
+      const creatorId = response.data.meeting.creator.userId;
+      const userIds = [currentUserId, creatorId];
+
+      createDmChatRoomMutate(
+        {
+          meetingId: response.data.meeting.meetingId,
+          userIds: userIds,
+        },
+        {
+          onSuccess: response => {
+            console.log('DM 채팅방 생성 성공:', response.data);
+
+            // 채팅방 ID를 이용해 채팅방 화면으로 이동
+            const dmChatRoomId = response.data.detail.dmChatRoomId;
+            navigation.navigate('DmChat', {dmChatRoomId});
+
+            toastService.success(
+              t('common.success'),
+              '채팅방이 생성되었습니다.',
+            );
+          },
+          onError: (err: any) => {
+            console.error('DM 채팅방 생성 실패:', err.message);
+            toastService.error(
+              t('common.error'),
+              err.message || 'DM 채팅방 생성에 실패했습니다.',
+            );
+          },
+          onSettled: () => {
+            setIsSubmitting(false);
+          },
+        },
+      );
+    } catch (err: any) {
+      setIsSubmitting(false);
+      console.error('DM 채팅방 생성 오류:', err);
+      toastService.error(t('common.error'), 'DM 채팅방 생성에 실패했습니다.');
     }
   };
 
@@ -218,14 +299,16 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
         {/* 좋아요 정보 */}
         <GroupLikes likeCount={post.likeCount} postId={post.postId} />
 
-        {/* 하단 버튼 */}
-        <Button
-          label={t('group.detail.joinGroup')}
-          onPress={handleJoinPress}
-          style={navigationStyles.joinButton}
-          textStyle={navigationStyles.joinButtonText}
-          disabled={isSubmitting}
-        />
+        {/* 하단 버튼 영역 */}
+        {!isMyPost && (
+          <Button
+            label={t('group.detail.joinGroup')}
+            onPress={handleSendDmPress}
+            style={navigationStyles.joinButton}
+            textStyle={navigationStyles.joinButtonText}
+            disabled={isSubmitting}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );

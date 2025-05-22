@@ -89,6 +89,7 @@ export type GroupStackParamList = {
   CreateGroup: undefined;
   GroupSearch: undefined;
   UserProfile: {userId: number};
+  DmChat: {dmChatRoomId: number};
 };
 
 export type GroupListNavigationProp = StackNavigationProp<GroupStackParamList>;
