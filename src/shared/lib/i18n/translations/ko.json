@@ -317,6 +317,25 @@
       },
       "help": {
         "description": "언어, 학습과 관련 도움을 필요로 하거나 도움을 주는 사람들을 위한 모임이에요."
+      },
+      "step2": {
+        "title": "고려할 언어와 모임 인원을 선택해주세요",
+        "languageExchange": "언어 교환",
+        "myLanguage": "나의 언어인",
+        "and": "과",
+        "exchangeWith": "를 교환할게요",
+        "memberCount": "모임 인원",
+        "memberTotal": "우리 모임의 인원은",
+        "members": "명",
+        "isAmount": "이에요"
+      },
+      "step3": {
+        "title": "모임글의 제목과 모임글의 내용을 입력해 주세요",
+        "groupTitle": "그룹명 제목",
+        "groupTitlePlaceholder": "그룹명 제목을 입력해주세요",
+        "groupContent": "상세내용 내용",
+        "groupContentPlaceholder": "상세내용 내용을 입력해주세요",
+        "imageCount": "(0/1)"
       }
     },
     "search": {

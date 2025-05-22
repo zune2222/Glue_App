@@ -12,6 +12,8 @@ import {
   GroupDetail,
   GroupSearch,
   GroupCreate,
+  GroupCreateStep2,
+  GroupCreateStep3,
 } from '@features/Group';
 
 // 채팅 화면 컴포넌트 임포트
@@ -308,6 +310,20 @@ export const AppNavigator = () => {
       <GroupStack.Screen
         name="GroupCreate"
         component={GroupCreate}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <GroupStack.Screen
+        name="GroupCreateStep2"
+        component={GroupCreateStep2}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <GroupStack.Screen
+        name="GroupCreateStep3"
+        component={GroupCreateStep3}
         options={{
           headerShown: false,
         }}

@@ -34,6 +34,7 @@ export {default as Logo} from './logo.svg';
 export {default as SocialIcon} from './social.svg';
 export {default as StudyIcon} from './study.svg';
 export {default as HelpIcon} from './help.svg';
+export {default as CameraIcon} from './camera.svg';
 // 이미지 파일들
 export const logo = require('./logo.png');
 export const dummyProfile = require('./dummy-profile.png');

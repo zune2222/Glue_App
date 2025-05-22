@@ -18,14 +18,14 @@ import {colors} from '../../../app/styles/colors';
 import {Text} from '../../../shared/ui/typography/Text';
 
 const GroupCreate = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const {t} = useTranslation();
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
   const handleNext = () => {
     if (selectedType) {
-      // 다음 페이지로 이동 (추후 구현)
-      // navigation.navigate('GroupCreateStep2', {groupType: selectedType});
+      // 다음 페이지(Step2)로 이동
+      navigation.navigate('GroupCreateStep2', {groupType: selectedType});
     }
   };
 
@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
   },
   selectedType: {
     borderColor: colors.batteryChargedBlue,
+    backgroundColor: '#F4FCFD',
     borderWidth: 1,
   },
   typeContent: {
