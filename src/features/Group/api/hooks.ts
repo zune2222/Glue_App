@@ -1,10 +1,17 @@
-import {useApiMutation, useApiInfiniteQuery} from '@/shared/lib/api/hooks';
+import {
+  useApiMutation,
+  useApiInfiniteQuery,
+  useApiQuery,
+} from '@/shared/lib/api/hooks';
 import {
   CreateGroupPostRequest,
   CreateGroupPostResponse,
+  GetPostResponse,
   GetPostsResponse,
   createGroupPost,
   getPosts,
+  getGroupDetail,
+  joinGroup,
 } from './api';
 
 /**
@@ -61,6 +68,40 @@ export const useInfinitePosts = (categoryId?: number, size = 10) => {
       // 에러 발생 시 콜솔에 로그 출력
       onError: (error: any) => {
         console.error('모임 게시글 목록 조회 실패:', error.message);
+      },
+    },
+  );
+};
+
+/**
+ * 모임 상세 정보를 가져오기 위한 React Query 훅
+ * @param postId 모임 게시글 ID
+ * @returns useQuery 훅의 반환값
+ */
+export const useGroupDetail = (postId: number) => {
+  return useApiQuery<GetPostResponse>(
+    ['groupDetail', String(postId)],
+    () => getGroupDetail(postId),
+    {
+      retry: 1,
+    },
+  );
+};
+
+/**
+ * 모임 참여를 위한 React Query 훅
+ * @returns useApiMutation 훅의 반환값
+ */
+export const useJoinGroup = () => {
+  return useApiMutation<boolean, number>(
+    'joinGroup',
+    (meetingId: number) => joinGroup(meetingId),
+    {
+      onSuccess: () => {
+        console.log('모임 참여 성공');
+      },
+      onError: error => {
+        console.error('모임 참여 실패:', error.message);
       },
     },
   );

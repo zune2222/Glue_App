@@ -20,7 +20,18 @@
     "photo_permission_blocked": "Photo access permission is blocked. Please enable it in settings.",
     "permission_check_error": "An error occurred while checking permissions",
     "sending": "Sending...",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "success": "Success"
+  },
+  "time": {
+    "am": "AM",
+    "pm": "PM",
+    "year": "",
+    "month": "",
+    "day": "",
+    "hour": "",
+    "minute": "",
+    "dateTimeFormat": "{{month}}/{{day}}/{{year}} {{period}} {{hours}}:{{minutes}}"
   },
   "auth": {
     "login": "Log in",
@@ -385,7 +396,10 @@
       "minForeigners": "Minimum English-speaking students: 2",
       "meetingDate": "April 12, 2025 at 6:00 PM",
       "likesCount": "{{count}} people like this.",
-      "joinGroup": "Send a message"
+      "joinGroup": "Send a message",
+      "language_desc": "The first language is the author's language, the second one is the exchange language.",
+      "capacity_desc": "Click to see who is participating in this group.",
+      "minForeigners_desc": "The exact meeting location address is available after joining the group."
     },
     "author": {
       "name": "Kim Glue",
