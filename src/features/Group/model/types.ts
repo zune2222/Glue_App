@@ -85,7 +85,7 @@ export interface GroupState {
 // 네비게이션 타입 정의
 export type GroupStackParamList = {
   GroupList: undefined;
-  GroupDetail: {groupId: string};
+  GroupDetail: {postId: string | number};
   CreateGroup: undefined;
   GroupSearch: undefined;
 };
@@ -100,7 +100,7 @@ export interface GroupDetailProps {
   navigation: GroupListNavigationProp;
   route: {
     params: {
-      groupId: string;
+      postId: string | number;
     };
   };
 }

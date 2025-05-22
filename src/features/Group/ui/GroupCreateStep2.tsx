@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   View,
@@ -9,9 +9,10 @@ import {
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
-import {ChevronLeft, ChevronDown} from '../../../shared/assets/images';
+import {ChevronDown} from '../../../shared/assets/images';
 import {colors} from '../../../app/styles/colors';
 import {Text} from '../../../shared/ui/typography/Text';
+import GroupCreateHeader from './components/GroupCreateHeader';
 
 type RouteParams = {
   groupType: string;
@@ -20,19 +21,30 @@ type RouteParams = {
 const MAX_MEMBERS = 10;
 
 const GroupCreateStep2 = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const route = useRoute();
   const {t} = useTranslation();
   const {groupType} = route.params as RouteParams;
 
-  const [myLanguage, setMyLanguage] = useState('한국어');
-  const [exchangeLanguage, setExchangeLanguage] = useState('영어');
+  const [myLanguage, setMyLanguage] = useState(
+    t('signup.nativeLanguage.korean'),
+  );
+  const [exchangeLanguage, setExchangeLanguage] = useState(
+    t('signup.nativeLanguage.english'),
+  );
   const [memberCount, setMemberCount] = useState('8');
 
   const [showMyLanguageModal, setShowMyLanguageModal] = useState(false);
   const [showExchangeLanguageModal, setShowExchangeLanguageModal] =
     useState(false);
   const [showMemberCountModal, setShowMemberCountModal] = useState(false);
+
+  // 도움 유형이 선택되면 인원수를 2명으로 고정
+  useEffect(() => {
+    if (groupType === 'help') {
+      setMemberCount('2');
+    }
+  }, [groupType]);
 
   const handleBack = () => {
     navigation.goBack();
@@ -49,26 +61,24 @@ const GroupCreateStep2 = () => {
   };
 
   const languageOptions = [
-    '한국어',
-    '영어',
-    '일본어',
-    '중국어',
-    '독일어',
-    '프랑스어',
-    '스페인어',
+    t('signup.nativeLanguage.korean'),
+    t('signup.nativeLanguage.english'),
+    t('signup.nativeLanguage.japanese'),
+    t('signup.nativeLanguage.chinese'),
+    t('signup.nativeLanguage.german'),
+    t('signup.nativeLanguage.french'),
+    t('signup.nativeLanguage.spanish'),
   ];
   const memberCountOptions = Array.from({length: MAX_MEMBERS}, (_, i) =>
     String(i + 1),
   );
 
+  // 도움 유형인지 확인하는 함수
+  const isHelpType = groupType === 'help';
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <ChevronLeft style={styles.backIcon} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('group.create.title')}</Text>
-      </View>
+      <GroupCreateHeader title={t('group.create.title')} onBack={handleBack} />
 
       <ScrollView style={styles.scrollView}>
         <Text style={styles.stepText}>
@@ -76,17 +86,23 @@ const GroupCreateStep2 = () => {
         </Text>
 
         <Text style={styles.titleText}>
-          고려할 언어와 모임 인원을{'\n'}선택해주세요
+          {isHelpType
+            ? t('group.create.step2.title_help')
+            : t('group.create.step2.title')}
         </Text>
 
         {/* 언어 선택 섹션 */}
         <View style={styles.section}>
           <View style={styles.sectionTitle}>
-            <Text style={styles.sectionTitleText}>언어 교환</Text>
+            <Text style={styles.sectionTitleText}>
+              {t('group.create.step2.language_exchange')}
+            </Text>
           </View>
 
           <View style={styles.languageSelectionRow}>
-            <Text style={styles.labelText}>나의 언어인</Text>
+            <Text style={styles.labelText}>
+              {t('group.create.step2.my_language')}
+            </Text>
             <TouchableOpacity
               style={styles.dropdownButton}
               onPress={() => setShowMyLanguageModal(true)}>
@@ -94,7 +110,7 @@ const GroupCreateStep2 = () => {
               <ChevronDown width={16} height={16} />
             </TouchableOpacity>
 
-            <Text style={styles.labelText}>과</Text>
+            <Text style={styles.labelText}>{t('group.create.step2.and')}</Text>
           </View>
 
           <View style={styles.languageSelectionRow}>
@@ -105,28 +121,41 @@ const GroupCreateStep2 = () => {
               <ChevronDown width={16} height={16} />
             </TouchableOpacity>
 
-            <Text style={styles.labelText}>를 교환할게요.</Text>
+            <Text style={styles.labelText}>
+              {t('group.create.step2.will_exchange')}
+            </Text>
           </View>
         </View>
 
-        {/* 인원 선택 섹션 */}
-        <View style={styles.section}>
-          <View style={styles.sectionTitle}>
-            <Text style={styles.sectionTitleText}>모임 인원</Text>
-          </View>
+        {/* 인원 선택 섹션 - 도움 유형일 때는 표시하지 않음 */}
+        {!isHelpType && (
+          <View style={styles.section}>
+            <View style={styles.sectionTitle}>
+              <Text style={styles.sectionTitleText}>
+                {t('group.create.step2.member_count')}
+              </Text>
+            </View>
 
-          <View style={styles.languageSelectionRow}>
-            <Text style={styles.labelText}>우리 모임의 인원은</Text>
-            <TouchableOpacity
-              style={styles.dropdownButton}
-              onPress={() => setShowMemberCountModal(true)}>
-              <Text style={styles.dropdownButtonText}>{memberCount}명</Text>
-              <ChevronDown width={16} height={16} />
-            </TouchableOpacity>
+            <View style={styles.languageSelectionRow}>
+              <Text style={styles.labelText}>
+                {t('group.create.step2.member_count_prefix')}
+              </Text>
+              <TouchableOpacity
+                style={styles.dropdownButton}
+                onPress={() => setShowMemberCountModal(true)}>
+                <Text style={styles.dropdownButtonText}>
+                  {memberCount}
+                  {t('group.create.step2.people')}
+                </Text>
+                <ChevronDown width={16} height={16} />
+              </TouchableOpacity>
 
-            <Text style={styles.labelText}>이에요.</Text>
+              <Text style={styles.labelText}>
+                {t('group.create.step2.member_count_suffix')}
+              </Text>
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
 
       <View style={styles.bottomContainer}>
@@ -232,7 +261,8 @@ const GroupCreateStep2 = () => {
                     styles.modalItemText,
                     memberCount === count && styles.selectedModalItemText,
                   ]}>
-                  {count}명
+                  {count}
+                  {t('group.create.step2.people')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -251,31 +281,6 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: colors.white,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 28,
-    marginHorizontal: 17,
-    position: 'relative',
-  },
-  backButton: {
-    padding: 10,
-    marginLeft: -10,
-    zIndex: 10,
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-  },
-  headerTitle: {
-    color: colors.darkCharcoal,
-    fontSize: 16,
-    fontWeight: 'bold',
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    textAlign: 'center',
   },
   stepText: {
     color: colors.charcoal,

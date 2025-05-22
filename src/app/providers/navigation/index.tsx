@@ -14,6 +14,7 @@ import {
   GroupCreate,
   GroupCreateStep2,
   GroupCreateStep3,
+  GroupCreateStep4,
 } from '@features/Group';
 
 // 채팅 화면 컴포넌트 임포트
@@ -324,6 +325,13 @@ export const AppNavigator = () => {
       <GroupStack.Screen
         name="GroupCreateStep3"
         component={GroupCreateStep3}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <GroupStack.Screen
+        name="GroupCreateStep4"
+        component={GroupCreateStep4}
         options={{
           headerShown: false,
         }}

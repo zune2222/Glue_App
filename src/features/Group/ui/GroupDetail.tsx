@@ -16,12 +16,13 @@ import GroupLikes from './components/GroupLikes';
 import {Button} from '@shared/ui';
 import {Text} from '@shared/ui/typography';
 import {mockGroupApi} from '../model/api';
+import {toastService} from '../../../shared/lib/notifications/toast';
 
 /**
  * 모임 상세 화면 컴포넌트
  */
 const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
-  const {groupId} = route.params;
+  const {postId} = route.params;
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [groupDetail, setGroupDetail] = useState<GroupDetailType | null>(null);
@@ -30,7 +31,14 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
     const fetchGroupDetail = async () => {
       try {
         setIsLoading(true);
-        const response = await mockGroupApi.getGroupDetail(groupId);
+        console.log(`모임 상세 정보 조회: postId=${postId}`);
+
+        // TODO: 실제 API가 구현되면 아래 코드로 대체
+        // const response = await getGroupDetail(postId);
+
+        // 임시로 Mock API 사용
+        const response = await mockGroupApi.getGroupDetail(String(postId));
+
         // API 응답을 GroupDetailType으로 변환
         setGroupDetail({
           id: response.id,
@@ -52,27 +60,36 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route}) => {
       } catch (err) {
         setError('모임 정보를 불러오는 중 오류가 발생했습니다.');
         console.error('Error fetching group detail:', err);
+        toastService.error(
+          '오류',
+          '모임 정보를 불러오는 중 오류가 발생했습니다.',
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchGroupDetail();
-  }, [groupId]);
+  }, [postId]);
 
   // 모임 참여 버튼 클릭 핸들러
   const handleJoinPress = async () => {
     if (!groupDetail) return;
 
     try {
+      // TODO: 실제 API가 구현되면 아래 코드로 대체
+      // const response = await joinGroup(groupDetail.id);
+
+      // 임시로 Mock API 사용
       const response = await mockGroupApi.joinGroup(groupDetail.id);
+
       if (response.success) {
-        console.log(`모임 ${groupId} 참여 신청 성공`);
-        // TODO: 성공 메시지 표시
+        console.log(`모임 ${postId} 참여 신청 성공`);
+        toastService.success('성공', '모임 참여 신청이 완료되었습니다.');
       }
     } catch (err) {
       console.error('Error joining group:', err);
-      // TODO: 에러 메시지 표시
+      toastService.error('오류', '모임 참여 신청 중 오류가 발생했습니다.');
     }
   };
 

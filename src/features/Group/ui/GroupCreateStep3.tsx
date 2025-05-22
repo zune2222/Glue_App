@@ -7,26 +7,25 @@ import {
   StyleSheet,
   TextInput,
   Image,
+  Platform,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
-import {ChevronLeft} from '../../../shared/assets/images';
+import {
+  launchImageLibrary,
+  ImageLibraryOptions,
+} from 'react-native-image-picker';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import {colors} from '../../../app/styles/colors';
 import {Text} from '../../../shared/ui/typography/Text';
 import {CameraIcon} from '../../../shared/assets/images';
-
-type RouteParams = {
-  groupType: string;
-  myLanguage: string;
-  exchangeLanguage: string;
-  memberCount: number;
-};
+import GroupCreateHeader from './components/GroupCreateHeader';
+import {toastService} from '../../../shared/lib/notifications/toast';
 
 const GroupCreateStep3 = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const route = useRoute();
   const {t} = useTranslation();
-  const params = route.params as RouteParams;
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -37,45 +36,102 @@ const GroupCreateStep3 = () => {
   };
 
   const handleNext = () => {
-    // 다음 페이지로 이동
-    // navigation.navigate('GroupCreateStep4', {
-    //   ...params,
-    //   title,
-    //   content,
-    //   image,
-    // });
+    // route.params가 존재하는지 확인 후 사용
+    const routeParams = route.params || {};
+
+    // 다음 페이지로 이동 - 파라미터 이름을 GroupCreateStep4에서 기대하는 이름과 일치시킴
+    navigation.navigate('GroupCreateStep4', {
+      ...routeParams,
+      groupTitle: title,
+      groupContent: content,
+      imageUrls: image ? [image] : [],
+    });
   };
 
-  const handleAddImage = () => {
-    // 이미지 선택 기능 구현 예정
-    // 여기서는 더미 이미지 URL을 설정
-    setImage('https://example.com/dummy-image.jpg');
+  const checkAndRequestPermission = async () => {
+    // iOS와 Android의 권한 체크 로직이 다름
+    const permission =
+      Platform.OS === 'ios'
+        ? PERMISSIONS.IOS.PHOTO_LIBRARY
+        : PERMISSIONS.ANDROID.READ_MEDIA_IMAGES;
+
+    try {
+      const result = await check(permission);
+
+      switch (result) {
+        case RESULTS.GRANTED:
+          return true;
+        case RESULTS.DENIED:
+          const requestResult = await request(permission);
+          return requestResult === RESULTS.GRANTED;
+        case RESULTS.BLOCKED:
+          toastService.error(
+            t('common.permission_required'),
+            t('common.photo_permission_blocked'),
+          );
+          return false;
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.error(t('common.permission_check_error'), error);
+      return false;
+    }
+  };
+
+  const handleAddImage = async () => {
+    const hasPermission = await checkAndRequestPermission();
+
+    if (!hasPermission) {
+      return;
+    }
+
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo',
+      maxWidth: 1200,
+      maxHeight: 1200,
+      quality: 0.8,
+      includeBase64: false,
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log(t('group.create.step3.image_cancel'));
+      } else if (response.errorCode) {
+        console.log(t('group.create.step3.image_error'), response.errorMessage);
+        toastService.error(
+          t('common.error'),
+          t('group.create.step3.image_selection_error'),
+        );
+      } else if (response.assets && response.assets.length > 0) {
+        const selectedImage = response.assets[0];
+        if (selectedImage.uri) {
+          setImage(selectedImage.uri);
+          toastService.success(t('group.create.step3.image_added'));
+        }
+      }
+    });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <ChevronLeft style={styles.backIcon} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('group.create.title')}</Text>
-      </View>
+      <GroupCreateHeader title={t('group.create.title')} onBack={handleBack} />
 
       <ScrollView style={styles.scrollView}>
         <Text style={styles.stepText}>
           {t('group.create.step', {step: 3, total: 4})}
         </Text>
 
-        <Text style={styles.titleText}>
-          모임글의 제목과{'\n'}모임글의 내용을 입력해 주세요
-        </Text>
+        <Text style={styles.titleText}>{t('group.create.step3.title')}</Text>
 
         {/* 제목 입력 */}
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>그룹명 제목</Text>
+          <Text style={styles.inputLabel}>
+            {t('group.create.step3.group_name_title')}
+          </Text>
           <TextInput
             style={styles.titleInput}
-            placeholder="그룹명 제목을 입력해주세요"
+            placeholder={t('group.create.step3.group_name_placeholder')}
             placeholderTextColor={colors.manatee}
             value={title}
             onChangeText={setTitle}
@@ -85,10 +141,12 @@ const GroupCreateStep3 = () => {
 
         {/* 내용 입력 */}
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>상세내용 내용</Text>
+          <Text style={styles.inputLabel}>
+            {t('group.create.step3.detail_content')}
+          </Text>
           <TextInput
             style={styles.contentInput}
-            placeholder="상세내용 내용을 입력해주세요"
+            placeholder={t('group.create.step3.detail_content_placeholder')}
             placeholderTextColor={colors.manatee}
             value={content}
             onChangeText={setContent}
@@ -120,7 +178,9 @@ const GroupCreateStep3 = () => {
               onPress={handleAddImage}>
               <View style={styles.addImageContent}>
                 <CameraIcon style={styles.cameraIcon} />
-                <Text style={styles.addImageText}>(0/1)</Text>
+                <Text style={styles.addImageText}>
+                  {t('group.create.step3.image_count')}
+                </Text>
               </View>
             </TouchableOpacity>
           )}
@@ -152,31 +212,6 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: colors.white,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 28,
-    marginHorizontal: 17,
-    position: 'relative',
-  },
-  backButton: {
-    padding: 10,
-    marginLeft: -10,
-    zIndex: 10,
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-  },
-  headerTitle: {
-    color: colors.darkCharcoal,
-    fontSize: 16,
-    fontWeight: 'bold',
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    textAlign: 'center',
   },
   stepText: {
     color: colors.charcoal,

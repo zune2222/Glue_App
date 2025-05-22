@@ -16,7 +16,11 @@
     "send": "보내기",
     "select": "선택",
     "permission": "권한 필요",
-    "sending": "전송 중..."
+    "permission_required": "권한 필요",
+    "photo_permission_blocked": "사진 접근 권한이 차단되었습니다. 설정에서 권한을 허용해주세요.",
+    "permission_check_error": "권한 확인 중 오류가 발생했습니다",
+    "sending": "전송 중...",
+    "confirm": "확인"
   },
   "auth": {
     "login": "로그인",
@@ -318,24 +322,53 @@
       "help": {
         "description": "언어, 학습과 관련 도움을 필요로 하거나 도움을 주는 사람들을 위한 모임이에요."
       },
+      "success": {
+        "title": "성공",
+        "message": "모임 게시글이 성공적으로 생성되었습니다."
+      },
+      "error": {
+        "title": "오류",
+        "message": "모임 게시글 생성에 실패했습니다",
+        "required_fields": "모임 제목과 장소를 모두 입력해주세요."
+      },
       "step2": {
-        "title": "고려할 언어와 모임 인원을 선택해주세요",
-        "languageExchange": "언어 교환",
-        "myLanguage": "나의 언어인",
+        "title": "고려할 언어와 모임 인원을\n선택해주세요",
+        "title_help": "교환할 언어를 선택해 주세요",
+        "language_exchange": "언어 교환",
+        "my_language": "나의 언어인",
         "and": "과",
-        "exchangeWith": "를 교환할게요",
-        "memberCount": "모임 인원",
-        "memberTotal": "우리 모임의 인원은",
-        "members": "명",
-        "isAmount": "이에요"
+        "will_exchange": "를 교환할게요.",
+        "member_count": "모임 인원",
+        "member_count_prefix": "우리 모임의 인원은",
+        "people": "명",
+        "member_count_suffix": "이에요."
       },
       "step3": {
-        "title": "모임글의 제목과 모임글의 내용을 입력해 주세요",
-        "groupTitle": "그룹명 제목",
-        "groupTitlePlaceholder": "그룹명 제목을 입력해주세요",
-        "groupContent": "상세내용 내용",
-        "groupContentPlaceholder": "상세내용 내용을 입력해주세요",
-        "imageCount": "(0/1)"
+        "title": "모임글의 제목과\n모임글의 내용을 입력해 주세요",
+        "group_name_title": "그룹명 제목",
+        "group_name_placeholder": "그룹명 제목을 입력해주세요",
+        "detail_content": "상세내용 내용",
+        "detail_content_placeholder": "상세내용 내용을 입력해주세요",
+        "image_count": "(0/1)",
+        "image_cancel": "사용자가 이미지 선택을 취소했습니다",
+        "image_error": "이미지 선택 오류",
+        "image_selection_error": "이미지를 선택하는 중 오류가 발생했습니다",
+        "image_added": "이미지가 추가되었습니다"
+      },
+      "step4": {
+        "title": "우리 모임의 이름과\n만남 일시 및 장소를 지정해 주세요",
+        "group_title": "모임글 제목",
+        "group_title_placeholder": "우리 모임의 이름을 지정해주세요",
+        "meeting_datetime": "모임 일시",
+        "meeting_date": "모임 일자",
+        "meeting_date_placeholder": "YYYY-MM-DD",
+        "meeting_time": "모임 시간",
+        "meeting_time_placeholder": "HH:MM",
+        "meeting_location": "만남 장소",
+        "meeting_location_placeholder": "우리 모임이 만날 장소를 지정해주세요",
+        "complete": "다음",
+        "select_date": "날짜 선택",
+        "select_time": "시간 선택"
       }
     },
     "search": {
