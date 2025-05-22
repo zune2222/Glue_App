@@ -90,7 +90,10 @@ export const GroupItemCard: React.FC<GroupItemProps> = ({item, onPress}) => {
               <Text
                 variant="caption"
                 color={item.categoryTextColor}
-                style={groupListStyles.categoryText}>
+                style={[
+                  groupListStyles.categoryText,
+                  {color: item.categoryTextColor},
+                ]}>
                 {item.category}
               </Text>
             </View>

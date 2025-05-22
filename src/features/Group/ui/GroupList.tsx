@@ -111,7 +111,7 @@ const GroupList: React.FC = () => {
           : item.content,
       category: getCategoryTextFromId(item.categoryId),
       categoryColor: getCategoryColorFromId(item.categoryId),
-      categoryTextColor: '#FFFFFF',
+      categoryTextColor: getCategoryTextColorFromId(item.categoryId),
       likes: item.likeCount,
       viewCounts: `${item.viewCount}`,
       participants: `${item.currentParticipants}/${item.maxParticipants}`,
@@ -145,13 +145,25 @@ const GroupList: React.FC = () => {
   const getCategoryColorFromId = (categoryId: number): string => {
     switch (categoryId) {
       case 1: // 공부
-        return '#3498db';
+        return '#DEE9FC';
       case 2: // 친목
-        return '#2ecc71';
+        return '#E1FBE8';
       case 3: // 도움
-        return '#e74c3c';
+        return '#FFF1BB';
       default:
-        return '#95a5a6';
+        return '#384050';
+    }
+  };
+  const getCategoryTextColorFromId = (categoryId: number): string => {
+    switch (categoryId) {
+      case 1:
+        return '#263FA9';
+      case 2:
+        return '#306339';
+      case 3:
+        return '#A47C5E';
+      default:
+        return '#384050';
     }
   };
 
