@@ -16,7 +16,11 @@
     "send": "Send",
     "select": "Select",
     "permission": "Permission Required",
-    "sending": "Sending..."
+    "permission_required": "Permission Required",
+    "photo_permission_blocked": "Photo access permission is blocked. Please enable it in settings.",
+    "permission_check_error": "An error occurred while checking permissions",
+    "sending": "Sending...",
+    "confirm": "Confirm"
   },
   "auth": {
     "login": "Log in",
@@ -304,6 +308,68 @@
       "study": "Study",
       "social": "Social",
       "help": "Help"
+    },
+    "create": {
+      "title": "Create Group Post",
+      "step": "{{step}} / {{total}}",
+      "selectType": "Please select the type of group\nyou want to create",
+      "social": {
+        "description": "A group for people who want to get to know each other while learning a language. Up to 10 people can join."
+      },
+      "study": {
+        "description": "A group for people who want to learn and practice a language together. Up to 10 people can join."
+      },
+      "help": {
+        "description": "A group for people who need help with language learning or want to provide assistance to others."
+      },
+      "success": {
+        "title": "Success",
+        "message": "Group post created successfully."
+      },
+      "error": {
+        "title": "Error",
+        "message": "Failed to create group post",
+        "required_fields": "Please enter both group title and location."
+      },
+      "step2": {
+        "title": "Select the languages and number\nof group members",
+        "title_help": "Please select the languages to exchange",
+        "language_exchange": "Language Exchange",
+        "my_language": "My language",
+        "and": "and",
+        "will_exchange": "will be exchanged.",
+        "member_count": "Number of Members",
+        "member_count_prefix": "Our group will have",
+        "people": "people",
+        "member_count_suffix": "in total."
+      },
+      "step3": {
+        "title": "Enter the title and content\nfor your group post",
+        "group_name_title": "Group Name Title",
+        "group_name_placeholder": "Enter group name title",
+        "detail_content": "Detailed Content",
+        "detail_content_placeholder": "Enter detailed content",
+        "image_count": "(0/1)",
+        "image_cancel": "User cancelled image selection",
+        "image_error": "Image selection error",
+        "image_selection_error": "An error occurred while selecting an image",
+        "image_added": "Image added successfully"
+      },
+      "step4": {
+        "title": "Please name your group and\nspecify meeting time and place",
+        "group_title": "Group Title",
+        "group_title_placeholder": "Please specify your group name",
+        "meeting_datetime": "Meeting Time",
+        "meeting_date": "Meeting Date",
+        "meeting_date_placeholder": "YYYY-MM-DD",
+        "meeting_time": "Meeting Time",
+        "meeting_time_placeholder": "HH:MM",
+        "meeting_location": "Meeting Place",
+        "meeting_location_placeholder": "Please specify where your group will meet",
+        "complete": "Next",
+        "select_date": "Select Date",
+        "select_time": "Select Time"
+      }
     },
     "search": {
       "placeholder": "Search title, category, or content",

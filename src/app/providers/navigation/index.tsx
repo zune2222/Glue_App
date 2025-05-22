@@ -7,7 +7,15 @@ import {useTranslation} from 'react-i18next';
 import {HomeScreen} from '@features/Home';
 
 // 모임글 화면 컴포넌트 임포트
-import {GroupList, GroupDetail, GroupSearch} from '@features/Group';
+import {
+  GroupList,
+  GroupDetail,
+  GroupSearch,
+  GroupCreate,
+  GroupCreateStep2,
+  GroupCreateStep3,
+  GroupCreateStep4,
+} from '@features/Group';
 
 // 채팅 화면 컴포넌트 임포트
 import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
@@ -158,14 +166,7 @@ const GroupNavigator = () => {
         component={GroupDetail}
         options={{headerShown: false}}
       />
-      <GroupStack.Screen
-        name="CreateGroup"
-        component={GroupList} // 임시로 동일한 컴포넌트 사용, 추후 변경 필요
-        options={{
-          title: t('group.create'),
-          headerBackTitle: t('common.cancel'),
-        }}
-      />
+
       <GroupStack.Screen
         name="GroupSearch"
         component={GroupSearch}
@@ -267,6 +268,7 @@ const MainTabNavigator = () => {
           tabBarIcon: renderGroupIcon,
         }}
       />
+
       <MainTab.Screen
         name="Messages"
         component={MessagesNavigator}
@@ -306,6 +308,34 @@ export const AppNavigator = () => {
     <RootStack.Navigator screenOptions={{headerShown: false}}>
       <RootStack.Screen name="Auth" component={AuthNavigator} />
       <RootStack.Screen name="Main" component={MainNavigator} />
+      <GroupStack.Screen
+        name="GroupCreate"
+        component={GroupCreate}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <GroupStack.Screen
+        name="GroupCreateStep2"
+        component={GroupCreateStep2}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <GroupStack.Screen
+        name="GroupCreateStep3"
+        component={GroupCreateStep3}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <GroupStack.Screen
+        name="GroupCreateStep4"
+        component={GroupCreateStep4}
+        options={{
+          headerShown: false,
+        }}
+      />
     </RootStack.Navigator>
   );
 };
