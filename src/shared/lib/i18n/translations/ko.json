@@ -305,6 +305,20 @@
       "social": "친목",
       "help": "도움"
     },
+    "create": {
+      "title": "모임 게시글 작성",
+      "step": "{{step}} / {{total}}",
+      "selectType": "만들고자 하는\n모임 유형을 선택해 주세요",
+      "social": {
+        "description": "서로 친해지며 언어를 배우고 싶은 사람들을 위한 모임으로, 최대 10명까지 함께할 수 있어요."
+      },
+      "study": {
+        "description": "언어를 함께 배우고 익히고 싶은 사람들을 위한 모임으로, 최대 10명까지 함께할 수 있어요."
+      },
+      "help": {
+        "description": "언어, 학습과 관련 도움을 필요로 하거나 도움을 주는 사람들을 위한 모임이에요."
+      }
+    },
     "search": {
       "placeholder": "제목, 모임 카테고리, 내용 검색",
       "recentSearches": "최근 검색어",

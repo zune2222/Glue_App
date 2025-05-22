@@ -305,6 +305,20 @@
       "social": "Social",
       "help": "Help"
     },
+    "create": {
+      "title": "Create Group Post",
+      "step": "{{step}} / {{total}}",
+      "selectType": "Please select the type of group\nyou want to create",
+      "social": {
+        "description": "A group for people who want to get to know each other while learning a language. Up to 10 people can join."
+      },
+      "study": {
+        "description": "A group for people who want to learn and practice a language together. Up to 10 people can join."
+      },
+      "help": {
+        "description": "A group for people who need help with language learning or want to provide assistance to others."
+      }
+    },
     "search": {
       "placeholder": "Search title, category, or content",
       "recentSearches": "Recent Searches",

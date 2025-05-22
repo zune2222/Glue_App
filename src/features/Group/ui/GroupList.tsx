@@ -58,7 +58,7 @@ const GroupList: React.FC = () => {
 
   // 글쓰기 버튼 클릭 핸들러
   const handleCreatePress = () => {
-    navigation.navigate('CreateGroup');
+    navigation.navigate('GroupCreate');
   };
 
   // 카테고리 변경 핸들러
