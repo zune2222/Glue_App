@@ -179,7 +179,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
           category={categoryText}
           authorName={creator.userNickname}
           date={meeting.createdAt}
-          likeCount={post.likeCount}
+          viewCounts={post.viewCount}
           avatarUrl={creator.profileImageUrl || null}
           userId={creator.userId}
           onAuthorPress={handleAuthorPress}
@@ -207,6 +207,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
         {/* 모임 정보 */}
         <GroupInfo
           capacity={meeting.maxParticipants}
+          currentParticipants={meeting.currentParticipants}
           language={meeting.languageId}
           minForeigners={0} // TODO: 백엔드 API에 추가 필요
           meetingDate={meeting.meetingTime}
@@ -215,7 +216,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
         />
 
         {/* 좋아요 정보 */}
-        <GroupLikes likeCount={post.likeCount} />
+        <GroupLikes likeCount={post.likeCount} postId={post.postId} />
 
         {/* 하단 버튼 */}
         <Button

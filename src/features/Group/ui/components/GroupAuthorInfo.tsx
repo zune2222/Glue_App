@@ -8,7 +8,7 @@ interface GroupAuthorInfoProps {
   category: string | number;
   authorName: string;
   date: string;
-  likeCount: number;
+  viewCounts: number;
   avatarUrl: string | null;
   userId: number;
   onAuthorPress?: (userId: number) => void;
@@ -48,7 +48,7 @@ const GroupAuthorInfo: React.FC<GroupAuthorInfoProps> = ({
   category,
   authorName,
   date,
-  likeCount,
+  viewCounts,
   avatarUrl,
   userId,
   onAuthorPress,
@@ -114,7 +114,7 @@ const GroupAuthorInfo: React.FC<GroupAuthorInfoProps> = ({
         <View style={groupDetailStyles.likeContainer}>
           <Eye style={groupDetailStyles.likeIcon} />
           <Text variant="body2" style={groupDetailStyles.likeCount}>
-            {likeCount}
+            {viewCounts}
           </Text>
         </View>
       </View>

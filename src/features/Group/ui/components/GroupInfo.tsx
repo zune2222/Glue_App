@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
   StyleSheet,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {groupDetailStyles} from '../styles/groupDetailStyles';
 import {Text} from '../../../../shared/ui/typography/Text';
@@ -26,6 +27,7 @@ interface Participant {
 
 interface GroupInfoProps {
   capacity: string | number;
+  currentParticipants?: number;
   language: string | number;
   minForeigners: string | number;
   meetingDate: string;
@@ -77,10 +79,42 @@ const formatMeetingDate = (isoDateString: string, t: any): string => {
 };
 
 /**
+ * 언어 ID를 언어 이름으로 변환하는 함수
+ * @param languageId 언어 ID
+ * @param t i18n 번역 함수
+ * @returns 언어 이름
+ */
+const getLanguageName = (languageId: number | string, t: any): string => {
+  if (typeof languageId === 'string') {
+    return languageId;
+  }
+
+  switch (languageId) {
+    case 1:
+      return t('signup.nativeLanguage.korean');
+    case 2:
+      return t('signup.nativeLanguage.english');
+    case 3:
+      return t('signup.nativeLanguage.japanese');
+    case 4:
+      return t('signup.nativeLanguage.chinese');
+    case 5:
+      return t('signup.nativeLanguage.german');
+    case 6:
+      return t('signup.nativeLanguage.french');
+    case 7:
+      return t('signup.nativeLanguage.spanish');
+    default:
+      return t('signup.nativeLanguage.korean');
+  }
+};
+
+/**
  * 모임 정보 컴포넌트
  */
 const GroupInfo: React.FC<GroupInfoProps> = ({
   capacity,
+  currentParticipants = 0,
   language,
   minForeigners,
   meetingDate,
@@ -91,13 +125,14 @@ const GroupInfo: React.FC<GroupInfoProps> = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [popoverVisible, setPopoverVisible] = useState(false);
 
-  // 숫자를 문자열로 변환
+  // 현재 참가자 수/최대 참가자 수 형식으로 표시
   const capacityText =
-    typeof capacity === 'number' ? `${capacity}명` : capacity;
+    typeof capacity === 'number'
+      ? `${currentParticipants || participants.length}/${capacity}`
+      : capacity;
 
-  // 언어 ID를 문자열로 변환 (추후 언어 이름으로 매핑 가능)
-  const languageText =
-    typeof language === 'number' ? `언어 ${language}` : language;
+  // 언어 ID를 언어 이름으로 변환
+  const languageText = getLanguageName(language, t);
 
   // 최소 외국인 수를 문자열로 변환
   const minForeignersText =
@@ -126,13 +161,49 @@ const GroupInfo: React.FC<GroupInfoProps> = ({
           {t('group.detail.meeting_info')}
         </Text>
         <Pressable
-          onPress={() => setPopoverVisible(!popoverVisible)}
+          onPress={() => setPopoverVisible(true)}
           style={({pressed}) => [styles.iconButton, pressed && {opacity: 0.7}]}>
           <InfoIcon width={14} height={14} />
-          {popoverVisible && (
-            <View style={styles.popover}>
-              <View style={styles.popoverArrow} />
+        </Pressable>
+      </View>
+
+      <Pressable onPress={() => setModalVisible(true)}>
+        <View style={groupDetailStyles.infoItemsContainer}>
+          <View style={groupDetailStyles.infoItem}>
+            <Users style={groupDetailStyles.infoIcon} />
+            <Text variant="body2" style={groupDetailStyles.infoText}>
+              {capacityText}
+            </Text>
+          </View>
+          <View style={groupDetailStyles.infoItem}>
+            <Exchange style={groupDetailStyles.infoIconWide} />
+            <Text variant="body2" style={groupDetailStyles.infoText}>
+              {t('group.detail.language_prefix')} {languageText}
+            </Text>
+          </View>
+
+          <View style={groupDetailStyles.infoItemLast}>
+            <Calendar style={groupDetailStyles.infoIconWide} />
+            <Text variant="body2" style={groupDetailStyles.infoText}>
+              {formattedMeetingDate}
+            </Text>
+          </View>
+        </View>
+      </Pressable>
+
+      {/* 정보 팝오버 모달 */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={popoverVisible}
+        onRequestClose={() => setPopoverVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => setPopoverVisible(false)}>
+          <View style={styles.popoverModalOverlay}>
+            <View style={styles.popoverContainer}>
               <View style={styles.popoverContent}>
+                <Text style={styles.popoverTitle}>
+                  {t('group.detail.meeting_info')}
+                </Text>
                 <Text style={styles.popoverText}>
                   • {t('group.detail.language')}:{' '}
                   {t('group.detail.language_desc')}
@@ -147,38 +218,9 @@ const GroupInfo: React.FC<GroupInfoProps> = ({
                 </Text>
               </View>
             </View>
-          )}
-        </Pressable>
-      </View>
-
-      <Pressable onPress={() => setModalVisible(true)}>
-        <View style={groupDetailStyles.infoItemsContainer}>
-          <View style={groupDetailStyles.infoItem}>
-            <Users style={groupDetailStyles.infoIcon} />
-            <Text variant="body2" style={groupDetailStyles.infoText}>
-              {capacityText}
-            </Text>
           </View>
-          <View style={groupDetailStyles.infoItem}>
-            <Global style={groupDetailStyles.infoIconWide} />
-            <Text variant="body2" style={groupDetailStyles.infoText}>
-              {languageText}
-            </Text>
-          </View>
-          <View style={groupDetailStyles.infoItem}>
-            <Exchange style={groupDetailStyles.infoIconWide} />
-            <Text variant="body2" style={groupDetailStyles.infoText}>
-              {minForeignersText}
-            </Text>
-          </View>
-          <View style={groupDetailStyles.infoItemLast}>
-            <Calendar style={groupDetailStyles.infoIconWide} />
-            <Text variant="body2" style={groupDetailStyles.infoText}>
-              {formattedMeetingDate}
-            </Text>
-          </View>
-        </View>
-      </Pressable>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       {/* 참가자 팝오버 모달 */}
       <Modal
@@ -303,14 +345,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: '#9DA2AF',
   },
-  popover: {
-    position: 'absolute',
-    top: 20,
-    left: -230,
-    width: 250,
+  popoverModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  popoverContainer: {
+    marginTop: '80%',
+    width: '90%',
     backgroundColor: 'white',
     borderRadius: 8,
-    padding: 10,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -319,23 +365,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    zIndex: 1000,
-  },
-  popoverArrow: {
-    position: 'absolute',
-    top: -8,
-    right: 30,
-    width: 0,
-    height: 0,
-    borderLeftWidth: 8,
-    borderRightWidth: 8,
-    borderBottomWidth: 8,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: 'white',
   },
   popoverContent: {
     padding: 5,
+  },
+  popoverTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#000',
   },
   popoverText: {
     fontSize: 14,

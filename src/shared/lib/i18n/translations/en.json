@@ -393,6 +393,7 @@
       "meeting_info": "Meeting Information",
       "capacity": "8/10",
       "language": "Preferred exchange language: English",
+      "language_prefix": "Preferred exchange language:",
       "minForeigners": "Minimum English-speaking students: 2",
       "meetingDate": "April 12, 2025 at 6:00 PM",
       "likesCount": "{{count}} people like this.",

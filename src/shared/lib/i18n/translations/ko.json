@@ -393,6 +393,7 @@
       "meeting_info": "모임 정보",
       "capacity": "8/10",
       "language": "교환 희망 언어: 영어",
+      "language_prefix": "교환 희망 언어:",
       "minForeigners": "영어권 학생 최소 희망 인원: 2명",
       "meetingDate": "2025년 4월 12일 오후 6시 00분",
       "likesCount": "{{count}}명이 좋아합니다.",

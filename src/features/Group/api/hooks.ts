@@ -12,7 +12,9 @@ import {
   getPosts,
   getGroupDetail,
   joinGroup,
+  toggleLike,
 } from './api';
+import {useQueryClient, InvalidateQueryFilters} from '@tanstack/react-query';
 
 /**
  * 모임 게시글 생성을 위한 React Query 훅
@@ -105,4 +107,57 @@ export const useJoinGroup = () => {
       },
     },
   );
+};
+
+/**
+ * 좋아요 토글을 위한 React Query 훅 (낙관적 업데이트 적용)
+ * @param postId 게시글 ID
+ * @returns useApiMutation 훅의 반환값
+ */
+export const useToggleLike = (postId: number) => {
+  const queryClient = useQueryClient();
+  const queryKey = ['groupDetail', String(postId)];
+
+  return useApiMutation<void, void>('toggleLike', () => toggleLike(postId), {
+    // 낙관적 업데이트 적용
+    onMutate: async () => {
+      // 현재 쿼리 데이터 가져오기
+      const previousData = queryClient.getQueryData<any>(queryKey);
+
+      if (!previousData) return {previousData};
+
+      // 낙관적으로 좋아요 수 업데이트
+      const updatedData = {
+        ...previousData,
+        data: {
+          ...previousData.data,
+          post: {
+            ...previousData.data.post,
+            likeCount: previousData.data.post.likeCount + 1,
+          },
+        },
+      };
+
+      // 업데이트된 데이터로 쿼리 캐시 갱신
+      queryClient.setQueryData(queryKey, updatedData);
+
+      // 롤백을 위한 이전 데이터 반환
+      return {previousData};
+    },
+
+    // 오류 발생 시 원래 데이터로 롤백
+    onError: (error, _, context: any) => {
+      console.error('좋아요 토글 실패:', error.message);
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+    },
+
+    // 서버 응답 후에 데이터 리페치하여 실제 데이터 동기화
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKey,
+      } as InvalidateQueryFilters);
+    },
+  });
 };
