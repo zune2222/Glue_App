@@ -255,7 +255,14 @@ const UserProfileDetail: React.FC<UserProfileDetailProps> = ({
             <Text style={userProfileDetailStyles.menuText}>좋아요 목록</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={userProfileDetailStyles.menuItem}>
+          <TouchableOpacity
+            style={userProfileDetailStyles.menuItem}
+            onPress={() =>
+              navigation.navigate('Guestbook', {
+                userId: userProfile.userId,
+                userNickname: userProfile.userNickname,
+              })
+            }>
             <Text style={userProfileDetailStyles.menuText}>방명록</Text>
           </TouchableOpacity>
         </View>

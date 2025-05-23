@@ -42,6 +42,10 @@ export {default as ReportIcon} from './report.svg';
 export {default as UserIcon} from './user.svg';
 export {default as SchoolIcon} from './school.svg';
 
+export {default as DotsVertical} from './dots-vertical.svg';
+export {default as LockIcon} from './lock.svg';
+export {default as UnlockIcon} from './unlock.svg';
+
 // 이미지 파일들
 export const logo = require('./logo.png');
 export const dummyProfile = require('./default-image.png');

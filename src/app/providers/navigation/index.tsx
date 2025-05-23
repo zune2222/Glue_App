@@ -30,6 +30,7 @@ import {
   GroupHistoryScreen,
   LikedGroupsScreen,
   UserProfileDetail,
+  GuestbookScreen,
 } from '@features/Profile';
 // 인증 화면 임포트
 import {
@@ -226,6 +227,11 @@ const ProfileNavigator = () => (
       component={ProfileEditScreen}
       options={{title: '프로필 수정', headerBackTitle: '취소'}}
     />
+    <ProfileStack.Screen
+      name="Guestbook"
+      component={GuestbookScreen}
+      options={{headerShown: false}}
+    />
   </ProfileStack.Navigator>
 );
 // 메인 탭 네비게이터
@@ -342,6 +348,11 @@ export const AppNavigator = () => {
       <GroupStack.Screen
         name="UserProfile"
         component={UserProfileDetail}
+        options={{headerShown: false}}
+      />
+      <GroupStack.Screen
+        name="Guestbook"
+        component={GuestbookScreen}
         options={{headerShown: false}}
       />
     </RootStack.Navigator>

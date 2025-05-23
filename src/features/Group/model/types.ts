@@ -95,6 +95,7 @@ export type GroupStackParamList = {
   GroupCreateStep3: undefined;
   GroupCreateStep4: undefined;
   EditGroup: {postId: string | number};
+  Guestbook: {userId: number; userNickname: string};
 };
 
 export type GroupListNavigationProp = StackNavigationProp<GroupStackParamList>;
