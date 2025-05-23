@@ -11,12 +11,17 @@ import {secureStorage} from '@shared/lib/security';
 interface GroupHeaderProps {
   creatorId?: number;
   postId?: number;
+  onReportPress?: () => void;
 }
 
 /**
  * 모임 상세 페이지의 헤더 컴포넌트
  */
-const GroupHeader: React.FC<GroupHeaderProps> = ({creatorId, postId}) => {
+const GroupHeader: React.FC<GroupHeaderProps> = ({
+  creatorId,
+  postId,
+  onReportPress,
+}) => {
   const navigation = useNavigation<any>();
   const {t} = useTranslation();
   const [menuVisible, setMenuVisible] = useState(false);
@@ -116,13 +121,10 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({creatorId, postId}) => {
 
   const handleReportPost = () => {
     setMenuVisible(false);
-    // 신고하기 기능 구현
-    console.log('게시글 신고:', postId);
-    // TODO: 신고하기 페이지로 이동 또는 신고 API 호출
-    toastService.info(
-      t('common.info'),
-      t('group.detail.menu.reportSubmitted') || '신고가 접수되었습니다.',
-    );
+    // 신고하기 모달 열기
+    if (onReportPress) {
+      onReportPress();
+    }
   };
 
   return (

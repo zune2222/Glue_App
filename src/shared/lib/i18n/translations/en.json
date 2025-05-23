@@ -416,7 +416,19 @@
         "cancel": "Cancel",
         "confirm": "Confirm",
         "report": "Report",
-        "reportSubmitted": "Your report has been submitted."
+        "reportSubmitted": "Your report has been submitted.",
+        "reportModal": {
+          "title": "Please select a reason for reporting.",
+          "reasons": {
+            "spam": "This is spam or promotional content.",
+            "adult": "This contains adult content.",
+            "illegal": "This contains illegal information.",
+            "hate": "This contains hate speech or discriminatory language."
+          },
+          "submitButton": "Report",
+          "success": "Your report has been successfully submitted.",
+          "error": "Failed to submit the report."
+        }
       }
     },
     "author": {

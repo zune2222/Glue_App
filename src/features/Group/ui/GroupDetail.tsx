@@ -16,9 +16,10 @@ import GroupLikes from './components/GroupLikes';
 import {Button} from '@shared/ui';
 import {Text} from '@shared/ui/typography';
 import {toastService} from '../../../shared/lib/notifications/toast';
-import {useGroupDetail, useJoinGroup, useCreateDmChatRoom} from '../api/hooks';
+import {useGroupDetail, useCreateDmChatRoom, useReportPost} from '../api/hooks';
 import {useTranslation} from 'react-i18next';
 import {secureStorage} from '@shared/lib/security';
+import ReportModal from './components/ReportModal';
 
 /**
  * 모임 상세 화면 컴포넌트
@@ -29,6 +30,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMyPost, setIsMyPost] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
 
   // 모임 상세 정보 조회 훅 사용
   const {
@@ -38,11 +40,11 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
     error,
   } = useGroupDetail(Number(postId));
 
-  // 모임 참여 훅 사용
-  const {mutate: joinGroupMutate} = useJoinGroup();
-
   // DM 채팅방 생성 훅 사용
   const {mutate: createDmChatRoomMutate} = useCreateDmChatRoom();
+
+  // 신고 훅 사용
+  const {mutate: reportPostMutate} = useReportPost();
 
   // 작성자 프로필로 이동하는 핸들러
   const handleAuthorPress = (userId: number) => {
@@ -167,6 +169,39 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
     }
   };
 
+  // 신고하기 모달 열기 핸들러
+  const handleReportPress = () => {
+    setReportModalVisible(true);
+  };
+
+  // 신고하기 핸들러
+  const handleReport = (reason: string) => {
+    if (!postId) return;
+
+    reportPostMutate(
+      {
+        postId: Number(postId),
+        reason: reason,
+      },
+      {
+        onSuccess: () => {
+          console.log('게시글 신고 성공');
+          toastService.success(
+            t('common.success'),
+            t('group.detail.menu.reportModal.success'),
+          );
+        },
+        onError: (error: any) => {
+          console.error('게시글 신고 실패:', error.message);
+          toastService.error(
+            t('common.error'),
+            error.message || t('group.detail.menu.reportModal.error'),
+          );
+        },
+      },
+    );
+  };
+
   // 로딩 중 표시
   if (isLoading) {
     return (
@@ -221,7 +256,11 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
 
   return (
     <SafeAreaView style={commonStyles.container}>
-      <GroupHeader creatorId={creator.userId} postId={post.postId} />
+      <GroupHeader
+        creatorId={creator.userId}
+        postId={post.postId}
+        onReportPress={handleReportPress}
+      />
       <ScrollView style={[commonStyles.container, {paddingHorizontal: 19}]}>
         {/* 작성자 정보 */}
         <GroupAuthorInfo
@@ -278,6 +317,11 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
           />
         )}
       </ScrollView>
+      <ReportModal
+        visible={reportModalVisible}
+        onClose={() => setReportModalVisible(false)}
+        onReport={handleReport}
+      />
     </SafeAreaView>
   );
 };
