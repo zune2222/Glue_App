@@ -91,7 +91,11 @@
       "sendingVerification": "Sending verification code...",
       "verificationSent": "Verification code has been sent",
       "sendFailed": "Failed to send verification code",
-      "nextButtonNotice": "Verification code will be sent when you click Next"
+      "nextButtonNotice": "Verification code will be sent when you click Next",
+      "notice": "Only @pusan.ac.kr emails are allowed.",
+      "error": {
+        "invalidDomain": "Only @pusan.ac.kr emails are allowed."
+      }
     },
     "verification": {
       "title": "Please enter the code\nwe sent you",
@@ -251,6 +255,7 @@
     "groupChat": "Group Chat",
     "directMessage": "Direct Message",
     "noGroupChats": "You're not participating in any group chats.",
+    "noDirectMessages": "You don't have any direct messages.",
     "browseGroups": "Browse Groups",
     "failedToLoad": "Failed to load chat rooms",
     "chatInfo": {
@@ -409,7 +414,21 @@
         "bumpSuccess": "Post has been bumped.",
         "deleteSuccess": "Post has been deleted.",
         "cancel": "Cancel",
-        "confirm": "Confirm"
+        "confirm": "Confirm",
+        "report": "Report",
+        "reportSubmitted": "Your report has been submitted.",
+        "reportModal": {
+          "title": "Please select a reason for reporting.",
+          "reasons": {
+            "spam": "This is spam or promotional content.",
+            "adult": "This contains adult content.",
+            "illegal": "This contains illegal information.",
+            "hate": "This contains hate speech or discriminatory language."
+          },
+          "submitButton": "Report",
+          "success": "Your report has been successfully submitted.",
+          "error": "Failed to submit the report."
+        }
       }
     },
     "author": {

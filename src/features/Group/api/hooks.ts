@@ -8,12 +8,18 @@ import {
   CreateGroupPostResponse,
   GetPostResponse,
   GetPostsResponse,
+  DmChatRoomCreateRequest,
+  DmChatRoomCreateResult,
+  ReportPostRequest,
+  ReportPostResponse,
   createGroupPost,
   getPosts,
   getGroupDetail,
   joinGroup,
   toggleLike,
   bumpPost,
+  createDmChatRoom,
+  reportPost,
 } from './api';
 import {useQueryClient, InvalidateQueryFilters} from '@tanstack/react-query';
 
@@ -189,6 +195,44 @@ export const useBumpPost = () => {
       },
       onError: (error, postId) => {
         console.error(`게시글 ${postId} 끌어올리기 실패:`, error.message);
+      },
+    },
+  );
+};
+
+/**
+ * DM 채팅방 생성을 위한 React Query 훅
+ * @returns useApiMutation 훅의 반환값
+ */
+export const useCreateDmChatRoom = () => {
+  return useApiMutation<DmChatRoomCreateResult, DmChatRoomCreateRequest>(
+    'createDmChatRoom',
+    (data: DmChatRoomCreateRequest) => createDmChatRoom(data),
+    {
+      onSuccess: response => {
+        console.log('DM 채팅방 생성 성공:', response.data);
+      },
+      onError: error => {
+        console.error('DM 채팅방 생성 실패:', error.message);
+      },
+    },
+  );
+};
+
+/**
+ * 게시글 신고를 위한 React Query 훅
+ * @returns useApiMutation 훅의 반환값
+ */
+export const useReportPost = () => {
+  return useApiMutation<ReportPostResponse, ReportPostRequest>(
+    'reportPost',
+    (data: ReportPostRequest) => reportPost(data),
+    {
+      onSuccess: response => {
+        console.log('게시글 신고 성공:', response.data);
+      },
+      onError: error => {
+        console.error('게시글 신고 실패:', error.message);
       },
     },
   );
