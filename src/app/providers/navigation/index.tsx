@@ -161,11 +161,6 @@ const GroupNavigator = () => {
         component={GroupList}
         options={{headerShown: false}}
       />
-      <GroupStack.Screen
-        name="GroupDetail"
-        component={GroupDetail}
-        options={{headerShown: false}}
-      />
 
       <GroupStack.Screen
         name="GroupSearch"
@@ -335,6 +330,11 @@ export const AppNavigator = () => {
         options={{
           headerShown: false,
         }}
+      />
+      <GroupStack.Screen
+        name="GroupDetail"
+        component={GroupDetail}
+        options={{headerShown: false}}
       />
     </RootStack.Navigator>
   );
