@@ -432,6 +432,9 @@ const GroupCreateStep4 = () => {
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={onDateChange}
                 style={styles.datePicker}
+                textColor={colors.charcoal}
+                accentColor={colors.batteryChargedBlue}
+                themeVariant="light"
               />
 
               <View style={styles.modalButtonContainer}>
@@ -475,6 +478,9 @@ const GroupCreateStep4 = () => {
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={onTimeChange}
                 style={styles.datePicker}
+                textColor={colors.charcoal}
+                accentColor={colors.batteryChargedBlue}
+                themeVariant="light"
               />
 
               <View style={styles.modalButtonContainer}>
@@ -506,6 +512,9 @@ const GroupCreateStep4 = () => {
           mode="date"
           display="default"
           onChange={onDateChange}
+          textColor={colors.charcoal}
+          accentColor={colors.batteryChargedBlue}
+          themeVariant="light"
         />
       )}
 
@@ -516,6 +525,9 @@ const GroupCreateStep4 = () => {
           mode="time"
           display="default"
           onChange={onTimeChange}
+          textColor={colors.charcoal}
+          accentColor={colors.batteryChargedBlue}
+          themeVariant="light"
         />
       )}
 
