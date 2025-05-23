@@ -57,6 +57,7 @@ const Chat: React.FC = () => {
               props.navigation.navigate('ChatRoom', {roomId});
             }}
             onDmChatRoomPress={dmRoomId => {
+              console.log('[Chat] DM 채팅방으로 네비게이션:', dmRoomId);
               props.navigation.navigate('ChatRoom', {dmChatRoomId: dmRoomId});
             }}
           />

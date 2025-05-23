@@ -19,7 +19,7 @@ import {
 import {GroupStackParamList} from '@features/Group/model/types';
 
 // 채팅 화면 컴포넌트 임포트
-import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
+import {ChatRoomListScreen, ChatRoomScreen} from '@features/Chat';
 
 // 프로필 화면 컴포넌트 임포트
 import {
@@ -107,16 +107,20 @@ const BoardNavigator = () => (
 // 메시지 스택 네비게이터
 const MessagesNavigator = () => (
   <MessagesStack.Navigator screenOptions={commonHeaderOptions}>
-    <MessagesStack.Screen
-      name="MessagesList"
-      component={ChatListScreen}
-      options={{headerShown: false}}
-    />
-    <MessagesStack.Screen
-      name="ChatRoom"
-      component={ChatRoomScreen}
-      options={{headerShown: false}}
-    />
+    <MessagesStack.Screen name="MessagesList" options={{headerShown: false}}>
+      {props => (
+        <ChatRoomListScreen
+          {...props}
+          chatRooms={[]} // 빈 배열로 초기화, 실제 데이터는 ChatRoomListScreen 내부에서 API로 로드
+          onChatRoomPress={roomId => {
+            props.navigation.navigate('ChatRoom', {roomId});
+          }}
+          onDmChatRoomPress={dmRoomId => {
+            props.navigation.navigate('ChatRoom', {dmChatRoomId: dmRoomId});
+          }}
+        />
+      )}
+    </MessagesStack.Screen>
   </MessagesStack.Navigator>
 );
 
@@ -353,6 +357,11 @@ export const AppNavigator = () => {
       <GroupStack.Screen
         name="Guestbook"
         component={GuestbookScreen}
+        options={{headerShown: false}}
+      />
+      <MessagesStack.Screen
+        name="ChatRoom"
+        component={ChatRoomScreen}
         options={{headerShown: false}}
       />
     </RootStack.Navigator>

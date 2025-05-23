@@ -125,8 +125,11 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
 
   // DM 채팅방 클릭 핸들러
   const handleDmChatRoomPress = (dmRoomId: number) => {
+    console.log('[ChatRoomList] DM 채팅방 클릭됨:', dmRoomId);
     if (onDmChatRoomPress) {
       onDmChatRoomPress(dmRoomId);
+    } else {
+      console.warn('[ChatRoomList] onDmChatRoomPress 콜백이 없습니다.');
     }
   };
 

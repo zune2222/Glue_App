@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {Text} from '../../../../shared/ui/typography/Text';
-import {Bell, Exit, Mail, Mine, Pen} from '@shared/assets/images';
+import {Bell, Exit, Mail, Mine, Pen, dummyProfile} from '@shared/assets/images';
 
 interface ChatRoomInfoProps {
   roomName: string;
@@ -43,23 +43,31 @@ interface MemberItemProps {
 }
 
 // 모임 참여자 컴포넌트
-const MemberItem: React.FC<MemberItemProps> = ({member}) => (
-  <View style={styles.memberItem}>
-    <View style={styles.memberInfo}>
-      <Image
-        source={{uri: member.profileImage}}
-        resizeMode={'cover'}
-        style={styles.memberAvatar}
-      />
-      <Text variant="body2" weight="medium" color="#303030">
-        {member.name}
-      </Text>
+const MemberItem: React.FC<MemberItemProps> = ({member}) => {
+  // profileImage가 dummyProfile(로컬 이미지)인지 URL(문자열)인지 확인
+  const imageSource =
+    member.profileImage === dummyProfile
+      ? dummyProfile // 로컬 이미지
+      : {uri: member.profileImage}; // URL 이미지
+
+  return (
+    <View style={styles.memberItem}>
+      <View style={styles.memberInfo}>
+        <Image
+          source={imageSource}
+          resizeMode={'cover'}
+          style={styles.memberAvatar}
+        />
+        <Text variant="body2" weight="medium" color="#303030">
+          {member.name}
+        </Text>
+      </View>
+      <View style={styles.memberBadges}>
+        {member.isHost && <Mine style={styles.hostBadge} />}
+      </View>
     </View>
-    <View style={styles.memberBadges}>
-      {member.isHost && <Mine style={styles.hostBadge} />}
-    </View>
-  </View>
-);
+  );
+};
 
 const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
