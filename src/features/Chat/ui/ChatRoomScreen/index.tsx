@@ -29,7 +29,8 @@ import {
 interface ChatRoomScreenProps {
   route?: {
     params: {
-      roomId: string;
+      roomId?: string;
+      dmChatRoomId?: number;
     };
   };
   navigation?: any;
@@ -50,6 +51,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   // route.params.roomId가 없으면 기본값이 아니라 에러 처리
   const roomId = route?.params?.roomId;
+  const dmChatRoomId = route?.params?.dmChatRoomId;
 
   // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
   const panResponder = useRef(
@@ -125,7 +127,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   useEffect(() => {
     const loadChatDetails = async () => {
-      if (!roomId) {
+      if (!roomId && !dmChatRoomId) {
         setError('채팅방 ID가 제공되지 않았습니다.');
         setLoading(false);
         return;
@@ -134,13 +136,22 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       try {
         setLoading(true);
         setError(null);
-        const details = await fetchChatDetails(roomId);
+
+        let details;
+        if (dmChatRoomId) {
+          // DM 채팅방 정보 로드 (임시로 fetchChatDetails 재사용)
+          // 실제로는 DM 채팅방 전용 API 호출 필요
+          details = await fetchChatDetails(`dm_${dmChatRoomId}`);
+        } else if (roomId) {
+          // 일반 채팅방 정보 로드
+          details = await fetchChatDetails(roomId);
+        }
 
         if (details) {
           setChatDetails(details);
           setMessages(details.messages);
         } else {
-          setError(`채팅방 정보를 찾을 수 없습니다: ${roomId}`);
+          setError(`채팅방 정보를 찾을 수 없습니다: ${dmChatRoomId || roomId}`);
         }
       } catch (error) {
         console.error('채팅방 정보를 불러오는데 실패했습니다:', error);
@@ -151,15 +162,24 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     };
 
     loadChatDetails();
-  }, [roomId]);
+  }, [roomId, dmChatRoomId]);
 
   const handleSendMessage = async (text: string) => {
-    if (!chatDetails || !roomId) return;
+    if (!chatDetails) return;
 
     try {
-      const newMessage = await sendMessage(roomId, text);
+      let newMessage;
+      if (dmChatRoomId) {
+        // DM 메시지 전송 (임시로 sendMessage 재사용)
+        // 실제로는 DM 메시지 전용 API 호출 필요
+        newMessage = await sendMessage(`dm_${dmChatRoomId}`, text);
+      } else if (roomId) {
+        // 일반 메시지 전송
+        newMessage = await sendMessage(roomId, text);
+      }
+
       if (newMessage) {
-        setMessages(prevMessages => [...prevMessages, newMessage]);
+        setMessages(prevMessages => [...prevMessages, newMessage!]);
 
         // 스크롤을 맨 아래로 이동
         setTimeout(() => {

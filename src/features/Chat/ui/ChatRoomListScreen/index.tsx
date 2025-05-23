@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -6,15 +6,21 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import {styles} from './styles';
 import {ChatRoom} from '../../entities/types';
 import {ChatRoomItem, TabHeader, MessageFilter} from '../../components';
 import {useTranslation} from 'react-i18next';
 import {dummyProfile} from '@shared/assets/images';
+import {useHostedDmRooms, useParticipatedDmRooms} from '../../api/hooks';
+import {DmChatRoom} from '../../api/api';
+import {toastService} from '@shared/lib/notifications/toast';
+
 interface ChatRoomListScreenProps {
   chatRooms: ChatRoom[];
   onChatRoomPress: (roomId: string) => void;
+  onDmChatRoomPress?: (dmRoomId: number) => void;
 }
 
 type FilterType = 'host' | 'guest' | 'all';
@@ -22,10 +28,90 @@ type FilterType = 'host' | 'guest' | 'all';
 const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
   chatRooms,
   onChatRoomPress,
+  onDmChatRoomPress,
 }) => {
   const {t} = useTranslation();
   const [activeTab, setActiveTab] = useState<'chat' | 'message'>('chat');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [directMessages, setDirectMessages] = useState<DmChatRoom[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 호스트 DM 채팅방 목록 조회 훅
+  const {
+    data: hostedDmRooms,
+    isLoading: isHostedLoading,
+    isError: isHostedError,
+    error: hostedError,
+  } = useHostedDmRooms();
+
+  // 참여자 DM 채팅방 목록 조회 훅
+  const {
+    data: participatedDmRooms,
+    isLoading: isParticipatedLoading,
+    isError: isParticipatedError,
+    error: participatedError,
+  } = useParticipatedDmRooms();
+
+  // 모든 DM 채팅방 데이터 로딩 상태
+  useEffect(() => {
+    setIsLoading(isHostedLoading || isParticipatedLoading);
+  }, [isHostedLoading, isParticipatedLoading]);
+
+  // 에러 발생시 토스트 표시
+  useEffect(() => {
+    if (isHostedError && hostedError) {
+      toastService.error('오류', hostedError.message);
+    }
+    if (isParticipatedError && participatedError) {
+      toastService.error('오류', participatedError.message);
+    }
+  }, [isHostedError, hostedError, isParticipatedError, participatedError]);
+
+  // 필터에 따라 DM 채팅방 목록 업데이트
+  useEffect(() => {
+    if (activeTab === 'message') {
+      let filteredMessages: DmChatRoom[] = [];
+
+      if (activeFilter === 'host' && hostedDmRooms?.data) {
+        filteredMessages = hostedDmRooms.data;
+      } else if (activeFilter === 'guest' && participatedDmRooms?.data) {
+        filteredMessages = participatedDmRooms.data;
+      } else {
+        // 'all' 필터인 경우 모든 채팅방 병합
+        const allMessages = [
+          ...(hostedDmRooms?.data || []),
+          ...(participatedDmRooms?.data || []),
+        ];
+
+        // dmChatRoomId로 중복 제거 (호스트/참여자 모두 포함된 채팅방이 있을 수 있음)
+        const uniqueRooms = allMessages.reduce((acc, current) => {
+          const duplicateIndex = acc.findIndex(
+            item => item.dmChatRoomId === current.dmChatRoomId,
+          );
+          if (duplicateIndex === -1) {
+            acc.push(current);
+          }
+          return acc;
+        }, [] as DmChatRoom[]);
+
+        filteredMessages = uniqueRooms;
+      }
+
+      // 최신 메시지 순으로 정렬
+      filteredMessages.sort((a, b) => {
+        // lastMessageTime이 null인 경우 가장 아래로
+        if (!a.lastMessageTime) return 1;
+        if (!b.lastMessageTime) return -1;
+
+        return (
+          new Date(b.lastMessageTime).getTime() -
+          new Date(a.lastMessageTime).getTime()
+        );
+      });
+
+      setDirectMessages(filteredMessages);
+    }
+  }, [activeTab, activeFilter, hostedDmRooms, participatedDmRooms]);
 
   // 탭 변경 핸들러
   const handleTabChange = (tab: 'chat' | 'message') => {
@@ -37,50 +123,50 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
     setActiveFilter(filter);
   };
 
+  // DM 채팅방 클릭 핸들러
+  const handleDmChatRoomPress = (dmRoomId: number) => {
+    if (onDmChatRoomPress) {
+      onDmChatRoomPress(dmRoomId);
+    }
+  };
+
   // 모임톡 데이터 필터링 (그룹 채팅만)
   const groupChats = chatRooms.filter(room => room.type === 'group');
 
-  // 쪽지 데이터 필터링 (개인 채팅만)
-  let directMessages = chatRooms.filter(room => room.type === 'direct');
-
-  // 필터 적용 (실제로는 여기서 호스트/게스트 구분 로직이 추가되어야 함)
-  if (activeFilter !== 'all' && activeTab === 'message') {
-    // 예시: 실제 앱에서는 호스트/게스트 정보를 기반으로 필터링
-    directMessages = directMessages.filter(room => {
-      if (activeFilter === 'host') {
-        // 호스트인 경우 필터링 로직
-        return room.id === '3'; // 예시로 id가 3인 채팅방을 호스트로 가정
-      } else if (activeFilter === 'guest') {
-        // 게스트인 경우 필터링 로직
-        return room.id === '4'; // 예시로 id가 4인 채팅방을 게스트로 가정
-      }
-      return true;
-    });
-  }
-
-  // 현재 탭에 맞는 데이터 선택
-  // const currentChats = activeTab === 'chat' ? groupChats : directMessages;
-
-  // 직접 메시지 아이템 렌더링 (디자인 참고 구현)
-  const renderDirectMessageItem = (room: ChatRoom) => {
+  // DM 채팅방 아이템 렌더링
+  const renderDmChatRoomItem = (room: DmChatRoom) => {
     return (
       <TouchableOpacity
-        key={room.id}
+        key={room.dmChatRoomId}
         style={styles.directMessageItem}
-        onPress={() => onChatRoomPress(room.id)}
+        onPress={() => handleDmChatRoomPress(room.dmChatRoomId)}
         activeOpacity={0.7}>
         <Image
-          source={dummyProfile}
-          resizeMode={'stretch'}
+          source={
+            room.otherUser.profileImageUrl
+              ? {uri: room.otherUser.profileImageUrl}
+              : dummyProfile
+          }
+          resizeMode={'cover'}
           style={styles.profileImage}
         />
         <View style={styles.messageContent}>
-          <Text style={styles.senderName}>{room.name}</Text>
-          <Text style={styles.messagePreview}>{room.lastMessage}</Text>
+          <Text style={styles.senderName}>{room.otherUser.userName}</Text>
+          <Text style={styles.messagePreview}>
+            {room.lastMessage || '새로운 채팅방이 생성되었습니다.'}
+          </Text>
         </View>
         <View style={styles.messageTimeContainer}>
-          <Text style={styles.messageTime}>{room.lastMessageTime}</Text>
-          {room?.unreadCount > 0 && <View style={styles.unreadIndicator} />}
+          <Text style={styles.messageTime}>
+            {room.lastMessageTime
+              ? new Date(room.lastMessageTime).toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                })
+              : ''}
+          </Text>
+          {room.hasUnreadMessages && <View style={styles.unreadIndicator} />}
         </View>
       </TouchableOpacity>
     );
@@ -97,12 +183,20 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
       )}
 
       <ScrollView style={styles.scrollView}>
+        {/* 로딩 표시 */}
+        {isLoading && activeTab === 'message' && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#1CBFDC" />
+            <Text style={styles.loadingText}>쪽지 목록을 불러오는 중...</Text>
+          </View>
+        )}
+
         {/* 쪽지 화면일 때 */}
-        {activeTab === 'message' ? (
-          // 디자인 참고한 쪽지 목록
+        {activeTab === 'message' && !isLoading ? (
+          // API로부터 가져온 DM 채팅방 목록
           <View style={styles.directMessagesContainer}>
             {directMessages.length > 0 ? (
-              directMessages.map(room => renderDirectMessageItem(room))
+              directMessages.map(room => renderDmChatRoomItem(room))
             ) : (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>
@@ -112,24 +206,26 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
             )}
           </View>
         ) : (
-          // 기존 모임톡 목록
-          <View>
-            {groupChats.length > 0 ? (
-              groupChats.map(room => (
-                <ChatRoomItem
-                  key={room.id}
-                  room={room}
-                  onPress={onChatRoomPress}
-                />
-              ))
-            ) : (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>
-                  {t('messages.noGroupChats')}
-                </Text>
-              </View>
-            )}
-          </View>
+          // 기존 모임톡 목록 (API에서 온 데이터가 아님)
+          !isLoading && (
+            <View>
+              {groupChats.length > 0 ? (
+                groupChats.map(room => (
+                  <ChatRoomItem
+                    key={room.id}
+                    room={room}
+                    onPress={onChatRoomPress}
+                  />
+                ))
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>
+                    {t('messages.noGroupChats')}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )
         )}
       </ScrollView>
     </SafeAreaView>

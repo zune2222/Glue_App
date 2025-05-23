@@ -251,6 +251,7 @@
     "groupChat": "모임톡",
     "directMessage": "쪽지",
     "noGroupChats": "참여하고 있는 모임톡이 없습니다.",
+    "noDirectMessages": "받은 쪽지가 없습니다.",
     "browseGroups": "모임 둘러보기",
     "failedToLoad": "채팅방 목록을 불러오는데 실패했습니다",
     "chatInfo": {
