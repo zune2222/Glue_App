@@ -20,10 +20,11 @@ export const styles = StyleSheet.create({
   },
   tabButton: {
     alignItems: 'center',
-    marginRight: 19,
+    marginRight: 10,
+    minWidth: 60,
   },
   indicator: {
-    width: 48,
+    width: 50,
     height: 2,
     backgroundColor: '#394050',
     marginTop: 5,

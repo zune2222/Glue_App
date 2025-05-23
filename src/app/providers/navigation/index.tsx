@@ -16,6 +16,7 @@ import {
   GroupCreateStep3,
   GroupCreateStep4,
 } from '@features/Group';
+import {GroupStackParamList} from '@features/Group/model/types';
 
 // 채팅 화면 컴포넌트 임포트
 import {ChatListScreen, ChatRoomScreen} from '@features/Chat';
@@ -56,7 +57,7 @@ const RootStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 const BoardStack = createNativeStackNavigator();
-const GroupStack = createNativeStackNavigator();
+const GroupStack = createNativeStackNavigator<GroupStackParamList>();
 const MessagesStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
 const MainTab = createBottomTabNavigator();
@@ -152,8 +153,6 @@ const AuthNavigator = () => (
 
 // 모임글 스택 네비게이터
 const GroupNavigator = () => {
-  const {t} = useTranslation();
-
   return (
     <GroupStack.Navigator screenOptions={commonHeaderOptions}>
       <GroupStack.Screen
