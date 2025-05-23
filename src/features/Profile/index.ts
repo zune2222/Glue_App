@@ -13,3 +13,7 @@ export {default as GuestbookScreen} from './ui/GuestbookScreen';
 // 모델 훅 & 타입도 한 번에
 export * from './model/useProfile';
 export * from './model/types';
+export * from './model/guestbookTypes';
+
+// API
+export * from './api/guestbookApi';
