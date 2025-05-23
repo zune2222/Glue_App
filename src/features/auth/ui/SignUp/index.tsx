@@ -182,7 +182,6 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
       } catch (error) {
         // 오류 알림
 
-        setStep(step + 1);
         Toast.show({
           type: 'error',
           text1: t('signup.email.sendFailed'),

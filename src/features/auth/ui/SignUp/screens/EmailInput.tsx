@@ -38,7 +38,7 @@ const EmailInput = ({
 
     // 이메일이 비어있지 않고 pusan.ac.kr이 아닐 경우 에러 메시지 표시
     if (text && !isValidEmail(text)) {
-      setErrorMessage('@pusan.ac.kr 이메일만 사용 가능합니다.');
+      setErrorMessage(t('signup.email.error.invalidDomain'));
     } else {
       setErrorMessage('');
     }
@@ -93,7 +93,7 @@ const EmailInput = ({
           </Text>
         ) : (
           <Text variant="body2" color={colors.charcoal} style={styles.notice}>
-            @pusan.ac.kr 이메일만 사용 가능합니다.
+            {t('signup.email.notice')}
           </Text>
         )}
       </View>

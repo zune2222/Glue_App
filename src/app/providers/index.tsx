@@ -1,6 +1,6 @@
 import React, {ReactNode} from 'react';
 import {StatusBar} from 'react-native';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {QueryProvider} from './query';
 import {ThemeProvider, useTheme} from './theme';
 import {NavigationContainer} from '@react-navigation/native';
@@ -24,15 +24,27 @@ const ThemedStatusBar = () => {
   );
 };
 
-// 앱 콘텐츠 래퍼 컴포넌트
-const AppContent = ({children}: {children: ReactNode}) => {
+// SafeArea 및 네비게이션 컨테이너
+const ThemedSafeAreaContainer = ({children}: {children: ReactNode}) => {
   const {theme} = useTheme();
 
   return (
-    <SafeAreaProvider style={{backgroundColor: theme.colors.background}}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: theme.colors.background,
+      }}
+      edges={['top', 'left', 'right']}>
       <ThemedStatusBar />
-      {children}
-    </SafeAreaProvider>
+      <NavigationContainer
+        ref={navigationRef}
+        onStateChange={state => {
+          // 네비게이션 상태 변경 디버깅 로그
+          console.log('Navigation State:', state);
+        }}>
+        {children}
+      </NavigationContainer>
+    </SafeAreaView>
   );
 };
 
@@ -42,19 +54,14 @@ const AppContent = ({children}: {children: ReactNode}) => {
  */
 export const AppProvider = ({children}: AppProviderProps) => {
   return (
-    <QueryProvider>
-      <ThemeProvider>
-        <I18nextProvider i18n={i18n}>
-          <NavigationContainer
-            ref={navigationRef}
-            onStateChange={state => {
-              // 네비게이션 상태 변경 디버깅 로그
-              console.log('Navigation State:', state);
-            }}>
-            <AppContent>{children}</AppContent>
-          </NavigationContainer>
-        </I18nextProvider>
-      </ThemeProvider>
-    </QueryProvider>
+    <SafeAreaProvider>
+      <QueryProvider>
+        <ThemeProvider>
+          <I18nextProvider i18n={i18n}>
+            <ThemedSafeAreaContainer>{children}</ThemedSafeAreaContainer>
+          </I18nextProvider>
+        </ThemeProvider>
+      </QueryProvider>
+    </SafeAreaProvider>
   );
 };

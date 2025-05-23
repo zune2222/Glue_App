@@ -41,21 +41,12 @@ export const Header = (props: HeaderProps) => {
     }
   };
 
-  return (
-    <View style={[styles.header]}>
-      <Text
-        variant="h4"
-        weight="bold"
-        color={theme?.colors.primary ? '#FFFFFF' : undefined}>
-        {getTitle()}
-      </Text>
-    </View>
-  );
+  return <View style={[styles.header]} />;
 };
 
 const styles = StyleSheet.create({
   header: {
-    height: 60,
+    // height: 60,
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',

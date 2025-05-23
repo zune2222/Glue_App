@@ -1,5 +1,5 @@
 import React from 'react';
-import {SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import Header from './components/Header';
 import BannerSection from './components/BannerSection';

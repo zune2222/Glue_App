@@ -91,7 +91,11 @@
       "sendingVerification": "Sending verification code...",
       "verificationSent": "Verification code has been sent",
       "sendFailed": "Failed to send verification code",
-      "nextButtonNotice": "Verification code will be sent when you click Next"
+      "nextButtonNotice": "Verification code will be sent when you click Next",
+      "notice": "Only @pusan.ac.kr emails are allowed.",
+      "error": {
+        "invalidDomain": "Only @pusan.ac.kr emails are allowed."
+      }
     },
     "verification": {
       "title": "Please enter the code\nwe sent you",
