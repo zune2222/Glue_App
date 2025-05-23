@@ -39,6 +39,9 @@ export {default as ClockIcon} from './clock.svg';
 export {default as CalendarOpacityIcon} from './calendar-opacity.svg';
 export {default as InfoIcon} from './info.svg';
 export {default as ReportIcon} from './report.svg';
+export {default as UserIcon} from './user.svg';
+export {default as SchoolIcon} from './school.svg';
+
 // 이미지 파일들
 export const logo = require('./logo.png');
 export const dummyProfile = require('./default-image.png');

@@ -29,6 +29,7 @@ import {
   MyProfileDetailScreen,
   GroupHistoryScreen,
   LikedGroupsScreen,
+  UserProfileDetail,
 } from '@features/Profile';
 // 인증 화면 임포트
 import {
@@ -38,7 +39,6 @@ import {
 } from '@features/auth';
 
 // 헤더 컴포넌트 임포트
-import {Header} from '@widgets/header';
 import CustomHeader from '@widgets/header/ui/CustomHeader';
 
 // 알림 패널 임포트
@@ -189,7 +189,6 @@ const renderProfileIcon = ({color}: {color: string}) => (
 );
 
 // 커스텀 헤더 랜더러
-const renderHeader = (props: any) => <Header {...props} theme={navTheme} />;
 const ProfileNavigator = () => (
   <ProfileStack.Navigator
     initialRouteName="MyPage" // ← 여기 추가!
@@ -338,6 +337,11 @@ export const AppNavigator = () => {
       <GroupStack.Screen
         name="GroupDetail"
         component={GroupDetail}
+        options={{headerShown: false}}
+      />
+      <GroupStack.Screen
+        name="UserProfile"
+        component={UserProfileDetail}
         options={{headerShown: false}}
       />
     </RootStack.Navigator>
