@@ -410,7 +410,9 @@
         "bumpSuccess": "Post has been bumped.",
         "deleteSuccess": "Post has been deleted.",
         "cancel": "Cancel",
-        "confirm": "Confirm"
+        "confirm": "Confirm",
+        "report": "Report",
+        "reportSubmitted": "Your report has been submitted."
       }
     },
     "author": {

@@ -114,6 +114,17 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({creatorId, postId}) => {
     console.log('게시글 삭제:', postId);
   };
 
+  const handleReportPost = () => {
+    setMenuVisible(false);
+    // 신고하기 기능 구현
+    console.log('게시글 신고:', postId);
+    // TODO: 신고하기 페이지로 이동 또는 신고 API 호출
+    toastService.info(
+      t('common.info'),
+      t('group.detail.menu.reportSubmitted') || '신고가 접수되었습니다.',
+    );
+  };
+
   return (
     <>
       <View style={groupDetailStyles.subHeaderContainer}>
@@ -131,28 +142,48 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({creatorId, postId}) => {
       <Modal
         animationType="fade"
         transparent={true}
-        visible={menuVisible && isMyPost}
+        visible={menuVisible}
         onRequestClose={() => setMenuVisible(false)}>
         <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setMenuVisible(false)}>
           <View style={styles.menuContainer}>
-            <TouchableOpacity style={styles.menuItem} onPress={handleEditPost}>
-              <Text style={styles.menuText}>{t('group.detail.menu.edit')}</Text>
-            </TouchableOpacity>
+            {isMyPost ? (
+              <>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleEditPost}>
+                  <Text style={styles.menuText}>
+                    {t('group.detail.menu.edit')}
+                  </Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem} onPress={handleBumpPost}>
-              <Text style={styles.menuText}>{t('group.detail.menu.bump')}</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleBumpPost}>
+                  <Text style={styles.menuText}>
+                    {t('group.detail.menu.bump')}
+                  </Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={handleDeletePost}>
-              <Text style={styles.menuText}>
-                {t('group.detail.menu.delete')}
-              </Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleDeletePost}>
+                  <Text style={styles.menuText}>
+                    {t('group.detail.menu.delete')}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={handleReportPost}>
+                <Text style={styles.menuText}>
+                  {t('group.detail.menu.report') || '신고하기'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </TouchableOpacity>
       </Modal>

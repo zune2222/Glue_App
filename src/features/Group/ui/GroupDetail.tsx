@@ -119,38 +119,6 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
     }
   };
 
-  // 모임 참여 버튼 클릭 핸들러
-  const handleJoinPress = async () => {
-    if (!response?.data?.meeting) return;
-
-    try {
-      setIsSubmitting(true);
-      joinGroupMutate(response.data.meeting.meetingId, {
-        onSuccess: () => {
-          console.log(`모임 ${response.data.meeting.meetingId} 참여 신청 성공`);
-          toastService.success(
-            t('common.success'),
-            t('group.detail.joinSuccess'),
-          );
-        },
-        onError: (err: any) => {
-          console.error('모임 참여 실패:', err.message);
-          toastService.error(
-            t('common.error'),
-            err.message || t('group.detail.joinError'),
-          );
-        },
-        onSettled: () => {
-          setIsSubmitting(false);
-        },
-      });
-    } catch (err: any) {
-      setIsSubmitting(false);
-      console.error('Error joining group:', err);
-      toastService.error(t('common.error'), t('group.detail.joinError'));
-    }
-  };
-
   // DM 채팅방 생성 버튼 클릭 핸들러
   const handleSendDmPress = async () => {
     if (!response?.data?.meeting || !currentUserId) return;

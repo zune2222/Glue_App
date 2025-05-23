@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Image, Pressable} from 'react-native';
 import {groupDetailStyles} from '../styles/groupDetailStyles';
 import {Text} from '../../../../shared/ui/typography/Text';
-import {Eye} from '@shared/assets/images';
+import {dummyProfile, Eye} from '@shared/assets/images';
 
 interface GroupAuthorInfoProps {
   category: string | number;
@@ -55,9 +55,6 @@ const GroupAuthorInfo: React.FC<GroupAuthorInfoProps> = ({
   categoryBgColor = '#DEE9FC', // 기본 배경색
   categoryTextColor = '#263FA9', // 기본 텍스트 색상
 }) => {
-  // 기본 아바타 이미지 URL
-  const defaultAvatar = 'https://via.placeholder.com/40';
-
   // 날짜 형식 변환
   const formattedDate = formatDate(date);
 
@@ -91,11 +88,19 @@ const GroupAuthorInfo: React.FC<GroupAuthorInfoProps> = ({
               opacity: pressed ? 0.7 : 1,
             },
           ]}>
-          <Image
-            source={{uri: avatarUrl || defaultAvatar}}
-            resizeMode={'stretch'}
-            style={groupDetailStyles.authorAvatar}
-          />
+          {avatarUrl ? (
+            <Image
+              source={{uri: avatarUrl || dummyProfile}}
+              resizeMode={'stretch'}
+              style={groupDetailStyles.authorAvatar}
+            />
+          ) : (
+            <Image
+              source={dummyProfile}
+              resizeMode={'stretch'}
+              style={groupDetailStyles.authorAvatar}
+            />
+          )}
           <View style={groupDetailStyles.authorTextContainer}>
             <Text
               variant="subtitle2"

@@ -40,7 +40,7 @@ export {default as CalendarOpacityIcon} from './calendar-opacity.svg';
 export {default as InfoIcon} from './info.svg';
 // 이미지 파일들
 export const logo = require('./logo.png');
-export const dummyProfile = require('./dummy-profile.png');
+export const dummyProfile = require('./default-image.png');
 
 // PNG 파일이 없어서 오류 발생 - 삭제
 // 소셜 로그인은 SVG 파일만 사용

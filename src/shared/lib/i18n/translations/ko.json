@@ -410,7 +410,9 @@
         "bumpSuccess": "게시글이 끌어올려졌습니다.",
         "deleteSuccess": "게시글이 삭제되었습니다.",
         "cancel": "취소",
-        "confirm": "확인"
+        "confirm": "확인",
+        "report": "신고하기",
+        "reportSubmitted": "신고가 접수되었습니다."
       }
     },
     "author": {
