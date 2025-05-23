@@ -154,7 +154,11 @@ const AuthNavigator = () => (
 // 모임글 스택 네비게이터
 const GroupNavigator = () => {
   return (
-    <GroupStack.Navigator screenOptions={commonHeaderOptions}>
+    <GroupStack.Navigator
+      screenOptions={{
+        ...commonHeaderOptions,
+        headerShown: false,
+      }}>
       <GroupStack.Screen
         name="GroupList"
         component={GroupList}
@@ -235,7 +239,8 @@ const MainTabNavigator = () => {
     <MainTab.Navigator
       screenOptions={{
         // 커스텀 헤더를 사용하여 모든 탭에 동일한 헤더 적용
-        header: renderHeader,
+        // header: renderHeader,
+        headerShown: false,
         tabBarActiveTintColor: navTheme.colors.primary,
         tabBarInactiveTintColor: '#9DA2AF',
         tabBarStyle: {

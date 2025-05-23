@@ -34,7 +34,7 @@ const ThemedSafeAreaContainer = ({children}: {children: ReactNode}) => {
         flex: 1,
         backgroundColor: theme.colors.background,
       }}
-      edges={['top', 'left', 'right']}>
+      edges={['top']}>
       <ThemedStatusBar />
       <NavigationContainer
         ref={navigationRef}
