@@ -19,11 +19,7 @@ import Postcode from '@actbase/react-daum-postcode';
 import {colors} from '../../../app/styles/colors';
 import {Text} from '../../../shared/ui/typography/Text';
 import GroupCreateHeader from './components/GroupCreateHeader';
-import {
-  Calendar,
-  CalendarOpacityIcon,
-  ClockIcon,
-} from '../../../shared/assets/images';
+import {CalendarOpacityIcon, ClockIcon} from '../../../shared/assets/images';
 import {useCreateGroupPost} from '../api/hooks';
 import {toastService} from '../../../shared/lib/notifications/toast';
 
@@ -218,15 +214,49 @@ const GroupCreateStep4 = () => {
     });
   };
 
+  const openDatePicker = () => {
+    setTempDate(date);
+    if (Platform.OS === 'ios') {
+      setShowDatePicker(true);
+    } else {
+      // Android에서는 바로 DateTimePicker 표시
+      setShowDatePicker(true);
+    }
+  };
+
+  const openTimePicker = () => {
+    setTempDate(date);
+    if (Platform.OS === 'ios') {
+      setShowTimePicker(true);
+    } else {
+      // Android에서는 바로 DateTimePicker 표시
+      setShowTimePicker(true);
+    }
+  };
+
   const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (selectedDate) {
-      setTempDate(selectedDate);
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+      if (event.type === 'set' && selectedDate) {
+        setDate(selectedDate);
+      }
+    } else {
+      if (selectedDate) {
+        setTempDate(selectedDate);
+      }
     }
   };
 
   const onTimeChange = (event: DateTimePickerEvent, selectedTime?: Date) => {
-    if (selectedTime) {
-      setTempDate(selectedTime);
+    if (Platform.OS === 'android') {
+      setShowTimePicker(false);
+      if (event.type === 'set' && selectedTime) {
+        setDate(selectedTime);
+      }
+    } else {
+      if (selectedTime) {
+        setTempDate(selectedTime);
+      }
     }
   };
 
@@ -238,16 +268,6 @@ const GroupCreateStep4 = () => {
   const confirmTime = () => {
     setDate(tempDate);
     setShowTimePicker(false);
-  };
-
-  const openDatePicker = () => {
-    setTempDate(date);
-    setShowDatePicker(true);
-  };
-
-  const openTimePicker = () => {
-    setTempDate(date);
-    setShowTimePicker(true);
   };
 
   const handleAddressSelect = (data: DaumPostcodeResult) => {
@@ -394,86 +414,110 @@ const GroupCreateStep4 = () => {
       )}
 
       {/* 날짜 선택 모달 */}
-      <Modal
-        transparent={true}
-        visible={showDatePicker}
-        animationType="fade"
-        onRequestClose={() => setShowDatePicker(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>
-              {t('group.create.step4.select_date')}
-            </Text>
+      {Platform.OS === 'ios' && (
+        <Modal
+          transparent={true}
+          visible={showDatePicker}
+          animationType="fade"
+          onRequestClose={() => setShowDatePicker(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>
+                {t('group.create.step4.select_date')}
+              </Text>
 
-            <DateTimePicker
-              value={tempDate}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={onDateChange}
-              style={styles.datePicker}
-            />
+              <DateTimePicker
+                value={tempDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={onDateChange}
+                style={styles.datePicker}
+              />
 
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setShowDatePicker(false)}>
-                <Text style={styles.modalCancelButtonText}>
-                  {t('common.cancel')}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => setShowDatePicker(false)}>
+                  <Text style={styles.modalCancelButtonText}>
+                    {t('common.cancel')}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.modalConfirmButton}
-                onPress={confirmDate}>
-                <Text style={styles.modalConfirmButtonText}>
-                  {t('common.ok')}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalConfirmButton}
+                  onPress={confirmDate}>
+                  <Text style={styles.modalConfirmButtonText}>
+                    {t('common.ok')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
 
       {/* 시간 선택 모달 */}
-      <Modal
-        transparent={true}
-        visible={showTimePicker}
-        animationType="fade"
-        onRequestClose={() => setShowTimePicker(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>
-              {t('group.create.step4.select_time')}
-            </Text>
+      {Platform.OS === 'ios' && (
+        <Modal
+          transparent={true}
+          visible={showTimePicker}
+          animationType="fade"
+          onRequestClose={() => setShowTimePicker(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>
+                {t('group.create.step4.select_time')}
+              </Text>
 
-            <DateTimePicker
-              value={tempDate}
-              mode="time"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={onTimeChange}
-              style={styles.datePicker}
-            />
+              <DateTimePicker
+                value={tempDate}
+                mode="time"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={onTimeChange}
+                style={styles.datePicker}
+              />
 
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setShowTimePicker(false)}>
-                <Text style={styles.modalCancelButtonText}>
-                  {t('common.cancel')}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => setShowTimePicker(false)}>
+                  <Text style={styles.modalCancelButtonText}>
+                    {t('common.cancel')}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.modalConfirmButton}
-                onPress={confirmTime}>
-                <Text style={styles.modalConfirmButtonText}>
-                  {t('common.ok')}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalConfirmButton}
+                  onPress={confirmTime}>
+                  <Text style={styles.modalConfirmButtonText}>
+                    {t('common.ok')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
+
+      {/* Android용 DateTimePicker */}
+      {Platform.OS === 'android' && showDatePicker && (
+        <DateTimePicker
+          value={tempDate}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+        />
+      )}
+
+      {/* Android용 TimePicker */}
+      {Platform.OS === 'android' && showTimePicker && (
+        <DateTimePicker
+          value={tempDate}
+          mode="time"
+          display="default"
+          onChange={onTimeChange}
+        />
+      )}
 
       {/* 주소 검색 모달 */}
       <Modal
