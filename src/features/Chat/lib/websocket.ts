@@ -24,7 +24,8 @@ class WebSocketService {
   private client: Client | null = null;
   private status: WebSocketStatus = 'disconnected';
   private messageCallbacks: Map<number, MessageCallback[]> = new Map();
-  private subscriptions: Map<number, any> = new Map();
+  private subscriptions: Map<string, any> = new Map();
+  private currentUserId: number | null = null;
 
   /**
    * WebSocket URL 생성
@@ -118,10 +119,94 @@ class WebSocketService {
     this.status = 'disconnected';
     this.messageCallbacks.clear();
     this.subscriptions.clear();
+    this.currentUserId = null;
+
+    console.log('[WebSocket] 모든 구독이 해제되었습니다.');
   }
 
   /**
-   * 채팅방 구독
+   * 사용자별 메시지 구독 (문서 기준: /queue/dm/{userId})
+   */
+  subscribeToUserMessages(userId: number, _callback: MessageCallback): void {
+    if (!this.client || this.status !== 'connected') {
+      console.warn('[WebSocket] 연결되지 않음 - 사용자 메시지 구독 불가');
+      return;
+    }
+
+    this.currentUserId = userId;
+    const subscriptionKey = `user-messages-${userId}`;
+
+    // 이미 구독 중인 경우 구독하지 않음
+    if (this.subscriptions.has(subscriptionKey)) {
+      console.log(`[WebSocket] 사용자 ${userId} 메시지 이미 구독 중`);
+      return;
+    }
+
+    // 사용자 메시지 구독
+    const subscription = this.client.subscribe(
+      `/queue/dm/${userId}`,
+      (message: IMessage) => {
+        try {
+          const messageData: DmMessageResponse = JSON.parse(message.body);
+          console.log(
+            `[WebSocket] 사용자 ${userId} 새 메시지 수신:`,
+            messageData,
+          );
+
+          // 메시지가 속한 채팅방의 콜백들에게 알림
+          const dmChatRoomId = messageData.dmChatRoomId;
+          if (dmChatRoomId) {
+            this.handleNewMessage(dmChatRoomId, messageData);
+          }
+        } catch (error) {
+          console.error('[WebSocket] 사용자 메시지 파싱 에러:', error);
+        }
+      },
+    );
+
+    this.subscriptions.set(subscriptionKey, subscription);
+    console.log(`[WebSocket] 사용자 ${userId} 메시지 구독됨`);
+  }
+
+  /**
+   * 채팅방별 읽음 상태 구독 (문서 기준: /queue/dm/{dmChatRoomId}/readStatus)
+   */
+  subscribeToReadStatus(dmChatRoomId: number): void {
+    if (!this.client || this.status !== 'connected') {
+      console.warn('[WebSocket] 연결되지 않음 - 읽음 상태 구독 불가');
+      return;
+    }
+
+    const subscriptionKey = `read-status-${dmChatRoomId}`;
+
+    // 이미 구독 중인 경우 구독하지 않음
+    if (this.subscriptions.has(subscriptionKey)) {
+      return;
+    }
+
+    // 읽음 상태 구독
+    const subscription = this.client.subscribe(
+      `/queue/dm/${dmChatRoomId}/readStatus`,
+      (message: IMessage) => {
+        try {
+          const readStatusData = JSON.parse(message.body);
+          console.log(
+            `[WebSocket] 채팅방 ${dmChatRoomId} 읽음 상태 업데이트:`,
+            readStatusData,
+          );
+          // TODO: 읽음 상태 처리 로직 추가
+        } catch (error) {
+          console.error('[WebSocket] 읽음 상태 파싱 에러:', error);
+        }
+      },
+    );
+
+    this.subscriptions.set(subscriptionKey, subscription);
+    console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 읽음 상태 구독됨`);
+  }
+
+  /**
+   * 채팅방 구독 (기존 메소드를 새로운 방식으로 변경)
    */
   subscribeToChatRoom(dmChatRoomId: number, callback: MessageCallback): void {
     if (!this.client || this.status !== 'connected') {
@@ -135,25 +220,14 @@ class WebSocketService {
     }
     this.messageCallbacks.get(dmChatRoomId)!.push(callback);
 
-    // 이미 구독 중인 경우 구독하지 않음
-    if (this.subscriptions.has(dmChatRoomId)) {
-      return;
+    // 현재 사용자 ID가 있으면 사용자 메시지 구독
+    if (this.currentUserId) {
+      this.subscribeToUserMessages(this.currentUserId, callback);
     }
 
-    // 채팅방 구독
-    const subscription = this.client.subscribe(
-      `/topic/dm/${dmChatRoomId}`,
-      (message: IMessage) => {
-        try {
-          const messageData: DmMessageResponse = JSON.parse(message.body);
-          this.handleNewMessage(dmChatRoomId, messageData);
-        } catch (error) {
-          console.error('[WebSocket] 메시지 파싱 에러:', error);
-        }
-      },
-    );
+    // 읽음 상태 구독
+    this.subscribeToReadStatus(dmChatRoomId);
 
-    this.subscriptions.set(dmChatRoomId, subscription);
     console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 구독됨`);
   }
 
@@ -164,12 +238,28 @@ class WebSocketService {
     // 콜백 제거
     this.messageCallbacks.delete(dmChatRoomId);
 
-    // 구독 해제
-    const subscription = this.subscriptions.get(dmChatRoomId);
+    // 읽음 상태 구독 해제
+    const readStatusKey = `read-status-${dmChatRoomId}`;
+    const readStatusSubscription = this.subscriptions.get(readStatusKey);
+    if (readStatusSubscription) {
+      readStatusSubscription.unsubscribe();
+      this.subscriptions.delete(readStatusKey);
+      console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 읽음 상태 구독 해제됨`);
+    }
+
+    console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 구독 해제됨`);
+  }
+
+  /**
+   * 사용자 메시지 구독 해제
+   */
+  unsubscribeFromUserMessages(userId: number): void {
+    const subscriptionKey = `user-messages-${userId}`;
+    const subscription = this.subscriptions.get(subscriptionKey);
     if (subscription) {
       subscription.unsubscribe();
-      this.subscriptions.delete(dmChatRoomId);
-      console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 구독 해제됨`);
+      this.subscriptions.delete(subscriptionKey);
+      console.log(`[WebSocket] 사용자 ${userId} 메시지 구독 해제됨`);
     }
   }
 
