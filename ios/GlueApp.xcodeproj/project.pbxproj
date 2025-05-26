@@ -330,6 +330,7 @@
 				DEVELOPMENT_TEAM = 67J52CSL6U;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = GlueApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Glue;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -359,6 +360,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 67J52CSL6U;
 				INFOPLIST_FILE = GlueApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Glue;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

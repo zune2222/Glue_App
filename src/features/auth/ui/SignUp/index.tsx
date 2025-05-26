@@ -539,7 +539,7 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
         // 애플 회원가입 데이터 준비
         const appleSignupData = {
           authorizationCode: route.params.authorizationCode,
-          userName: name,
+          realName: name,
           nickname: nickname,
           gender: genderValue,
           birthDate: birthDate ? birthDate.toISOString().split('T')[0] : '',
@@ -596,6 +596,7 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
 
         const kakaoSignupData = {
           oauthId,
+          realName: name,
           nickname,
           gender: genderValue,
           birthDate: birthDate ? birthDate.toISOString().split('T')[0] : '',

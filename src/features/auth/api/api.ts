@@ -100,6 +100,7 @@ export const signinWithKakao = async (
 export interface KakaoSignupRequest {
   oauthId: string;
   nickname: string;
+  realName: string;
   gender: number;
   birthDate: string;
   description: string;
@@ -336,6 +337,7 @@ export const signinWithApple = async (
 export interface AppleSignupRequest {
   authorizationCode: string;
   userName: string;
+  realName: string;
   nickname: string;
   gender: number;
   birthDate: string;
