@@ -13,12 +13,12 @@ interface AppProviderProps {
   children: ReactNode;
 }
 
-// 테마에 맞는 상태바 설정 컴포넌트
+// 항상 라이트 모드 테마의 상태바 설정 컴포넌트
 const ThemedStatusBar = () => {
   const {theme} = useTheme();
   return (
     <StatusBar
-      barStyle={theme.colors.statusBarStyle}
+      barStyle="dark-content"
       backgroundColor={theme.colors.background}
     />
   );
