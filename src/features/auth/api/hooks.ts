@@ -5,6 +5,7 @@ import {
   signupWithApple,
   signupWithKakao,
   signinWithKakao,
+  checkNicknameDuplicate,
 } from './api';
 import {useApiMutation} from '@/shared/lib/api/hooks';
 
@@ -48,4 +49,9 @@ export const useAppleSignin = () => {
     (variables: {authorizationCode: string; fcmToken?: string}) =>
       signinWithApple(variables.authorizationCode, variables.fcmToken),
   );
+};
+
+// 닉네임 중복 확인 훅
+export const useCheckNicknameDuplicate = () => {
+  return useApiMutation('checkNicknameDuplicate', checkNicknameDuplicate);
 };

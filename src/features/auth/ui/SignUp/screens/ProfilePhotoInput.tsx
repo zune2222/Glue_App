@@ -166,6 +166,7 @@ const ProfilePhotoInput = ({
       const uri = selectedAsset.uri;
 
       if (uri) {
+        // 로컬 이미지 설정 (회원가입 완료 후 업로드 예정)
         setPhotoUri(uri);
         onPhotoSelect(uri);
       }

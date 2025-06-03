@@ -50,6 +50,11 @@
     "invalidEmail": "Invalid email format",
     "invalidPassword": "Password must be at least 6 characters",
     "kakaoLoginProcessing": "Processing Kakao login...",
+    "appleLoginProcessing": "Processing Apple login...",
+    "appleNoAuthCodeError": "Failed to receive Apple authorization code",
+    "noTokenError": "Failed to receive authentication token",
+    "loginFailed": "Login failed",
+    "kakaoNoIdError": "Unable to get Kakao ID",
     "newUserRegistration": "Please register your account information",
     "welcome": {
       "title": "GLUE",
@@ -112,7 +117,9 @@
       "title": "Please enter the nickname\nyou want to use on GLUE",
       "label": "Nickname",
       "placeholder": "Enter your nickname",
-      "duplicate": "This nickname is already in use."
+      "duplicate": "This nickname is already in use.",
+      "required": "Please enter a nickname.",
+      "checkFailed": "Failed to check nickname duplicate."
     },
     "profilePhoto": {
       "title": "Set your profile picture",
@@ -123,7 +130,12 @@
       "unavailable": "This feature is not available on this device.",
       "blocked": "The app cannot access the camera or gallery. Please enable permissions in settings.",
       "goToSettings": "Go to Settings",
-      "error": "An error occurred while loading the image."
+      "settingsError": "Unable to open settings.",
+      "generalError": "An error occurred while checking permissions.",
+      "error": "An error occurred while loading the image.",
+      "uploading": "Uploading...",
+      "uploadSuccess": "Image upload completed successfully.",
+      "uploadFailed": "Image upload failed."
     },
     "introduction": {
       "title": "Please introduce yourself in one line :)",

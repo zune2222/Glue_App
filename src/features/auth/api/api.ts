@@ -408,3 +408,44 @@ export const signupWithApple = async (
     throw error;
   }
 };
+
+// 닉네임 중복 확인 응답 타입
+export interface NicknameCheckResponse {
+  httpStatus: {
+    is4xxClientError: boolean;
+    error: boolean;
+    is5xxServerError: boolean;
+    is1xxInformational: boolean;
+    is2xxSuccessful: boolean;
+    is3xxRedirection: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: boolean; // true: 중복됨, false: 사용 가능
+}
+
+// 닉네임 중복 확인 API
+export const checkNicknameDuplicate = async (
+  nickname: string,
+): Promise<ApiResponse<boolean>> => {
+  try {
+    const response = await apiClient.get<NicknameCheckResponse>(
+      `/api/auth/nickname/${encodeURIComponent(nickname)}`,
+    );
+
+    console.log('닉네임 중복 확인 API 응답:', response.data);
+
+    // NicknameCheckResponse를 ApiResponse<boolean> 형태로 변환
+    // API에서 result: true = 사용 가능, false = 중복됨일 가능성이 높음
+    // 우리 로직에서는 true = 중복됨, false = 사용 가능이므로 반대로 변환
+    return {
+      data: !response.data.result, // API result를 반대로 변환
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    console.error('닉네임 중복 확인 실패:', error);
+    throw error;
+  }
+};

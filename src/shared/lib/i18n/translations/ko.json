@@ -50,6 +50,11 @@
     "invalidEmail": "올바른 이메일 형식이 아닙니다",
     "invalidPassword": "비밀번호는 6자 이상이어야 합니다",
     "kakaoLoginProcessing": "카카오 로그인 처리 중입니다...",
+    "appleLoginProcessing": "애플 로그인 처리 중입니다...",
+    "appleNoAuthCodeError": "애플 인증 코드를 받지 못했습니다",
+    "noTokenError": "인증 토큰을 받지 못했습니다",
+    "loginFailed": "로그인에 실패했습니다",
+    "kakaoNoIdError": "카카오 ID를 가져올 수 없습니다",
     "newUserRegistration": "회원 정보를 등록해주세요",
     "welcome": {
       "title": "GLUE",
@@ -112,7 +117,9 @@
       "title": "GLUE에서 사용할\n닉네임을 입력해주세요",
       "label": "닉네임",
       "placeholder": "닉네임을 입력하세요",
-      "duplicate": "이미 사용하고 있는 닉네임이에요."
+      "duplicate": "이미 사용하고 있는 닉네임이에요.",
+      "required": "닉네임을 입력해주세요.",
+      "checkFailed": "닉네임 중복 확인에 실패했습니다."
     },
     "profilePhoto": {
       "title": "프로필 사진을 설정해주세요",
@@ -123,7 +130,12 @@
       "unavailable": "이 기기에서는 이 기능을 사용할 수 없습니다.",
       "blocked": "앱이 카메라 또는 갤러리에 접근할 수 없습니다. 설정에서 권한을 허용해주세요.",
       "goToSettings": "설정으로 이동",
-      "error": "이미지를 불러오는 중 오류가 발생했습니다."
+      "settingsError": "설정으로 이동할 수 없습니다.",
+      "generalError": "권한 확인 중 오류가 발생했습니다.",
+      "error": "이미지를 불러오는 중 오류가 발생했습니다.",
+      "uploading": "업로드 중...",
+      "uploadSuccess": "이미지 업로드가 완료되었습니다.",
+      "uploadFailed": "이미지 업로드에 실패했습니다."
     },
     "introduction": {
       "title": "본인을 한 줄로 소개해보세요 :)",

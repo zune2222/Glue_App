@@ -92,6 +92,17 @@ const VerificationCodeInput = ({
       return;
     }
 
+    // 개발 모드에서 test@test.com이면 인증 건너뛰기
+    if (__DEV__ && email === 'test@test.com' && verificationCode === '123456') {
+      Toast.show({
+        type: 'success',
+        text1: '[DEV] 인증이 건너뛰어졌습니다',
+        position: 'bottom',
+      });
+      onVerificationComplete(verificationCode);
+      return;
+    }
+
     try {
       const result = await verifyCode.mutateAsync({
         email,
@@ -231,6 +242,17 @@ const VerificationCodeInput = ({
           />
         )}
       </TouchableOpacity>
+
+      {/* 개발 모드에서만 보이는 빠른 인증 버튼 */}
+      {__DEV__ && email === 'test@test.com' && (
+        <TouchableOpacity
+          style={styles.devButton}
+          onPress={() => handleCodeChange('123456')}>
+          <Text variant="button" color={colors.batteryChargedBlue}>
+            [DEV] 인증 코드 자동 입력 (123456)
+          </Text>
+        </TouchableOpacity>
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -295,6 +317,15 @@ const styles = StyleSheet.create({
   resendLink: {},
   resendIndicator: {
     marginLeft: 10,
+  },
+  devButton: {
+    backgroundColor: colors.antiFlashWhite,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: colors.batteryChargedBlue,
   },
 });
 
