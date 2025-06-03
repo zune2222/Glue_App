@@ -53,13 +53,16 @@ const GroupCreateStep4 = () => {
   const params = route.params as RouteParams;
 
   const [title, setTitle] = useState<string>('');
-  const [date, setDate] = useState<Date>(new Date());
-  const [tempDate, setTempDate] = useState<Date>(new Date());
+  // 현재 시간 + 3시간을 최소 시간으로 설정
+  const getMinimumDateTime = () => {
+    const now = new Date();
+    now.setHours(now.getHours() + 3);
+    return now;
+  };
+
+  const [date, setDate] = useState<Date>(getMinimumDateTime());
+  const [tempDate, setTempDate] = useState<Date>(getMinimumDateTime());
   const [location, setLocation] = useState<string>('');
-  const [coordinates, _setCoordinates] = useState<{
-    latitude?: number;
-    longitude?: number;
-  }>({});
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
   const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
@@ -133,9 +136,8 @@ const GroupCreateStep4 = () => {
         categoryId: getCategoryId(params.groupType),
         meetingPlaceName: location,
         meetingTime: formattedDate,
-        meetingPlaceLatitude: coordinates.latitude,
-        meetingPlaceLongitude: coordinates.longitude,
-        languageId: getLanguageId(params.exchangeLanguage),
+        mainLanguageId: getLanguageId(params.myLanguage),
+        exchangeLanguageId: getLanguageId(params.exchangeLanguage),
         maxParticipants: params.memberCount,
       },
       post: {
@@ -238,7 +240,17 @@ const GroupCreateStep4 = () => {
     if (Platform.OS === 'android') {
       setShowDatePicker(false);
       if (event.type === 'set' && selectedDate) {
-        setDate(selectedDate);
+        const minimumDateTime = getMinimumDateTime();
+        // 선택한 날짜가 최소 시간보다 이후인지 확인
+        if (selectedDate >= minimumDateTime) {
+          setDate(selectedDate);
+        } else {
+          // 최소 시간보다 이전인 경우 토스트 메시지 표시
+          toastService.error(
+            t('common.error'),
+            '모임 시간은 현재 시간으로부터 3시간 이후로 설정해주세요.',
+          );
+        }
       }
     } else {
       if (selectedDate) {
@@ -251,7 +263,17 @@ const GroupCreateStep4 = () => {
     if (Platform.OS === 'android') {
       setShowTimePicker(false);
       if (event.type === 'set' && selectedTime) {
-        setDate(selectedTime);
+        const minimumDateTime = getMinimumDateTime();
+        // 선택한 시간이 최소 시간보다 이후인지 확인
+        if (selectedTime >= minimumDateTime) {
+          setDate(selectedTime);
+        } else {
+          // 최소 시간보다 이전인 경우 토스트 메시지 표시
+          toastService.error(
+            t('common.error'),
+            '모임 시간은 현재 시간으로부터 3시간 이후로 설정해주세요.',
+          );
+        }
       }
     } else {
       if (selectedTime) {
@@ -261,13 +283,33 @@ const GroupCreateStep4 = () => {
   };
 
   const confirmDate = () => {
-    setDate(tempDate);
-    setShowDatePicker(false);
+    const minimumDateTime = getMinimumDateTime();
+    // 선택한 날짜가 최소 시간보다 이후인지 확인
+    if (tempDate >= minimumDateTime) {
+      setDate(tempDate);
+      setShowDatePicker(false);
+    } else {
+      // 최소 시간보다 이전인 경우 토스트 메시지 표시
+      toastService.error(
+        t('common.error'),
+        '모임 시간은 현재 시간으로부터 3시간 이후로 설정해주세요.',
+      );
+    }
   };
 
   const confirmTime = () => {
-    setDate(tempDate);
-    setShowTimePicker(false);
+    const minimumDateTime = getMinimumDateTime();
+    // 선택한 시간이 최소 시간보다 이후인지 확인
+    if (tempDate >= minimumDateTime) {
+      setDate(tempDate);
+      setShowTimePicker(false);
+    } else {
+      // 최소 시간보다 이전인 경우 토스트 메시지 표시
+      toastService.error(
+        t('common.error'),
+        '모임 시간은 현재 시간으로부터 3시간 이후로 설정해주세요.',
+      );
+    }
   };
 
   const handleAddressSelect = (data: DaumPostcodeResult) => {
@@ -431,6 +473,7 @@ const GroupCreateStep4 = () => {
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={onDateChange}
+                minimumDate={getMinimumDateTime()}
                 style={styles.datePicker}
                 textColor={colors.charcoal}
                 accentColor={colors.batteryChargedBlue}
@@ -477,6 +520,7 @@ const GroupCreateStep4 = () => {
                 mode="time"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={onTimeChange}
+                minimumDate={getMinimumDateTime()}
                 style={styles.datePicker}
                 textColor={colors.charcoal}
                 accentColor={colors.batteryChargedBlue}
@@ -512,6 +556,7 @@ const GroupCreateStep4 = () => {
           mode="date"
           display="default"
           onChange={onDateChange}
+          minimumDate={getMinimumDateTime()}
           textColor={colors.charcoal}
           accentColor={colors.batteryChargedBlue}
           themeVariant="light"
@@ -525,6 +570,7 @@ const GroupCreateStep4 = () => {
           mode="time"
           display="default"
           onChange={onTimeChange}
+          minimumDate={getMinimumDateTime()}
           textColor={colors.charcoal}
           accentColor={colors.batteryChargedBlue}
           themeVariant="light"

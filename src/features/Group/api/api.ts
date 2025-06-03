@@ -11,9 +11,8 @@ export interface CreateGroupPostRequest {
     categoryId: number;
     meetingPlaceName: string;
     meetingTime: string; // 'yyyy-MM-dd'T'HH:mm:ss' 형식
-    meetingPlaceLatitude?: number;
-    meetingPlaceLongitude?: number;
-    languageId: number;
+    mainLanguageId: number;
+    exchangeLanguageId: number;
     maxParticipants: number;
   };
   post: {
