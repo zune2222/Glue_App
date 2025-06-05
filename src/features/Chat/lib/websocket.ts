@@ -1,314 +1,227 @@
-import {Client, IMessage} from '@stomp/stompjs';
-import {config} from '@/shared/config/env';
+import {Client} from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import {secureStorage} from '@/shared/lib/security';
-import {DmMessageResponse} from '../api/api';
+import {config} from '@/shared/config/env';
 
-// React Native에서 WebSocket 사용을 위한 설정
-if (typeof global !== 'undefined') {
-  // @ts-ignore
-  global.WebSocket = global.WebSocket || require('ws');
-}
-
-// WebSocket 연결 상태 타입
-export type WebSocketStatus =
-  | 'disconnected'
-  | 'connecting'
-  | 'connected'
-  | 'error';
-
-// 메시지 콜백 타입
-export type MessageCallback = (message: DmMessageResponse) => void;
-
-// WebSocket 서비스 클래스
-class WebSocketService {
-  private client: Client | null = null;
-  private status: WebSocketStatus = 'disconnected';
-  private messageCallbacks: Map<number, MessageCallback[]> = new Map();
-  private subscriptions: Map<string, any> = new Map();
+// WebSocket 연결 관리 클래스 (SockJS + STOMP)
+export class WebSocketService {
+  private stompClient: Client | null = null;
+  private url: string;
   private currentUserId: number | null = null;
+  private connectionStatus:
+    | 'disconnected'
+    | 'connecting'
+    | 'connected'
+    | 'error' = 'disconnected';
+  private useSockJS: boolean = false; // 기본값: 원시 WebSocket 사용
 
-  /**
-   * WebSocket URL 생성
-   */
-  private getWebSocketUrl(): string {
-    // HTTP URL을 WebSocket URL로 변환
-    const wsUrl = config.API_URL.replace('http://', 'ws://').replace(
-      'https://',
-      'wss://',
-    );
-    return `${wsUrl}/ws`;
+  constructor(url?: string, useSockJS: boolean = false) {
+    this.url = url || `${config.API_URL}/ws`;
+    this.useSockJS = useSockJS;
   }
 
-  /**
-   * WebSocket 연결
-   */
-  async connect(): Promise<void> {
-    if (this.status === 'connected' || this.status === 'connecting') {
+  // WebSocket 연결 (현재 사용자 ID 필요)
+  async connectWebSocket(currentUserId: number): Promise<Client> {
+    const token = await this.getAuthToken();
+    
+    if (!token) {
+      throw new Error('인증 토큰이 없습니다.');
+    }
+
+    this.currentUserId = currentUserId;
+
+    console.log('[WebSocketService] 토큰:', token ? `${token.substring(0, 20)}...` : 'null');
+    console.log('[WebSocketService] 현재 사용자 ID:', currentUserId);
+    console.log('[WebSocketService] 연결 방식:', this.useSockJS ? 'SockJS' : '원시 WebSocket');
+
+    let clientConfig: any = {};
+
+    if (this.useSockJS) {
+      // 방법 1: SockJS 사용 (토큰은 URL에 포함)
+      const socket = new SockJS(`${this.url}?token=${token}`);
+      console.log('[WebSocketService] SockJS URL:', `${this.url}?token=${token.substring(0, 20)}...`);
+      
+      clientConfig = {
+        webSocketFactory: () => socket,
+        // SockJS 사용 시 connectHeaders는 제대로 작동하지 않을 수 있음
+      };
+    } else {
+      // 방법 2: 원시 WebSocket 사용 (connectHeaders 지원)
+      const wsUrl = this.url.replace('http://', 'ws://').replace('https://', 'wss://');
+      const brokerURL = `${wsUrl}/websocket?token=${token}`;
+      console.log('[WebSocketService] 원시 WebSocket URL:', brokerURL);
+      
+      clientConfig = {
+        brokerURL,
+        connectHeaders: {
+          'Authorization': `Bearer ${token}`,
+        },
+      };
+    }
+    
+    // STOMP 클라이언트 설정
+    this.stompClient = new Client({
+      ...clientConfig,
+      onConnect: (frame) => {
+        console.log('WebSocket 연결 성공:', frame);
+        this.connectionStatus = 'connected';
+        this.notifyStatusChange();
+        this.setupDmSubscription(currentUserId); // 내 ID로 구독
+      },
+      onStompError: (frame) => {
+        console.error('STOMP 에러:', frame);
+        this.connectionStatus = 'error';
+        this.notifyStatusChange();
+      },
+      onDisconnect: (frame) => {
+        console.log('WebSocket 연결 해제:', frame);
+        this.connectionStatus = 'disconnected';
+        this.notifyStatusChange();
+      },
+      debug: (str) => {
+        if (config.ENABLE_LOGGING) {
+          console.log('STOMP Debug:', str);
+        }
+      },
+    });
+
+    // 연결 상태 설정
+    this.connectionStatus = 'connecting';
+
+    // 연결 시작
+    this.stompClient.activate();
+
+    return this.stompClient;
+  }
+
+  // DM 구독 설정 (중요) - 내 ID로 구독
+  private setupDmSubscription(currentUserId: number): void {
+    if (!this.stompClient?.connected) {
+      console.error('STOMP 클라이언트가 연결되어 있지 않습니다.');
       return;
+    }
+
+    // DM 구독 - 나에게 오는 모든 DM을 구독
+    this.stompClient.subscribe(`/queue/dm/${currentUserId}`, (message) => {
+      const dmMessage = JSON.parse(message.body);
+      console.log('DM 수신:', dmMessage);
+
+      // UI 업데이트 로직
+      this.handleNewDmMessage(dmMessage);
+    });
+
+    console.log(`[WebSocketService] DM 구독 완료: /queue/dm/${currentUserId}`);
+  }
+
+  // 메시지 수신 처리
+  private handleNewDmMessage(dmMessage: any): void {
+    // 채팅 목록 업데이트
+    // 현재 채팅방이면 메시지 추가
+    // 푸시 알림 등...
+    console.log('[WebSocketService] 새 DM 메시지 처리:', dmMessage);
+
+    // 이벤트 발생 (외부에서 구독 가능)
+    if (this.onMessageReceived) {
+      this.onMessageReceived(dmMessage);
+    }
+  }
+
+  // 메시지 수신 콜백
+  private onMessageReceived: ((message: any) => void) | null = null;
+
+  // 메시지 수신 리스너 설정
+  setMessageListener(callback: (message: any) => void): void {
+    this.onMessageReceived = callback;
+  }
+
+  // DM 메시지 전송
+  sendDmMessage(targetUserId: number, content: string): boolean {
+    if (!this.stompClient?.connected) {
+      console.error('WebSocket이 연결되어 있지 않습니다.');
+      return false;
     }
 
     try {
-      this.status = 'connecting';
+      const message = {
+        targetUserId,
+        content,
+        timestamp: new Date().toISOString(),
+      };
 
-      // JWT 토큰 가져오기
-      const token = await secureStorage.getToken();
-      if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
-      }
-
-      const wsUrl = this.getWebSocketUrl();
-      console.log('[WebSocket] 연결 시도:', wsUrl);
-
-      // STOMP 클라이언트 생성
-      this.client = new Client({
-        brokerURL: wsUrl,
-        connectHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-        debug: str => {
-          console.log('[STOMP Debug]', str);
-        },
-        reconnectDelay: 5000,
-        heartbeatIncoming: 4000,
-        heartbeatOutgoing: 4000,
+      this.stompClient.publish({
+        destination: '/app/dm/send',
+        body: JSON.stringify(message),
       });
 
-      // 연결 성공 콜백
-      this.client.onConnect = () => {
-        console.log('[WebSocket] 연결됨');
-        this.status = 'connected';
-      };
-
-      // 연결 해제 콜백
-      this.client.onDisconnect = () => {
-        console.log('[WebSocket] 연결 해제됨');
-        this.status = 'disconnected';
-      };
-
-      // 에러 콜백
-      this.client.onStompError = frame => {
-        console.error('[WebSocket] STOMP 에러:', frame.headers['message']);
-        console.error('[WebSocket] 추가 정보:', frame.body);
-        this.status = 'error';
-      };
-
-      // WebSocket 에러 콜백
-      this.client.onWebSocketError = error => {
-        console.error('[WebSocket] WebSocket 에러:', error);
-        this.status = 'error';
-      };
-
-      // 연결 시작
-      this.client.activate();
+      console.log('[WebSocketService] DM 메시지 전송:', message);
+      return true;
     } catch (error) {
-      console.error('[WebSocket] 연결 실패:', error);
-      this.status = 'error';
-      throw error;
+      console.error('DM 메시지 전송 오류:', error);
+      return false;
     }
   }
 
-  /**
-   * WebSocket 연결 해제
-   */
-  disconnect(): void {
-    if (this.client) {
-      this.client.deactivate();
-      this.client = null;
-    }
-
-    this.status = 'disconnected';
-    this.messageCallbacks.clear();
-    this.subscriptions.clear();
-    this.currentUserId = null;
-
-    console.log('[WebSocket] 모든 구독이 해제되었습니다.');
-  }
-
-  /**
-   * 사용자별 메시지 구독 (문서 기준: /queue/dm/{userId})
-   */
-  subscribeToUserMessages(userId: number, _callback: MessageCallback): void {
-    if (!this.client || this.status !== 'connected') {
-      console.warn('[WebSocket] 연결되지 않음 - 사용자 메시지 구독 불가');
-      return;
-    }
-
-    this.currentUserId = userId;
-    const subscriptionKey = `user-messages-${userId}`;
-
-    // 이미 구독 중인 경우 구독하지 않음
-    if (this.subscriptions.has(subscriptionKey)) {
-      console.log(`[WebSocket] 사용자 ${userId} 메시지 이미 구독 중`);
-      return;
-    }
-
-    // 사용자 메시지 구독
-    const subscription = this.client.subscribe(
-      `/queue/dm/${userId}`,
-      (message: IMessage) => {
-        try {
-          const messageData: DmMessageResponse = JSON.parse(message.body);
-          console.log(
-            `[WebSocket] 사용자 ${userId} 새 메시지 수신:`,
-            messageData,
-          );
-
-          // 메시지가 속한 채팅방의 콜백들에게 알림
-          const dmChatRoomId = messageData.dmChatRoomId;
-          if (dmChatRoomId) {
-            this.handleNewMessage(dmChatRoomId, messageData);
-          }
-        } catch (error) {
-          console.error('[WebSocket] 사용자 메시지 파싱 에러:', error);
-        }
-      },
-    );
-
-    this.subscriptions.set(subscriptionKey, subscription);
-    console.log(`[WebSocket] 사용자 ${userId} 메시지 구독됨`);
-  }
-
-  /**
-   * 채팅방별 읽음 상태 구독 (문서 기준: /queue/dm/{dmChatRoomId}/readStatus)
-   */
-  subscribeToReadStatus(dmChatRoomId: number): void {
-    if (!this.client || this.status !== 'connected') {
-      console.warn('[WebSocket] 연결되지 않음 - 읽음 상태 구독 불가');
-      return;
-    }
-
-    const subscriptionKey = `read-status-${dmChatRoomId}`;
-
-    // 이미 구독 중인 경우 구독하지 않음
-    if (this.subscriptions.has(subscriptionKey)) {
-      return;
-    }
-
-    // 읽음 상태 구독
-    const subscription = this.client.subscribe(
-      `/queue/dm/${dmChatRoomId}/readStatus`,
-      (message: IMessage) => {
-        try {
-          const readStatusData = JSON.parse(message.body);
-          console.log(
-            `[WebSocket] 채팅방 ${dmChatRoomId} 읽음 상태 업데이트:`,
-            readStatusData,
-          );
-          // TODO: 읽음 상태 처리 로직 추가
-        } catch (error) {
-          console.error('[WebSocket] 읽음 상태 파싱 에러:', error);
-        }
-      },
-    );
-
-    this.subscriptions.set(subscriptionKey, subscription);
-    console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 읽음 상태 구독됨`);
-  }
-
-  /**
-   * 채팅방 구독 (기존 메소드를 새로운 방식으로 변경)
-   */
-  subscribeToChatRoom(dmChatRoomId: number, callback: MessageCallback): void {
-    if (!this.client || this.status !== 'connected') {
-      console.warn('[WebSocket] 연결되지 않음 - 구독 불가');
-      return;
-    }
-
-    // 콜백 등록
-    if (!this.messageCallbacks.has(dmChatRoomId)) {
-      this.messageCallbacks.set(dmChatRoomId, []);
-    }
-    this.messageCallbacks.get(dmChatRoomId)!.push(callback);
-
-    // 현재 사용자 ID가 있으면 사용자 메시지 구독
-    if (this.currentUserId) {
-      this.subscribeToUserMessages(this.currentUserId, callback);
-    }
-
-    // 읽음 상태 구독
-    this.subscribeToReadStatus(dmChatRoomId);
-
-    console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 구독됨`);
-  }
-
-  /**
-   * 채팅방 구독 해제
-   */
-  unsubscribeFromChatRoom(dmChatRoomId: number): void {
-    // 콜백 제거
-    this.messageCallbacks.delete(dmChatRoomId);
-
-    // 읽음 상태 구독 해제
-    const readStatusKey = `read-status-${dmChatRoomId}`;
-    const readStatusSubscription = this.subscriptions.get(readStatusKey);
-    if (readStatusSubscription) {
-      readStatusSubscription.unsubscribe();
-      this.subscriptions.delete(readStatusKey);
-      console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 읽음 상태 구독 해제됨`);
-    }
-
-    console.log(`[WebSocket] 채팅방 ${dmChatRoomId} 구독 해제됨`);
-  }
-
-  /**
-   * 사용자 메시지 구독 해제
-   */
-  unsubscribeFromUserMessages(userId: number): void {
-    const subscriptionKey = `user-messages-${userId}`;
-    const subscription = this.subscriptions.get(subscriptionKey);
-    if (subscription) {
-      subscription.unsubscribe();
-      this.subscriptions.delete(subscriptionKey);
-      console.log(`[WebSocket] 사용자 ${userId} 메시지 구독 해제됨`);
+  private async getAuthToken(): Promise<string | null> {
+    try {
+      return await secureStorage.getToken();
+    } catch (error) {
+      console.error('토큰 조회 실패:', error);
+      return null;
     }
   }
 
-  /**
-   * 읽음 처리 메시지 전송
-   */
-  sendReadMessage(dmChatRoomId: number, receiverId: number): void {
-    if (!this.client || this.status !== 'connected') {
-      console.warn('[WebSocket] 연결되지 않음 - 읽음 처리 불가');
-      return;
-    }
-
-    this.client.publish({
-      destination: `/app/dm/${dmChatRoomId}/read-message`,
-      body: JSON.stringify({receiverId}),
-    });
-
-    console.log(
-      `[WebSocket] 읽음 처리 전송: 채팅방 ${dmChatRoomId}, 수신자 ${receiverId}`,
-    );
-  }
-
-  /**
-   * 새 메시지 처리
-   */
-  private handleNewMessage(
-    dmChatRoomId: number,
-    message: DmMessageResponse,
-  ): void {
-    const callbacks = this.messageCallbacks.get(dmChatRoomId);
-    if (callbacks) {
-      callbacks.forEach(callback => callback(message));
-    }
-  }
-
-  /**
-   * 현재 연결 상태 반환
-   */
-  getStatus(): WebSocketStatus {
-    return this.status;
-  }
-
-  /**
-   * 연결 상태 확인
-   */
+  // 연결 상태 확인
   isConnected(): boolean {
-    return this.status === 'connected';
+    return this.stompClient?.connected || false;
   }
+
+  // 연결 상태 반환
+  getStatus(): 'disconnected' | 'connecting' | 'connected' | 'error' {
+    return this.connectionStatus;
+  }
+
+  // 수동 재연결
+  async reconnect(): Promise<void> {
+    if (!this.currentUserId) {
+      throw new Error('사용자 ID가 설정되지 않았습니다. connectWebSocket을 먼저 호출하세요.');
+    }
+
+    console.log('수동 재연결을 시도합니다...');
+    this.disconnect();
+    await this.connectWebSocket(this.currentUserId);
+  }
+
+  // 연결 해제
+  disconnect(): void {
+    if (this.stompClient) {
+      this.stompClient.deactivate();
+      this.stompClient = null;
+      this.connectionStatus = 'disconnected';
+      console.log('[WebSocketService] WebSocket 연결 해제됨');
+    }
+  }
+
+  // 연결 상태 리스너 추가
+  private statusChangeCallback: ((status: typeof this.connectionStatus) => void) | null = null;
+
+  onConnectionStatusChange(
+    callback: (status: typeof this.connectionStatus) => void,
+  ): void {
+    this.statusChangeCallback = callback;
+  }
+
+  // 상태 변경 알림
+  private notifyStatusChange(): void {
+    if (this.statusChangeCallback) {
+      this.statusChangeCallback(this.connectionStatus);
+    }
+  }
+
 }
 
-// 싱글톤 인스턴스 생성
+// 서비스 인스턴스 생성 및 내보내기
+// 기본값: 원시 WebSocket 사용 (connectHeaders 지원)
 export const webSocketService = new WebSocketService();
+
+// SockJS 사용하고 싶다면 이렇게 생성:
+// export const webSocketService = new WebSocketService(undefined, true);

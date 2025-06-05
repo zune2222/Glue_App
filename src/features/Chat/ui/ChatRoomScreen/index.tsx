@@ -30,6 +30,7 @@ import {webSocketService} from '../../lib/websocket';
 import {toastService} from '@shared/lib/notifications/toast';
 import {dummyProfile} from '@shared/assets/images';
 import {config} from '@shared/config/env';
+import {secureStorage} from '@shared/lib/security';
 
 interface ChatRoomScreenProps {
   route?: {
@@ -47,11 +48,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   console.log('[ChatRoomScreen] 컴포넌트 로드됨');
   console.log('[ChatRoomScreen] route.params:', route?.params);
   console.log('[ChatRoomScreen] API_URL:', config.API_URL);
-  console.log(
-    '[ChatRoomScreen] WebSocket URL:',
-    config.API_URL.replace('http://', 'ws://').replace('https://', 'wss://') +
-      '/ws',
-  );
+  console.log('[ChatRoomScreen] WebSocket URL:', `${config.API_URL}/ws`);
 
   const [messages, setMessages] = useState<DmMessageResponse[]>([]);
   const [showRoomInfo, setShowRoomInfo] = useState(false);
@@ -130,7 +127,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   // WebSocket 연결 및 구독
   useEffect(() => {
-    if (!dmChatRoomId) return;
+    if (!dmChatRoomId || !chatRoomDetail?.data?.participants || !currentUserId) {
+      return;
+    }
 
     let isComponentMounted = true;
 
@@ -142,76 +141,44 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           webSocketService.getStatus(),
         );
 
-        // WebSocket 연결
-        await webSocketService.connect();
+        // 연결 상태 변경 리스너 설정
+        webSocketService.onConnectionStatusChange(status => {
+          if (isComponentMounted) {
+            setWsStatus(status);
+            console.log('[ChatRoomScreen] WebSocket 상태 변경:', status);
+          }
+        });
+
+        // currentUserId는 이미 state에서 가져옴
+        console.log(`[ChatRoomScreen] 현재 사용자 ID: ${currentUserId}`);
+
+        // 메시지 수신 리스너 설정
+        webSocketService.setMessageListener((dmMessage) => {
+          console.log('[ChatRoomScreen] 새 DM 메시지 수신:', dmMessage);
+          if (isComponentMounted && dmMessage.dmChatRoomId === dmChatRoomId) {
+            setMessages(prev => {
+              console.log('[ChatRoomScreen] 메시지 추가 전 개수:', prev.length);
+              const updated = [...prev, dmMessage];
+              console.log(
+                '[ChatRoomScreen] 메시지 추가 후 개수:',
+                updated.length,
+              );
+              return updated;
+            });
+            // 새 메시지가 도착하면 스크롤을 맨 아래로
+            setTimeout(() => {
+              scrollViewRef.current?.scrollToEnd({animated: true});
+            }, 100);
+          }
+        });
+
+        // WebSocket 연결 (DM 구독 포함) - 내 ID로 구독
+        await webSocketService.connectWebSocket(currentUserId);
 
         console.log(
           '[ChatRoomScreen] WebSocket 연결 후 상태:',
           webSocketService.getStatus(),
         );
-
-        // 연결이 완료될 때까지 잠시 대기
-        let maxRetries = 10;
-        let retryCount = 0;
-
-        while (
-          webSocketService.getStatus() !== 'connected' &&
-          retryCount < maxRetries
-        ) {
-          console.log(
-            `[ChatRoomScreen] 연결 대기 중... (${
-              retryCount + 1
-            }/${maxRetries})`,
-          );
-          await new Promise(resolve => setTimeout(resolve, 500));
-          retryCount++;
-        }
-
-        if (webSocketService.getStatus() !== 'connected') {
-          throw new Error('WebSocket 연결 시간 초과');
-        }
-
-        if (!isComponentMounted) return;
-
-        // 현재 사용자 ID 가져오기 (첫 번째 참가자를 현재 사용자로 가정)
-        const currentUserId =
-          chatRoomDetail?.data?.participants?.[0]?.user?.userId;
-        console.log(`[ChatRoomScreen] 현재 사용자 ID: ${currentUserId}`);
-
-        // 채팅방 구독
-        console.log(`[ChatRoomScreen] 채팅방 ${dmChatRoomId} 구독 시작...`);
-        console.log(`[ChatRoomScreen] 현재 사용자 ID: ${currentUserId}`);
-
-        // 현재 사용자 ID를 WebSocket 서비스에 설정
-        if (currentUserId) {
-          webSocketService.subscribeToUserMessages(
-            currentUserId,
-            newMessage => {
-              console.log('[ChatRoomScreen] 새 메시지 수신:', newMessage);
-              if (isComponentMounted) {
-                setMessages(prev => {
-                  console.log(
-                    '[ChatRoomScreen] 메시지 추가 전 개수:',
-                    prev.length,
-                  );
-                  const updated = [...prev, newMessage];
-                  console.log(
-                    '[ChatRoomScreen] 메시지 추가 후 개수:',
-                    updated.length,
-                  );
-                  return updated;
-                });
-                // 새 메시지가 도착하면 스크롤을 맨 아래로
-                setTimeout(() => {
-                  scrollViewRef.current?.scrollToEnd({animated: true});
-                }, 100);
-              }
-            },
-          );
-
-          // 읽음 상태 구독
-          webSocketService.subscribeToReadStatus(dmChatRoomId);
-        }
       } catch (error) {
         console.error('[ChatRoomScreen] WebSocket 초기화 실패:', error);
         if (isComponentMounted) {
@@ -230,20 +197,12 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     // 클린업
     return () => {
       console.log(
-        `[ChatRoomScreen] 컴포넌트 언마운트: 채팅방 ${dmChatRoomId} 구독 해제`,
+        `[ChatRoomScreen] 컴포넌트 언마운트: WebSocket 연결 해제`,
       );
       isComponentMounted = false;
-      if (dmChatRoomId) {
-        webSocketService.unsubscribeFromChatRoom(dmChatRoomId);
-      }
-      // 현재 사용자 메시지 구독 해제
-      const currentUserId =
-        chatRoomDetail?.data?.participants?.[0]?.user?.userId;
-      if (currentUserId) {
-        webSocketService.unsubscribeFromUserMessages(currentUserId);
-      }
+      webSocketService.disconnect();
     };
-  }, [dmChatRoomId, chatRoomDetail]);
+  }, [dmChatRoomId, chatRoomDetail, currentUserId]);
 
   // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
   const panResponder = useRef(
@@ -314,10 +273,30 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }
 
     try {
+      // API를 통한 메시지 전송
       await sendMessageMutation.mutateAsync({
         dmChatRoomId,
         content: text,
       });
+
+      // WebSocket을 통한 DM 메시지 전송 (테스트용)
+      if (webSocketService.isConnected() && currentUserId) {
+        // 상대방 사용자 ID 찾기
+        const targetUser = chatRoomDetail?.data?.participants?.find(
+          p => p.user.userId !== currentUserId
+        );
+
+        if (targetUser?.user?.userId) {
+          const success = webSocketService.sendDmMessage(targetUser.user.userId, text);
+          if (success) {
+            console.log('[ChatRoomScreen] DM 메시지 WebSocket 전송 성공');
+          } else {
+            console.warn('[ChatRoomScreen] DM 메시지 WebSocket 전송 실패');
+          }
+        }
+      } else {
+        console.warn('[ChatRoomScreen] WebSocket이 연결되어 있지 않거나 사용자 ID가 없음');
+      }
 
       // 메시지 전송 후 스크롤을 맨 아래로
       setTimeout(() => {
@@ -387,8 +366,17 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     };
   };
 
-  // 현재 사용자 ID 가져오기 (첫 번째 참가자를 현재 사용자로 가정)
-  const currentUserId = chatRoomDetail?.data?.participants?.[0]?.user?.userId;
+  // 현재 사용자 ID를 secureStorage에서 가져오기
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  // 현재 사용자 ID 초기화
+  useEffect(() => {
+    const initCurrentUser = async () => {
+      const userId = await secureStorage.getUserId();
+      setCurrentUserId(userId);
+    };
+    initCurrentUser();
+  }, []);
 
   // 로딩 중일 때
   if (isDetailLoading || isMessagesLoading) {
@@ -453,7 +441,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
                 : '#F44336',
             paddingVertical: 4,
             paddingHorizontal: 12,
+            flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'center',
           }}>
           <RNText style={{color: 'white', fontSize: 12}}>
             WebSocket:{' '}
@@ -465,6 +455,39 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
               ? '연결 오류'
               : '연결 해제됨'}
           </RNText>
+          {(wsStatus === 'error' || wsStatus === 'disconnected') && (
+            <TouchableWithoutFeedback
+              onPress={async () => {
+                try {
+                  await webSocketService.reconnect();
+                  toastService.success('성공', 'WebSocket 재연결되었습니다.');
+                } catch (error) {
+                  console.error('재연결 실패:', error);
+                  toastService.error(
+                    '오류',
+                    'WebSocket 재연결에 실패했습니다.',
+                  );
+                }
+              }}>
+              <View
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  borderRadius: 4,
+                  marginLeft: 8,
+                }}>
+                <RNText
+                  style={{
+                    color: 'white',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                  }}>
+                  재연결
+                </RNText>
+              </View>
+            </TouchableWithoutFeedback>
+          )}
         </View>
 
         <DateDivider date="2025년 01월 12일" />
@@ -497,7 +520,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
               }
 
               const user = getUserById(message.sender.userId);
-              if (!user) return null;
+              if (!user) {
+                return null;
+              }
 
               // dmMessageId가 없는 경우 index를 사용하여 안전하게 처리
               const messageId =
