@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   View,
@@ -13,6 +13,7 @@ import {Text} from '../../../../shared/ui/typography/Text';
 import {Bell, Exit, Mail, Pen} from '@shared/assets/images';
 import {ChatRoomInfoProps} from './types';
 import MemberItem from './components/MemberItem';
+import {secureStorage} from '@shared/lib/security';
 
 const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -30,6 +31,30 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   onNotificationToggle,
 }) => {
   const {t} = useTranslation();
+  const [_currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isCurrentUserHost, setIsCurrentUserHost] = useState(false);
+
+  // 현재 사용자 ID 가져오고 호스트 여부 확인
+  useEffect(() => {
+    const checkCurrentUserHost = async () => {
+      try {
+        const userId = await secureStorage.getUserId();
+        setCurrentUserId(userId);
+
+        if (userId) {
+          // members 배열에서 현재 사용자를 찾아 호스트 여부 확인
+          const currentUserMember = members.find(
+            member => member.id === userId.toString(),
+          );
+          setIsCurrentUserHost(currentUserMember?.isHost || false);
+        }
+      } catch (error) {
+        console.error('사용자 정보 확인 오류:', error);
+      }
+    };
+
+    checkCurrentUserHost();
+  }, [members]);
 
   const handleToggleNotification = () => {
     if (onNotificationToggle) {
@@ -101,26 +126,30 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
             />
           </View>
 
-          {/* 모든 채팅방에서 초대 메뉴 표시 */}
-          <View style={styles.menuItem}>
-            <Mail style={styles.menuIcon} />
-            <Text variant="body2" color="#303030" style={styles.menuText}>
-              {t('messages.chatInfo.invite')}
-            </Text>
-            <TouchableOpacity style={styles.inviteButton} onPress={() => {}}>
-              <Text variant="caption" weight="bold" color="#F9FAFB">
-                {t('messages.chatInfo.inviteButton')}
+          {/* 호스트만 초대 메뉴 표시 */}
+          {isCurrentUserHost && (
+            <View style={styles.menuItem}>
+              <Mail style={styles.menuIcon} />
+              <Text variant="body2" color="#303030" style={styles.menuText}>
+                {t('messages.chatInfo.invite')}
               </Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity style={styles.inviteButton} onPress={() => {}}>
+                <Text variant="caption" weight="bold" color="#F9FAFB">
+                  {t('messages.chatInfo.inviteButton')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-          {/* 모든 채팅방에서 수정 메뉴 표시 */}
-          <View style={styles.menuItem}>
-            <Pen style={styles.menuIcon} />
-            <Text variant="body2" color="#303030" style={styles.menuText}>
-              {t('messages.chatInfo.editPost')}
-            </Text>
-          </View>
+          {/* 호스트만 수정 메뉴 표시 */}
+          {isCurrentUserHost && (
+            <View style={styles.menuItem}>
+              <Pen style={styles.menuIcon} />
+              <Text variant="body2" color="#303030" style={styles.menuText}>
+                {t('messages.chatInfo.editPost')}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.divider}></View>
