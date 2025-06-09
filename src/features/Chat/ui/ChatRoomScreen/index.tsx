@@ -26,11 +26,10 @@ import {
   useSendDmMessage,
 } from '../../api/hooks';
 import {DmMessageResponse, DmChatRoomParticipant} from '../../api/api';
-import {webSocketService} from '../../lib/websocket';
 import {toastService} from '@shared/lib/notifications/toast';
 import {dummyProfile} from '@shared/assets/images';
-import {config} from '@shared/config/env';
 import {secureStorage} from '@shared/lib/security';
+import {webSocketService} from '../../lib/websocket';
 
 interface ChatRoomScreenProps {
   route?: {
@@ -45,22 +44,18 @@ interface ChatRoomScreenProps {
 const {width} = Dimensions.get('window');
 
 const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
-  console.log('[ChatRoomScreen] 컴포넌트 로드됨');
-  console.log('[ChatRoomScreen] route.params:', route?.params);
-  console.log('[ChatRoomScreen] API_URL:', config.API_URL);
-  console.log('[ChatRoomScreen] WebSocket URL:', `${config.API_URL}/ws`);
-
   const [messages, setMessages] = useState<DmMessageResponse[]>([]);
   const [showRoomInfo, setShowRoomInfo] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [wsStatus, setWsStatus] = useState(webSocketService.getStatus());
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
 
   // route.params에서 dmChatRoomId 가져오기
   const dmChatRoomId = route?.params?.dmChatRoomId;
-  console.log('[ChatRoomScreen] dmChatRoomId:', dmChatRoomId);
+
+  // 현재 사용자 ID 상태
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   // API 훅들
   const {
@@ -69,7 +64,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     isError: isDetailError,
     error: detailError,
   } = useDmChatRoomDetail(dmChatRoomId || -1);
-  console.log(chatRoomDetail);
+
   const {
     data: initialMessages,
     isLoading: isMessagesLoading,
@@ -78,28 +73,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   } = useDmMessages(dmChatRoomId || -1);
 
   const sendMessageMutation = useSendDmMessage();
-
-  console.log('[ChatRoomScreen] API 상태:', {
-    isDetailLoading,
-    isMessagesLoading,
-    isDetailError,
-    isMessagesError,
-    chatRoomDetail: !!chatRoomDetail,
-    initialMessages: !!initialMessages,
-  });
-
-  // WebSocket 상태 주기적 확인
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const currentStatus = webSocketService.getStatus();
-      if (currentStatus !== wsStatus) {
-        setWsStatus(currentStatus);
-        console.log('[ChatRoomScreen] WebSocket 상태 변경:', currentStatus);
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [wsStatus]);
 
   // 에러 처리
   useEffect(() => {
@@ -116,18 +89,13 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   // 초기 메시지 설정
   useEffect(() => {
     if (initialMessages?.data) {
-      console.log(
-        '[ChatRoomScreen] 초기 메시지 설정:',
-        initialMessages.data.length,
-        '개',
-      );
       setMessages(initialMessages.data);
     }
   }, [initialMessages]);
 
-  // WebSocket 연결 및 구독
+  // WebSocket 메시지 리스너 설정
   useEffect(() => {
-    if (!dmChatRoomId || !chatRoomDetail?.data?.participants || !currentUserId) {
+    if (!dmChatRoomId || !currentUserId) {
       return;
     }
 
@@ -135,52 +103,61 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
     const initializeWebSocket = async () => {
       try {
-        console.log('[ChatRoomScreen] WebSocket 초기화 시작...');
-        console.log(
-          '[ChatRoomScreen] 현재 WebSocket 상태:',
-          webSocketService.getStatus(),
-        );
+        // WebSocket이 연결되어 있는지 확인
+        if (!webSocketService.isConnected()) {
+          // 앱 레벨에서 연결이 완료될 때까지 대기 (10초 타임아웃)
+          const connected = await webSocketService.waitForConnection(10000);
 
-        // 연결 상태 변경 리스너 설정
-        webSocketService.onConnectionStatusChange(status => {
-          if (isComponentMounted) {
-            setWsStatus(status);
-            console.log('[ChatRoomScreen] WebSocket 상태 변경:', status);
+          if (!connected) {
+            // 앱 레벨 연결이 실패한 경우에만 직접 연결 시도
+            await webSocketService.connectWebSocket(currentUserId);
           }
-        });
+        }
 
-        // currentUserId는 이미 state에서 가져옴
-        console.log(`[ChatRoomScreen] 현재 사용자 ID: ${currentUserId}`);
+        if (!isComponentMounted) return;
 
-        // 메시지 수신 리스너 설정
-        webSocketService.setMessageListener((dmMessage) => {
-          console.log('[ChatRoomScreen] 새 DM 메시지 수신:', dmMessage);
-          if (isComponentMounted && dmMessage.dmChatRoomId === dmChatRoomId) {
+        // 메시지 수신 리스너 설정 (이 채팅방 메시지만 필터링)
+        webSocketService.setMessageListener((dmMessage: DmMessageResponse) => {
+          if (!isComponentMounted) return;
+
+          // 현재 채팅방의 메시지만 처리
+          if (dmMessage.dmChatRoomId === dmChatRoomId) {
             setMessages(prev => {
-              console.log('[ChatRoomScreen] 메시지 추가 전 개수:', prev.length);
-              const updated = [...prev, dmMessage];
-              console.log(
-                '[ChatRoomScreen] 메시지 추가 후 개수:',
-                updated.length,
+              // 중복 메시지 방지 (실제 메시지 ID로만 체크)
+              const exists = prev.find(
+                msg => msg.dmMessageId === dmMessage.dmMessageId && !msg.isTemp, // 임시 메시지가 아닌 것만 중복 체크
               );
-              return updated;
+
+              if (exists) {
+                return prev;
+              }
+
+              // 임시 메시지가 있다면 교체, 없다면 추가
+              const tempMessageIndex = prev.findIndex(
+                msg =>
+                  msg.isTemp &&
+                  msg.senderId === dmMessage.sender?.userId &&
+                  msg.content === dmMessage.content,
+              );
+
+              if (tempMessageIndex !== -1) {
+                // 임시 메시지를 실제 메시지로 교체
+                const updated = [...prev];
+                updated[tempMessageIndex] = dmMessage;
+                return updated;
+              } else {
+                // 새 메시지 추가
+                return [...prev, dmMessage];
+              }
             });
+
             // 새 메시지가 도착하면 스크롤을 맨 아래로
             setTimeout(() => {
               scrollViewRef.current?.scrollToEnd({animated: true});
             }, 100);
           }
         });
-
-        // WebSocket 연결 (DM 구독 포함) - 내 ID로 구독
-        await webSocketService.connectWebSocket(currentUserId);
-
-        console.log(
-          '[ChatRoomScreen] WebSocket 연결 후 상태:',
-          webSocketService.getStatus(),
-        );
       } catch (error) {
-        console.error('[ChatRoomScreen] WebSocket 초기화 실패:', error);
         if (isComponentMounted) {
           const errorMessage =
             error instanceof Error ? error.message : '알 수 없는 오류';
@@ -194,15 +171,12 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
     initializeWebSocket();
 
-    // 클린업
+    // 클린업: 리스너만 제거, 연결은 유지 (앱 레벨에서 관리)
     return () => {
-      console.log(
-        `[ChatRoomScreen] 컴포넌트 언마운트: WebSocket 연결 해제`,
-      );
       isComponentMounted = false;
-      webSocketService.disconnect();
+      webSocketService.setMessageListener(null);
     };
-  }, [dmChatRoomId, chatRoomDetail, currentUserId]);
+  }, [dmChatRoomId, currentUserId]);
 
   // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
   const panResponder = useRef(
@@ -265,58 +239,58 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }
   }, [showRoomInfo, isClosing, fadeAnim, slideAnim]);
 
-  // 메시지 전송 핸들러
+  // 메시지 전송 핸들러 (REST API 사용, WebSocket은 실시간 수신용)
   const handleSendMessage = async (text: string) => {
-    if (!dmChatRoomId) {
+    if (!dmChatRoomId || !currentUserId) {
       toastService.error('오류', '채팅방 정보가 없습니다.');
       return;
     }
 
+    // 낙관적 업데이트: 임시 메시지를 즉시 UI에 추가
+    const tempMessage: DmMessageResponse = {
+      dmMessageId: Date.now(), // 임시 ID (실제 ID는 서버에서 할당됨)
+      dmChatRoomId,
+      senderId: currentUserId,
+      content: text,
+      createdAt: new Date().toISOString(),
+      isRead: false,
+      isTemp: true, // 임시 메시지 표시
+    };
+
+    // 즉시 UI에 메시지 추가
+    setMessages(prev => [...prev, tempMessage]);
+
+    // 즉시 스크롤을 맨 아래로
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({animated: true});
+    }, 50);
+
     try {
-      // API를 통한 메시지 전송
-      await sendMessageMutation.mutateAsync({
+      // REST API를 통한 메시지 전송 (백엔드에서 WebSocket으로 브로드캐스트)
+      const response = await sendMessageMutation.mutateAsync({
         dmChatRoomId,
         content: text,
       });
 
-      // WebSocket을 통한 DM 메시지 전송 (테스트용)
-      if (webSocketService.isConnected() && currentUserId) {
-        // 상대방 사용자 ID 찾기
-        const targetUser = chatRoomDetail?.data?.participants?.find(
-          p => p.user.userId !== currentUserId
-        );
-
-        if (targetUser?.user?.userId) {
-          const success = webSocketService.sendDmMessage(targetUser.user.userId, text);
-          if (success) {
-            console.log('[ChatRoomScreen] DM 메시지 WebSocket 전송 성공');
-          } else {
-            console.warn('[ChatRoomScreen] DM 메시지 WebSocket 전송 실패');
-          }
-        }
-      } else {
-        console.warn('[ChatRoomScreen] WebSocket이 연결되어 있지 않거나 사용자 ID가 없음');
-      }
-
-      // 메시지 전송 후 스크롤을 맨 아래로
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({animated: true});
-      }, 100);
+      // 임시 메시지를 실제 메시지로 교체
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.dmMessageId === tempMessage.dmMessageId && msg.isTemp
+            ? {...response.data, isTemp: false}
+            : msg,
+        ),
+      );
     } catch (error: any) {
       console.error('메시지 전송 실패:', error);
 
-      // FCM 관련 에러인 경우 다른 메시지 표시
-      if (
-        error.message?.includes('firebase') ||
-        error.message?.includes('token')
-      ) {
-        toastService.error(
-          '알림 오류',
-          '메시지는 전송되었지만 푸시 알림에 문제가 있습니다.',
-        );
-      } else {
-        toastService.error('전송 실패', '메시지 전송에 실패했습니다.');
-      }
+      // 전송 실패 시 임시 메시지 제거
+      setMessages(prev =>
+        prev.filter(
+          msg => !(msg.dmMessageId === tempMessage.dmMessageId && msg.isTemp),
+        ),
+      );
+
+      toastService.error('전송 실패', '메시지 전송에 실패했습니다.');
     }
   };
 
@@ -365,9 +339,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       isHost: participant.isHost,
     };
   };
-
-  // 현재 사용자 ID를 secureStorage에서 가져오기
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   // 현재 사용자 ID 초기화
   useEffect(() => {
@@ -430,66 +401,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           onMenuPress={handleMenuPress}
         />
 
-        {/* WebSocket 연결 상태 표시 */}
-        <View
-          style={{
-            backgroundColor:
-              wsStatus === 'connected'
-                ? '#4CAF50'
-                : wsStatus === 'connecting'
-                ? '#FF9800'
-                : '#F44336',
-            paddingVertical: 4,
-            paddingHorizontal: 12,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <RNText style={{color: 'white', fontSize: 12}}>
-            WebSocket:{' '}
-            {wsStatus === 'connected'
-              ? '연결됨'
-              : wsStatus === 'connecting'
-              ? '연결 중...'
-              : wsStatus === 'error'
-              ? '연결 오류'
-              : '연결 해제됨'}
-          </RNText>
-          {(wsStatus === 'error' || wsStatus === 'disconnected') && (
-            <TouchableWithoutFeedback
-              onPress={async () => {
-                try {
-                  await webSocketService.reconnect();
-                  toastService.success('성공', 'WebSocket 재연결되었습니다.');
-                } catch (error) {
-                  console.error('재연결 실패:', error);
-                  toastService.error(
-                    '오류',
-                    'WebSocket 재연결에 실패했습니다.',
-                  );
-                }
-              }}>
-              <View
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  paddingHorizontal: 8,
-                  paddingVertical: 2,
-                  borderRadius: 4,
-                  marginLeft: 8,
-                }}>
-                <RNText
-                  style={{
-                    color: 'white',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                  }}>
-                  재연결
-                </RNText>
-              </View>
-            </TouchableWithoutFeedback>
-          )}
-        </View>
-
         <DateDivider date="2025년 01월 12일" />
 
         <ScrollView
@@ -513,13 +424,21 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
             </View>
           ) : (
             messages.map((message, index) => {
-              // message 및 sender 안전성 검사
-              if (!message || !message.sender) {
-                console.warn('Invalid message or sender:', message);
+              // message 안전성 검사
+              if (!message) {
+                console.warn('Invalid message:', message);
                 return null;
               }
 
-              const user = getUserById(message.sender.userId);
+              // senderId 또는 sender.userId 가져오기 (임시 메시지는 senderId, 실제 메시지는 sender.userId)
+              const messageSenderId =
+                message.senderId || message.sender?.userId;
+              if (!messageSenderId) {
+                console.warn('No sender ID found in message:', message);
+                return null;
+              }
+
+              const user = getUserById(messageSenderId);
               if (!user) {
                 return null;
               }
@@ -527,6 +446,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
               // dmMessageId가 없는 경우 index를 사용하여 안전하게 처리
               const messageId =
                 message.dmMessageId?.toString() || `temp-${index}`;
+
               return (
                 <ChatMessage
                   key={messageId}
@@ -544,8 +464,16 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
                         )
                       : '시간 미상'
                   }
-                  readCount={message.isRead ? 0 : 1}
-                  isMine={message.sender.userId === currentUserId}
+                  readCount={
+                    typeof message.isRead === 'number'
+                      ? message.isRead
+                        ? 0
+                        : 1
+                      : message.isRead
+                      ? 0
+                      : 1
+                  }
+                  isMine={messageSenderId === currentUserId}
                   sender={{
                     id: user?.userId?.toString() || 'unknown',
                     name: user.userName || '알 수 없는 사용자',

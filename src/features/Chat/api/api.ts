@@ -37,10 +37,12 @@ export interface UserSummaryWithHostInfo extends UserSummary {
 export interface DmMessageResponse {
   dmMessageId: number;
   dmChatRoomId: number;
-  sender: UserSummary;
+  sender?: UserSummary; // 임시 메시지에서는 없을 수 있음
+  senderId?: number; // 임시 메시지용 senderId
   content: string;
-  isRead: number; // 0: 읽지 않음, 1: 읽음
+  isRead: number | boolean; // 0: 읽지 않음, 1: 읽음, boolean for temp messages
   createdAt: string;
+  isTemp?: boolean; // 임시 메시지 여부
 }
 
 // 실제 API 응답에서 사용되는 참가자 타입
