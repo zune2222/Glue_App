@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -7,7 +7,9 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
 import {styles} from './styles';
 import {ChatRoom} from '../../entities/types';
 import {ChatRoomItem, TabHeader, MessageFilter} from '../../components';
@@ -42,6 +44,7 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
     isLoading: isHostedLoading,
     isError: isHostedError,
     error: hostedError,
+    refetch: refetchHostedRooms,
   } = useHostedDmRooms();
 
   // 참여자 DM 채팅방 목록 조회 훅
@@ -50,12 +53,39 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
     isLoading: isParticipatedLoading,
     isError: isParticipatedError,
     error: participatedError,
+    refetch: refetchParticipatedRooms,
   } = useParticipatedDmRooms();
 
   // 모든 DM 채팅방 데이터 로딩 상태
   useEffect(() => {
     setIsLoading(isHostedLoading || isParticipatedLoading);
   }, [isHostedLoading, isParticipatedLoading]);
+
+  // 새로고침 상태
+  const [refreshing, setRefreshing] = useState(false);
+
+  // 새로고침 핸들러
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refetchHostedRooms(), refetchParticipatedRooms()]);
+    } catch (error) {
+      console.error('새로고침 실패:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetchHostedRooms, refetchParticipatedRooms]);
+
+  // 화면 포커스 시 데이터 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      if (activeTab === 'message') {
+        // 쪽지 탭이 활성화된 상태에서 화면에 포커스될 때만 새로고침
+        refetchHostedRooms();
+        refetchParticipatedRooms();
+      }
+    }, [activeTab, refetchHostedRooms, refetchParticipatedRooms]),
+  );
 
   // 에러 발생시 토스트 표시
   useEffect(() => {
@@ -138,6 +168,9 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
 
   // DM 채팅방 아이템 렌더링
   const renderDmChatRoomItem = (room: DmChatRoom) => {
+    // 디버깅: otherUser 구조 확인
+    console.log('DM 채팅방 otherUser 구조:', room.otherUser);
+
     return (
       <TouchableOpacity
         key={room.dmChatRoomId}
@@ -146,7 +179,8 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
         activeOpacity={0.7}>
         <Image
           source={
-            room.otherUser.profileImageUrl
+            room.otherUser.profileImageUrl &&
+            room.otherUser.profileImageUrl.trim() !== ''
               ? {uri: room.otherUser.profileImageUrl}
               : dummyProfile
           }
@@ -154,7 +188,11 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
           style={styles.profileImage}
         />
         <View style={styles.messageContent}>
-          <Text style={styles.senderName}>{room.otherUser.userName}</Text>
+          <Text style={styles.senderName}>
+            {room.otherUser.userName ||
+              (room.otherUser as any).userNickname ||
+              '알 수 없는 사용자'}
+          </Text>
           <Text style={styles.messagePreview}>
             {room.lastMessage || '새로운 채팅방이 생성되었습니다.'}
           </Text>
@@ -185,7 +223,16 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
         <MessageFilter onFilterChange={handleFilterChange} />
       )}
 
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#1CBFDC"
+            colors={['#1CBFDC']}
+          />
+        }>
         {/* 로딩 표시 */}
         {isLoading && activeTab === 'message' && (
           <View style={styles.loadingContainer}>

@@ -45,8 +45,11 @@ interface MemberItemProps {
 // 모임 참여자 컴포넌트
 const MemberItem: React.FC<MemberItemProps> = ({member}) => {
   // profileImage가 dummyProfile(로컬 이미지)인지 URL(문자열)인지 확인
+  // null, undefined, 빈 문자열인 경우 기본 이미지 사용
   const imageSource =
-    member.profileImage === dummyProfile
+    member.profileImage === dummyProfile ||
+    !member.profileImage ||
+    member.profileImage.trim() === ''
       ? dummyProfile // 로컬 이미지
       : {uri: member.profileImage}; // URL 이미지
 

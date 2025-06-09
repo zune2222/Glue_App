@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-} from 'react-native';
-import {Crown} from '@shared/assets/images';
+import {View, Text, Image, StyleSheet} from 'react-native';
+import {Crown, dummyProfile} from '@shared/assets/images';
 // 인라인 스타일 정의
 const styles = StyleSheet.create({
   container: {
@@ -59,7 +52,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 11,
     paddingHorizontal: 14,
-    minWidth: 80,
+    minWidth: 30,
   },
   myBubble: {
     backgroundColor: '#1CBFDC',
@@ -87,10 +80,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginRight: 6,
   },
-  readCount: {
-    color: '#9DA2AF',
-    fontSize: 10,
-  },
 });
 
 export interface MessageProps {
@@ -104,7 +93,6 @@ export interface MessageProps {
     profileImage: string;
   };
   timestamp: string;
-  readCount?: number;
 }
 
 const ChatMessage: React.FC<MessageProps> = ({
@@ -112,7 +100,6 @@ const ChatMessage: React.FC<MessageProps> = ({
   isMine,
   sender,
   timestamp,
-  readCount,
 }) => {
   return (
     <View
@@ -122,7 +109,11 @@ const ChatMessage: React.FC<MessageProps> = ({
       ]}>
       {!isMine && (
         <Image
-          source={{uri: sender.profileImage}}
+          source={
+            sender.profileImage && sender.profileImage.trim() !== ''
+              ? {uri: sender.profileImage}
+              : dummyProfile
+          }
           resizeMode="cover"
           style={styles.profileImage}
         />
@@ -137,13 +128,11 @@ const ChatMessage: React.FC<MessageProps> = ({
           </View>
         )}
 
-        <TouchableOpacity
-          style={[styles.bubble, isMine && styles.myBubble]}
-          onPress={() => Alert.alert('메시지', text)}>
+        <View style={[styles.bubble, isMine && styles.myBubble]}>
           <Text style={[styles.messageText, isMine && styles.myMessageText]}>
             {text}
           </Text>
-        </TouchableOpacity>
+        </View>
 
         <View
           style={[
@@ -151,9 +140,6 @@ const ChatMessage: React.FC<MessageProps> = ({
             isMine && styles.myTimestampContainer,
           ]}>
           <Text style={styles.timestamp}>{timestamp}</Text>
-          {readCount !== undefined && (
-            <Text style={styles.readCount}>{readCount}</Text>
-          )}
         </View>
       </View>
 

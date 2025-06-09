@@ -93,90 +93,62 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }
   }, [initialMessages]);
 
-  // WebSocket 메시지 리스너 설정
+  // WebSocket 메시지 리스너 설정 (Provider에서 연결 관리)
   useEffect(() => {
-    if (!dmChatRoomId || !currentUserId) {
+    if (!dmChatRoomId) {
       return;
     }
 
     let isComponentMounted = true;
 
-    const initializeWebSocket = async () => {
-      try {
-        // WebSocket이 연결되어 있는지 확인
-        if (!webSocketService.isConnected()) {
-          // 앱 레벨에서 연결이 완료될 때까지 대기 (10초 타임아웃)
-          const connected = await webSocketService.waitForConnection(10000);
+    // 메시지 수신 리스너 설정 (이 채팅방 메시지만 필터링)
+    webSocketService.setMessageListener((dmMessage: DmMessageResponse) => {
+      if (!isComponentMounted) return;
 
-          if (!connected) {
-            // 앱 레벨 연결이 실패한 경우에만 직접 연결 시도
-            await webSocketService.connectWebSocket(currentUserId);
+      // 현재 채팅방의 메시지만 처리
+      if (dmMessage.dmChatRoomId === dmChatRoomId) {
+        setMessages(prev => {
+          // 중복 메시지 방지 (실제 메시지 ID로만 체크)
+          const exists = prev.find(
+            msg => msg.dmMessageId === dmMessage.dmMessageId && !msg.isTemp, // 임시 메시지가 아닌 것만 중복 체크
+          );
+
+          if (exists) {
+            return prev;
           }
-        }
 
-        if (!isComponentMounted) return;
+          // 임시 메시지가 있다면 교체, 없다면 추가
+          const tempMessageIndex = prev.findIndex(
+            msg =>
+              msg.isTemp &&
+              msg.senderId === dmMessage.sender?.userId &&
+              msg.content === dmMessage.content,
+          );
 
-        // 메시지 수신 리스너 설정 (이 채팅방 메시지만 필터링)
-        webSocketService.setMessageListener((dmMessage: DmMessageResponse) => {
-          if (!isComponentMounted) return;
-
-          // 현재 채팅방의 메시지만 처리
-          if (dmMessage.dmChatRoomId === dmChatRoomId) {
-            setMessages(prev => {
-              // 중복 메시지 방지 (실제 메시지 ID로만 체크)
-              const exists = prev.find(
-                msg => msg.dmMessageId === dmMessage.dmMessageId && !msg.isTemp, // 임시 메시지가 아닌 것만 중복 체크
-              );
-
-              if (exists) {
-                return prev;
-              }
-
-              // 임시 메시지가 있다면 교체, 없다면 추가
-              const tempMessageIndex = prev.findIndex(
-                msg =>
-                  msg.isTemp &&
-                  msg.senderId === dmMessage.sender?.userId &&
-                  msg.content === dmMessage.content,
-              );
-
-              if (tempMessageIndex !== -1) {
-                // 임시 메시지를 실제 메시지로 교체
-                const updated = [...prev];
-                updated[tempMessageIndex] = dmMessage;
-                return updated;
-              } else {
-                // 새 메시지 추가
-                return [...prev, dmMessage];
-              }
-            });
-
-            // 새 메시지가 도착하면 스크롤을 맨 아래로
-            setTimeout(() => {
-              scrollViewRef.current?.scrollToEnd({animated: true});
-            }, 100);
+          if (tempMessageIndex !== -1) {
+            // 임시 메시지를 실제 메시지로 교체
+            const updated = [...prev];
+            updated[tempMessageIndex] = dmMessage;
+            return updated;
+          } else {
+            // 새 메시지 추가
+            return [...prev, dmMessage];
           }
         });
-      } catch (error) {
-        if (isComponentMounted) {
-          const errorMessage =
-            error instanceof Error ? error.message : '알 수 없는 오류';
-          toastService.error(
-            '연결 오류',
-            `WebSocket 연결에 실패했습니다: ${errorMessage}`,
-          );
-        }
+
+        // 새 메시지가 도착하면 스크롤을 맨 아래로
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({animated: true});
+        }, 100);
       }
-    };
+    });
 
-    initializeWebSocket();
-
-    // 클린업: 리스너만 제거, 연결은 유지 (앱 레벨에서 관리)
+    // 클린업: 리스너만 제거, 연결은 Provider에서 관리
     return () => {
       isComponentMounted = false;
       webSocketService.setMessageListener(null);
     };
-  }, [dmChatRoomId, currentUserId]);
+  }, [dmChatRoomId]);
 
   // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
   const panResponder = useRef(
@@ -389,6 +361,22 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   );
   const chatRoomName = otherUser?.user?.userNickname || '알 수 없는 사용자';
 
+  // 날짜 계산 (메시지가 있으면 첫 번째 메시지 날짜, 없으면 오늘 날짜)
+  const getDisplayDate = () => {
+    if (messages.length > 0 && messages[0].createdAt) {
+      return new Date(messages[0].createdAt).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    }
+    return new Date().toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -401,7 +389,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           onMenuPress={handleMenuPress}
         />
 
-        <DateDivider date="2025년 01월 12일" />
+        <DateDivider date={getDisplayDate()} />
 
         <ScrollView
           ref={scrollViewRef}
@@ -464,20 +452,14 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
                         )
                       : '시간 미상'
                   }
-                  readCount={
-                    typeof message.isRead === 'number'
-                      ? message.isRead
-                        ? 0
-                        : 1
-                      : message.isRead
-                      ? 0
-                      : 1
-                  }
                   isMine={messageSenderId === currentUserId}
                   sender={{
                     id: user?.userId?.toString() || 'unknown',
                     name: user.userName || '알 수 없는 사용자',
-                    profileImage: user.profileImageUrl || '',
+                    profileImage:
+                      user.profileImageUrl && user.profileImageUrl.trim() !== ''
+                        ? user.profileImageUrl
+                        : '',
                     isHost: user.isHost || false,
                   }}
                 />
@@ -519,7 +501,10 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
                   id: participant.user.userId?.toString() || 'unknown',
                   name: participant.user.userNickname || '알 수 없는 사용자',
                   profileImage:
-                    participant.user.profileImageUrl || dummyProfile,
+                    participant.user.profileImageUrl &&
+                    participant.user.profileImageUrl.trim() !== ''
+                      ? participant.user.profileImageUrl
+                      : dummyProfile,
                   isHost: participant.isHost || false,
                   isOnline: false, // TODO: 온라인 상태 정보 추가 필요
                 }),
