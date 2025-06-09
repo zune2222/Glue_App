@@ -1,7 +1,7 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useMemo, useCallback} from 'react';
 import {
   SafeAreaView,
-  ScrollView,
+  FlatList,
   View,
   Animated,
   Dimensions,
@@ -24,6 +24,7 @@ import {
   useDmChatRoomDetail,
   useDmMessages,
   useSendDmMessage,
+  useToggleDmChatRoomNotification,
 } from '../../api/hooks';
 import {DmMessageResponse, DmChatRoomParticipant} from '../../api/api';
 import {toastService} from '@shared/lib/notifications/toast';
@@ -47,9 +48,10 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   const [messages, setMessages] = useState<DmMessageResponse[]>([]);
   const [showRoomInfo, setShowRoomInfo] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<FlatList>(null);
 
   // route.params에서 dmChatRoomId 가져오기
   const dmChatRoomId = route?.params?.dmChatRoomId;
@@ -66,13 +68,17 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   } = useDmChatRoomDetail(dmChatRoomId || -1);
 
   const {
-    data: initialMessages,
+    data: messagesData,
     isLoading: isMessagesLoading,
     isError: isMessagesError,
     error: messagesError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useDmMessages(dmChatRoomId || -1);
 
   const sendMessageMutation = useSendDmMessage();
+  const toggleNotificationMutation = useToggleDmChatRoomNotification();
 
   // 에러 처리
   useEffect(() => {
@@ -86,12 +92,76 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }
   }, [isDetailError, detailError, isMessagesError, messagesError]);
 
-  // 초기 메시지 설정
+  // 무한 스크롤 메시지 데이터를 평면 배열로 변환
+  const allMessages = useMemo(() => {
+    if (!messagesData?.pages) return [];
+
+    // 모든 페이지의 메시지를 하나의 배열로 합치기
+    // 첫 번째 페이지가 최신 메시지, 이후 페이지들이 더 오래된 메시지
+    const combined = messagesData.pages.flatMap(page => page.data || []);
+
+    console.log('📊 페이지 합치기 결과:', {
+      pageCount: messagesData.pages.length,
+      totalMessages: combined.length,
+      firstMessage: combined[0]?.dmMessageId,
+      lastMessage: combined[combined.length - 1]?.dmMessageId,
+      pages: messagesData.pages.map(page => ({
+        count: page.data?.length || 0,
+        first: page.data?.[0]?.dmMessageId,
+        last: page.data?.[page.data.length - 1]?.dmMessageId,
+      })),
+    });
+
+    // 서버에서 이미 시간순으로 정렬해서 주므로 별도 정렬 불필요
+    // 단, 중복 제거는 해야 함 (혹시 모를 중복 메시지 방지)
+    const uniqueMessages = combined.filter(
+      (message, index, array) =>
+        array.findIndex(m => m.dmMessageId === message.dmMessageId) === index,
+    );
+
+    console.log('📊 중복 제거 후:', {
+      totalMessages: uniqueMessages.length,
+      firstMessage: uniqueMessages[0]?.dmMessageId,
+      lastMessage: uniqueMessages[uniqueMessages.length - 1]?.dmMessageId,
+    });
+
+    // 시간순으로 정렬 후 역순으로 배치 (inverted FlatList용)
+    return uniqueMessages.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }, [messagesData]);
+
+  // 메시지 초기 설정 및 무한 스크롤 처리
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [lastLoadedMessageCount, setLastLoadedMessageCount] = useState(0);
+
   useEffect(() => {
-    if (initialMessages?.data) {
-      setMessages(initialMessages.data);
+    if (!allMessages || allMessages.length === 0) return;
+
+    if (isInitialLoad) {
+      // 초기 로드
+      console.log('🔄 초기 메시지 로드:', allMessages.length, '개');
+      setMessages(allMessages);
+      setLastLoadedMessageCount(allMessages.length);
+      setIsInitialLoad(false);
+    } else if (allMessages.length > lastLoadedMessageCount) {
+      // 무한 스크롤로 새 메시지 로드 (기존 메시지 뒤에 추가)
+      const newMessages = allMessages.slice(lastLoadedMessageCount);
+      console.log('📄 무한 스크롤 메시지 추가:', newMessages.length, '개');
+
+      setMessages(prev => {
+        // 새로운 메시지들을 기존 메시지 뒤에 추가 (중복 방지)
+        const existingIds = new Set(prev.map(msg => msg.dmMessageId));
+        const filteredNewMessages = newMessages.filter(
+          msg => !existingIds.has(msg.dmMessageId),
+        );
+        return [...prev, ...filteredNewMessages];
+      });
+
+      setLastLoadedMessageCount(allMessages.length);
     }
-  }, [initialMessages]);
+  }, [allMessages, isInitialLoad, lastLoadedMessageCount]);
 
   // WebSocket 메시지 리스너 설정 (Provider에서 연결 관리)
   useEffect(() => {
@@ -108,38 +178,32 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       // 현재 채팅방의 메시지만 처리
       if (dmMessage.dmChatRoomId === dmChatRoomId) {
         setMessages(prev => {
-          // 중복 메시지 방지 (실제 메시지 ID로만 체크)
+          // 중복 메시지 방지 (실제 메시지 ID로 확인)
           const exists = prev.find(
-            msg => msg.dmMessageId === dmMessage.dmMessageId && !msg.isTemp, // 임시 메시지가 아닌 것만 중복 체크
+            msg => msg.dmMessageId === dmMessage.dmMessageId && !msg.isTemp,
           );
-
           if (exists) {
+            console.log('중복 메시지 무시:', dmMessage.dmMessageId);
             return prev;
           }
 
-          // 임시 메시지가 있다면 교체, 없다면 추가
-          const tempMessageIndex = prev.findIndex(
-            msg =>
-              msg.isTemp &&
-              msg.senderId === dmMessage.sender?.userId &&
-              msg.content === dmMessage.content,
-          );
-
-          if (tempMessageIndex !== -1) {
-            // 임시 메시지를 실제 메시지로 교체
-            const updated = [...prev];
-            updated[tempMessageIndex] = dmMessage;
-            return updated;
+          // 현재 사용자가 보낸 메시지인 경우 임시 메시지 제거
+          const messageSenderId =
+            dmMessage.senderId || dmMessage.sender?.userId;
+          if (messageSenderId === currentUserId) {
+            // 임시 메시지들을 제거하고 실제 메시지 추가
+            const withoutTempMessages = prev.filter(msg => !msg.isTemp);
+            console.log(
+              '내가 보낸 메시지 - 임시 메시지 제거 후 실제 메시지 추가:',
+              dmMessage.dmMessageId,
+            );
+            return [dmMessage, ...withoutTempMessages];
           } else {
-            // 새 메시지 추가
-            return [...prev, dmMessage];
+            // 다른 사용자가 보낸 메시지는 그냥 추가
+            console.log('다른 사용자 메시지 추가:', dmMessage.dmMessageId);
+            return [dmMessage, ...prev];
           }
         });
-
-        // 새 메시지가 도착하면 스크롤을 맨 아래로
-        setTimeout(() => {
-          scrollViewRef.current?.scrollToEnd({animated: true});
-        }, 100);
       }
     });
 
@@ -148,7 +212,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       isComponentMounted = false;
       webSocketService.setMessageListener(null);
     };
-  }, [dmChatRoomId]);
+  }, [dmChatRoomId, currentUserId]);
 
   // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
   const panResponder = useRef(
@@ -211,55 +275,44 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }
   }, [showRoomInfo, isClosing, fadeAnim, slideAnim]);
 
-  // 메시지 전송 핸들러 (REST API 사용, WebSocket은 실시간 수신용)
+  // 메시지 전송 핸들러 - 낙관적 업데이트로 즉시 UI 반영
   const handleSendMessage = async (text: string) => {
     if (!dmChatRoomId || !currentUserId) {
       toastService.error('오류', '채팅방 정보가 없습니다.');
       return;
     }
 
-    // 낙관적 업데이트: 임시 메시지를 즉시 UI에 추가
+    // 임시 메시지 ID 생성 (음수로 설정하여 실제 메시지와 구분)
+    const tempMessageId = -Date.now();
+
+    // 낙관적 업데이트: 즉시 UI에 메시지 추가
     const tempMessage: DmMessageResponse = {
-      dmMessageId: Date.now(), // 임시 ID (실제 ID는 서버에서 할당됨)
+      dmMessageId: tempMessageId,
       dmChatRoomId,
       senderId: currentUserId,
       content: text,
+      isRead: false, // 임시 메시지는 읽지 않음으로 설정
       createdAt: new Date().toISOString(),
-      isRead: false,
       isTemp: true, // 임시 메시지 표시
     };
 
-    // 즉시 UI에 메시지 추가
-    setMessages(prev => [...prev, tempMessage]);
-
-    // 즉시 스크롤을 맨 아래로
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({animated: true});
-    }, 50);
+    // 임시 메시지 즉시 추가
+    setMessages(prev => [tempMessage, ...prev]);
 
     try {
-      // REST API를 통한 메시지 전송 (백엔드에서 WebSocket으로 브로드캐스트)
-      const response = await sendMessageMutation.mutateAsync({
+      // REST API를 통한 메시지 전송
+      await sendMessageMutation.mutateAsync({
         dmChatRoomId,
         content: text,
       });
 
-      // 임시 메시지를 실제 메시지로 교체
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.dmMessageId === tempMessage.dmMessageId && msg.isTemp
-            ? {...response.data, isTemp: false}
-            : msg,
-        ),
-      );
+      // 전송 성공 시 WebSocket으로 실제 메시지가 들어와서 임시 메시지를 자동으로 교체함
     } catch (error: any) {
       console.error('메시지 전송 실패:', error);
 
       // 전송 실패 시 임시 메시지 제거
       setMessages(prev =>
-        prev.filter(
-          msg => !(msg.dmMessageId === tempMessage.dmMessageId && msg.isTemp),
-        ),
+        prev.filter(msg => msg.dmMessageId !== tempMessageId),
       );
 
       toastService.error('전송 실패', '메시지 전송에 실패했습니다.');
@@ -293,24 +346,40 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }, 300);
   };
 
-  // 사용자 정보 가져오기 헬퍼 함수
-  const getUserById = (userId: number) => {
-    if (!chatRoomDetail?.data?.participants) return null;
+  // React Query 낙관적 업데이트를 사용한 알림 설정 토글 핸들러
+  const handleNotificationToggle = async () => {
+    console.log('🔔 handleNotificationToggle 호출됨');
 
-    const participant = chatRoomDetail.data.participants.find(
-      (participant: DmChatRoomParticipant) =>
-        participant.user.userId === userId,
-    );
+    if (!dmChatRoomId) {
+      console.log('❌ dmChatRoomId가 없음:', dmChatRoomId);
+      return;
+    }
 
-    if (!participant) return null;
-
-    return {
-      userId: participant.user.userId,
-      userName: participant.user.userNickname, // userNickname을 userName으로 매핑
-      profileImageUrl: participant.user.profileImageUrl,
-      isHost: participant.isHost,
-    };
+    // React Query의 낙관적 업데이트가 모든 것을 처리함
+    toggleNotificationMutation.mutate({dmChatRoomId});
   };
+
+  // 사용자 정보 가져오기 헬퍼 함수
+  const getUserById = useCallback(
+    (userId: number) => {
+      if (!chatRoomDetail?.data?.participants) return null;
+
+      const participant = chatRoomDetail.data.participants.find(
+        (participant: DmChatRoomParticipant) =>
+          participant.user.userId === userId,
+      );
+
+      if (!participant) return null;
+
+      return {
+        userId: participant.user.userId,
+        userName: participant.user.userNickname, // userNickname을 userName으로 매핑
+        profileImageUrl: participant.user.profileImageUrl,
+        isHost: participant.isHost,
+      };
+    },
+    [chatRoomDetail?.data?.participants],
+  );
 
   // 현재 사용자 ID 초기화
   useEffect(() => {
@@ -319,6 +388,92 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       setCurrentUserId(userId);
     };
     initCurrentUser();
+  }, []);
+
+  // 이전 메시지 로드 핸들러 - 맨 아래 도달시 호출
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // 메시지 렌더링 함수
+  const renderMessage = useCallback(
+    ({item: message}: {item: DmMessageResponse}) => {
+      // message 안전성 검사
+      if (!message) {
+        console.warn('Invalid message:', message);
+        return null;
+      }
+
+      // senderId 또는 sender.userId 가져오기 (임시 메시지는 senderId, 실제 메시지는 sender.userId)
+      const messageSenderId = message.senderId || message.sender?.userId;
+      if (!messageSenderId) {
+        console.warn('No sender ID found in message:', message);
+        return null;
+      }
+
+      const user = getUserById(messageSenderId);
+      if (!user) {
+        return null;
+      }
+
+      return (
+        <ChatMessage
+          id={message.dmMessageId?.toString() || ''}
+          text={message.content || ''}
+          timestamp={
+            message.createdAt
+              ? new Date(message.createdAt).toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                })
+              : '시간 미상'
+          }
+          isMine={messageSenderId === currentUserId}
+          sender={{
+            id: user?.userId?.toString() || 'unknown',
+            name: user.userName || '알 수 없는 사용자',
+            profileImage:
+              user.profileImageUrl && user.profileImageUrl.trim() !== ''
+                ? user.profileImageUrl
+                : '',
+            isHost: user.isHost || false,
+          }}
+        />
+      );
+    },
+    [currentUserId, getUserById],
+  );
+
+  // 빈 리스트 컴포넌트
+  const renderEmptyComponent = useCallback(
+    () => (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingVertical: 50,
+          minHeight: 200,
+        }}>
+        <RNText style={{color: '#999'}}>
+          아직 메시지가 없습니다. 첫 메시지를 보내보세요!
+        </RNText>
+      </View>
+    ),
+    [],
+  );
+
+  // 키 추출 함수
+  const keyExtractor = useCallback((item: DmMessageResponse, index: number) => {
+    return (
+      item.dmMessageId?.toString() ||
+      `${item.isTemp ? 'temp' : 'msg'}-${
+        item.senderId || item.sender?.userId
+      }-${index}-${item.createdAt}`
+    );
   }, []);
 
   // 로딩 중일 때
@@ -363,7 +518,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   // 날짜 계산 (메시지가 있으면 첫 번째 메시지 날짜, 없으면 오늘 날짜)
   const getDisplayDate = () => {
-    if (messages.length > 0 && messages[0].createdAt) {
+    if (messages && messages.length > 0 && messages[0]?.createdAt) {
       return new Date(messages[0].createdAt).toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: 'long',
@@ -391,82 +546,27 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
         <DateDivider date={getDisplayDate()} />
 
-        <ScrollView
+        <FlatList
           ref={scrollViewRef}
           style={styles.scrollView}
-          contentContainerStyle={styles.contentContainer}
-          onContentSizeChange={() =>
-            scrollViewRef.current?.scrollToEnd({animated: false})
-          }>
-          {messages.length === 0 ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingVertical: 50,
-              }}>
-              <RNText style={{color: '#999'}}>
-                아직 메시지가 없습니다. 첫 메시지를 보내보세요!
-              </RNText>
-            </View>
-          ) : (
-            messages.map((message, index) => {
-              // message 안전성 검사
-              if (!message) {
-                console.warn('Invalid message:', message);
-                return null;
-              }
-
-              // senderId 또는 sender.userId 가져오기 (임시 메시지는 senderId, 실제 메시지는 sender.userId)
-              const messageSenderId =
-                message.senderId || message.sender?.userId;
-              if (!messageSenderId) {
-                console.warn('No sender ID found in message:', message);
-                return null;
-              }
-
-              const user = getUserById(messageSenderId);
-              if (!user) {
-                return null;
-              }
-
-              // dmMessageId가 없는 경우 index를 사용하여 안전하게 처리
-              const messageId =
-                message.dmMessageId?.toString() || `temp-${index}`;
-
-              return (
-                <ChatMessage
-                  key={messageId}
-                  id={messageId}
-                  text={message.content || ''}
-                  timestamp={
-                    message.createdAt
-                      ? new Date(message.createdAt).toLocaleTimeString(
-                          'ko-KR',
-                          {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true,
-                          },
-                        )
-                      : '시간 미상'
-                  }
-                  isMine={messageSenderId === currentUserId}
-                  sender={{
-                    id: user?.userId?.toString() || 'unknown',
-                    name: user.userName || '알 수 없는 사용자',
-                    profileImage:
-                      user.profileImageUrl && user.profileImageUrl.trim() !== ''
-                        ? user.profileImageUrl
-                        : '',
-                    isHost: user.isHost || false,
-                  }}
-                />
-              );
-            })
-          )}
-        </ScrollView>
+          contentContainerStyle={[
+            styles.contentContainer,
+            messages.length === 0 && {flex: 1},
+          ]}
+          data={messages}
+          keyExtractor={keyExtractor}
+          renderItem={renderMessage}
+          ListEmptyComponent={renderEmptyComponent}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.1}
+          inverted
+          removeClippedSubviews={false}
+          showsVerticalScrollIndicator={false}
+          windowSize={10}
+          maxToRenderPerBatch={5}
+          updateCellsBatchingPeriod={100}
+          initialNumToRender={20}
+        />
 
         <ChatInput onSend={handleSendMessage} />
 
@@ -511,6 +611,10 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
               )}
               onClose={closeRoomInfo}
               onLeaveRoom={handleLeaveRoom}
+              isNotificationEnabled={
+                chatRoomDetail.data.isPushNotificationOn === 1
+              }
+              onNotificationToggle={handleNotificationToggle}
             />
           </Animated.View>
         </Animated.View>

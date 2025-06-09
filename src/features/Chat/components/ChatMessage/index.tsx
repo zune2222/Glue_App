@@ -1,5 +1,5 @@
-import React from 'react';
-import {View, Text, Image, StyleSheet} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {View, Text, Image, StyleSheet, Animated} from 'react-native';
 import {Crown, dummyProfile} from '@shared/assets/images';
 // 인라인 스타일 정의
 const styles = StyleSheet.create({
@@ -101,11 +101,35 @@ const ChatMessage: React.FC<MessageProps> = ({
   sender,
   timestamp,
 }) => {
+  // 애니메이션을 위한 Animated Values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    // 컴포넌트가 마운트될 때 애니메이션 실행
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim]);
+
   return (
-    <View
+    <Animated.View
       style={[
         styles.container,
         isMine ? styles.myContainer : styles.otherContainer,
+        {
+          opacity: fadeAnim,
+          transform: [{translateY: slideAnim}],
+        },
       ]}>
       {!isMine && (
         <Image
@@ -150,7 +174,7 @@ const ChatMessage: React.FC<MessageProps> = ({
         //   style={styles.profileImage}
         // />
       )} */}
-    </View>
+    </Animated.View>
   );
 };
 
