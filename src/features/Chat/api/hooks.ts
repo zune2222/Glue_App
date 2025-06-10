@@ -95,17 +95,18 @@ export const useGroupChatRooms = (cursorId?: number, pageSize: number = 10) => {
 /**
  * DM 채팅방 상세 정보를 가져오는 React Query 훅
  * @param dmChatRoomId 채팅방 ID
+ * @param options 추가 옵션
  * @returns useQuery 훅의 반환값
  */
-export const useDmChatRoomDetail = (dmChatRoomId: number) => {
+export const useDmChatRoomDetail = (dmChatRoomId?: number, options?: {enabled?: boolean}) => {
   return useApiQuery<ActualDmChatRoomDetailResponse>(
-    ['dmChatRoomDetail', dmChatRoomId.toString()],
-    () => getDmChatRoomDetail(dmChatRoomId),
+    ['dmChatRoomDetail', dmChatRoomId?.toString() || 'none'],
+    () => getDmChatRoomDetail(dmChatRoomId!),
     {
       staleTime: 1000 * 60 * 2, // 2분 동안 데이터 신선한 상태 유지
       refetchOnWindowFocus: false, // 창 포커스 시 다시 가져오기 안함
       retry: 1, // 실패 시 1번 재시도
-      enabled: dmChatRoomId !== -1 && dmChatRoomId > 0, // 유효한 dmChatRoomId일 때만 쿼리 실행
+      enabled: Boolean(dmChatRoomId && dmChatRoomId > 0), // 유효한 dmChatRoomId일 때만 쿼리 실행
     },
   );
 };
@@ -113,14 +114,15 @@ export const useDmChatRoomDetail = (dmChatRoomId: number) => {
 /**
  * DM 메시지 목록을 무한 스크롤로 가져오는 React Query 훅
  * @param dmChatRoomId 채팅방 ID
+ * @param options 추가 옵션
  * @returns useInfiniteQuery 훅의 반환값
  */
-export const useDmMessages = (dmChatRoomId: number) => {
+export const useDmMessages = (dmChatRoomId?: number, options?: {enabled?: boolean}) => {
   return useInfiniteQuery<ApiResponse<DmMessageResponse[]>, Error>({
-    queryKey: ['dmMessages', dmChatRoomId.toString()],
+    queryKey: ['dmMessages', dmChatRoomId?.toString() || 'none'],
     queryFn: async ({pageParam}) => {
       const cursorId = pageParam as number | undefined;
-      const response = await getDmMessages(dmChatRoomId, cursorId, 20);
+      const response = await getDmMessages(dmChatRoomId!, cursorId, 20);
       return response;
     },
     getNextPageParam: lastPage => {
@@ -140,7 +142,7 @@ export const useDmMessages = (dmChatRoomId: number) => {
     staleTime: 0, // 메시지는 항상 최신 상태로 유지
     refetchOnWindowFocus: true, // 창이 포커스될 때 다시 가져오기
     retry: 1, // 실패 시 1번 재시도
-    enabled: dmChatRoomId !== -1 && dmChatRoomId > 0, // 유효한 dmChatRoomId일 때만 쿼리 실행
+    enabled: Boolean(dmChatRoomId && dmChatRoomId > 0), // 유효한 dmChatRoomId일 때만 쿼리 실행
   });
 };
 

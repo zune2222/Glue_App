@@ -1,13 +1,8 @@
 import React, {useState} from 'react';
-import {
-  SafeAreaView,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import {View, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   ChevronLeft,
   HelpIcon,
@@ -16,13 +11,13 @@ import {
 } from '../../../shared/assets/images';
 import {colors} from '../../../app/styles/colors';
 import {Text} from '../../../shared/ui/typography/Text';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const GroupCreate = () => {
   const navigation = useNavigation<any>();
   const {t} = useTranslation();
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+
   const handleNext = () => {
     if (selectedType) {
       // 다음 페이지(Step2)로 이동
@@ -108,7 +103,7 @@ const GroupCreate = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      <View style={[styles.bottomContainer, {paddingBottom: insets.bottom}]}>
+      <View style={[styles.bottomContainer, Platform.OS === 'android' && {paddingBottom: insets.bottom + 24}]}>
         <TouchableOpacity
           style={[styles.nextButton, selectedType ? styles.activeButton : null]}
           disabled={!selectedType}
@@ -213,7 +208,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     paddingHorizontal: 19,
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
   nextButton: {
     backgroundColor: '#BBECF4',

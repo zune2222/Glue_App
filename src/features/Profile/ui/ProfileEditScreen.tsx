@@ -5,11 +5,11 @@ import {
   View,
   Image,
   TouchableOpacity,
-  TextInput,
   ActivityIndicator,
   Alert,
   Platform,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {Text} from '@shared/ui/typography/Text';
 import {useMyPage} from '../model/useMyPage';
 import {useProfileMe} from '../model/useProfileMe';
@@ -37,9 +37,10 @@ import {
 } from 'react-native-permissions';
 
 const ProfileEditScreen = () => {
+  const navigation = useNavigation<any>();
   const {myPageInfo, isLoading, isError, error} = useMyPage();
   const {
-    profileMe,
+    data: profileMe,
     isLoading: isProfileMeLoading,
     isError: isProfileMeError,
     error: profileMeError,
@@ -48,8 +49,6 @@ const ProfileEditScreen = () => {
   const profileImageUpload = useProfileImageUploadAndUpdate();
 
   // 편집 가능한 필드들의 상태
-  const [description, setDescription] = useState('');
-  const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
   const [localImageUri, setLocalImageUri] = useState<string | null>(null);
 
@@ -344,27 +343,21 @@ const ProfileEditScreen = () => {
             </Text>
             <TouchableOpacity
               style={styles.editButton}
-              onPress={() => setIsDescriptionEditing(!isDescriptionEditing)}>
+              onPress={() =>
+                navigation.navigate('DescriptionEdit', {
+                  initialDescription:
+                    profileMe?.description || myPageInfo?.description || '',
+                })
+              }>
               <Text style={styles.editButtonText}>{t('common.edit')}</Text>
             </TouchableOpacity>
           </View>
 
-          {isDescriptionEditing ? (
-            <TextInput
-              style={styles.descriptionCardInput}
-              value={description || myPageInfo?.description || ''}
-              onChangeText={setDescription}
-              placeholder={t('profile.editProfile.introductionPlaceholder')}
-              multiline
-              numberOfLines={3}
-            />
-          ) : (
-            <Text style={styles.descriptionCardContent}>
-              {profileMe?.description ||
-                myPageInfo?.description ||
-                t('profile.editProfile.defaultIntroduction')}
-            </Text>
-          )}
+          <Text style={styles.descriptionCardContent}>
+            {profileMe?.description ||
+              myPageInfo?.description ||
+              t('profile.editProfile.defaultIntroduction')}
+          </Text>
         </View>
 
         {/* 기본 정보 섹션 */}

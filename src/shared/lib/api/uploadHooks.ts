@@ -120,25 +120,63 @@ export const useImageUpload = () => {
           height: resizedImage.height,
         });
 
-        // 2단계: 리사이징된 이미지를 Blob으로 변환
+        // 2단계: 리사이징된 이미지를 Blob으로 변환 (개선된 방식)
         console.log('📱 리사이징된 이미지 fetch 시작:', resizedImage.uri);
-        const response = await fetch(resizedImage.uri);
+        // Fetch 옵션 설정으로 더 안정적인 Blob 생성
+        const response = await fetch(resizedImage.uri, {
+          method: 'GET',
+          headers: {
+            'Accept': 'image/*',
+          },
+        });
 
         if (!response.ok) {
           console.error('❌ fetch 응답 실패:', response.status, response.statusText);
           throw new Error(`이미지를 읽을 수 없습니다: ${response.status} ${response.statusText}`);
         }
 
-        const blob = await response.blob();
+        // Content-Type 헤더 확인
+        const responseContentType = response.headers.get('Content-Type');
+        console.log('📝 응답 Content-Type:', responseContentType);
 
-        if (!blob || blob.size === 0) {
-          console.error('❌ 빈 Blob 생성됨');
+        let blob = await response.blob();
+
+        // Blob 크기 및 유효성 검증 강화
+        if (!blob) {
+          console.error('❌ Blob이 null입니다');
+          throw new Error('이미지 파일을 읽을 수 없습니다');
+        }
+
+        if (blob.size === 0) {
+          console.error('❌ 빈 Blob 생성됨:', {
+            originalUri: resizedImage.uri,
+            responseStatus: response.status,
+            responseHeaders: Object.fromEntries(response.headers.entries()),
+          });
           throw new Error('이미지 파일이 비어있습니다');
+        }
+
+        // Blob 타입 보정 로직 개선
+        let finalContentType = 'image/jpeg'; // 기본값
+        if (blob.type && blob.type.startsWith('image/')) {
+          finalContentType = blob.type;
+          console.log('🎯 Blob의 유효한 이미지 타입 사용:', finalContentType);
+        } else if (responseContentType && responseContentType.startsWith('image/')) {
+          finalContentType = responseContentType;
+          console.log('📝 응답 헤더의 타입 사용:', finalContentType);
+          // Blob 타입 보정
+          const buffer = await blob.arrayBuffer();
+          blob = new Blob([new Uint8Array(buffer)], { type: finalContentType });
+        } else {
+          console.log('🔄 기본 JPEG 타입으로 설정');
+          const buffer = await blob.arrayBuffer();
+          blob = new Blob([new Uint8Array(buffer)], { type: finalContentType });
         }
 
         console.log('✅ 이미지 Blob 변환 성공:', {
           size: blob.size,
           type: blob.type,
+          finalContentType,
           sizeInMB: (blob.size / 1024 / 1024).toFixed(2) + 'MB',
         });
 

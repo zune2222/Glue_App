@@ -122,22 +122,28 @@ export interface DmChatRoomParticipant {
 export interface ActualDmChatRoomDetailResponse {
   dmChatRoomId: number;
   meetingId: number;
+  postId: number;
+  postTitle: string;
   participants: DmChatRoomParticipant[];
   isPushNotificationOn?: number;
   invitationStatus?: number;
   createdAt: string;
   updatedAt: string;
+  isOtherUserDeleted?: boolean;
 }
 
 // DM 채팅방 상세 정보 응답 타입
 export interface DmChatRoomDetailResponse {
   dmChatRoomId: number;
   meetingId: number;
+  postId: number;
+  postTitle: string;
   participants: UserSummaryWithHostInfo[];
   isPushNotificationOn?: number;
   invitationStatus?: number;
   createdAt: string;
   updatedAt: string;
+  isOtherUserDeleted?: boolean;
 }
 
 // DM 메시지 전송 요청 타입

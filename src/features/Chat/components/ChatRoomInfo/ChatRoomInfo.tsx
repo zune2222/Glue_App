@@ -42,20 +42,38 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   const [isCurrentUserHost, setIsCurrentUserHost] = useState(false);
   const [otherUserId, setOtherUserId] = useState<number | null>(null);
 
-  // 실제 모임 상세 정보 가져오기
-  const {data: groupDetailData, isLoading, isError} = useGroupDetail(postId || 0);
+  // 모임 상세 정보 가져오기 (postId가 있으면 게시글에서, meetingId가 있으면 모임에서)
+  const {data: groupDetailData} = useGroupDetail(postId || 0, {
+    enabled: !!postId && postId > 0,
+  });
 
   // 상대방의 모임 참가 여부 확인
   const {data: participationData} = useCheckMeetingParticipation(
     meetingId || 0,
     otherUserId || 0,
     // DM 채팅방이고, 호스트이고, 상대방 사용자 ID가 있고, meetingId가 있을 때만 쿼리 실행
-    isDirectMessage && isCurrentUserHost && !!otherUserId && !!meetingId,
+    isDirectMessage &&
+      isCurrentUserHost &&
+      !!otherUserId &&
+      !!meetingId &&
+      meetingId > 0 &&
+      otherUserId > 0,
   );
 
-  // API 데이터에서 카테고리와 제목 추출 (더미 데이터 대신 사용)
-  const category = propCategory || '공부'; // 일단 기본값 유지 (카테고리 매핑 로직 필요)
-  const postTitle = groupDetailData?.data?.post?.title || propPostTitle || '영어 공부할 모임 모집합니다';
+  // 제목과 카테고리 처리 - API에서 가져온 데이터 우선 사용
+  const category = propCategory || '공부';
+  const postTitle =
+    groupDetailData?.data?.post?.title || propPostTitle || '모임 정보';
+
+  // 디버깅: API 응답 확인
+  console.log('🔍 ChatRoomInfo API 데이터:', {
+    postId,
+    meetingId,
+    groupDetailData,
+    apiTitle: groupDetailData?.data?.post?.title,
+    propTitle: propPostTitle,
+    finalTitle: postTitle,
+  });
 
   // 디버깅용 로그
   console.log('🔍 ChatRoomInfo 초대 버튼 표시 조건:', {
@@ -72,9 +90,14 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
 
   // 현재 사용자 ID 가져오고 호스트 여부 확인
   useEffect(() => {
+    let isMounted = true;
+
     const checkCurrentUserHost = async () => {
       try {
         const userId = await secureStorage.getUserId();
+
+        if (!isMounted) return;
+
         setCurrentUserId(userId);
 
         if (userId) {
@@ -82,6 +105,9 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
           const currentUserMember = members.find(
             member => member.id === userId.toString(),
           );
+
+          if (!isMounted) return;
+
           setIsCurrentUserHost(currentUserMember?.isHost || false);
 
           // DM 채팅방인 경우 상대방 사용자 ID 찾기
@@ -89,7 +115,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
             const otherUser = members.find(
               member => member.id !== userId.toString(),
             );
-            if (otherUser) {
+            if (otherUser && isMounted) {
               setOtherUserId(parseInt(otherUser.id, 10));
             }
           }
@@ -100,6 +126,10 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
     };
 
     checkCurrentUserHost();
+
+    return () => {
+      isMounted = false;
+    };
   }, [members, isDirectMessage]);
 
   const handleToggleNotification = () => {
@@ -131,7 +161,9 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
     const targetPostId = postId || meetingId;
     if (targetPostId && navigation) {
       console.log('게시글로 이동:', targetPostId);
-      navigation.navigate('GroupDetail', {postId: targetPostId});
+      navigation.navigate('GroupDetail', {
+        postId: targetPostId,
+      });
     } else {
       console.warn('postId/meetingId 또는 navigation이 없습니다:', {
         postId,
@@ -140,32 +172,6 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
       });
     }
   };
-
-  // 로딩 상태 표시
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text variant="body2" color="#666666">
-            {t('common.loading')}
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // 에러 상태 표시
-  if (isError) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text variant="body2" color="#FF0000">
-            {t('common.error')}
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -280,12 +286,6 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
   },
   categoryButton: {
     backgroundColor: '#DEE9FC',

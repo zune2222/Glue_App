@@ -52,6 +52,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   const [messages, setMessages] = useState<DmMessageResponse[]>([]);
   const [showRoomInfo, setShowRoomInfo] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const isMountedRef = useRef(true);
 
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -65,13 +66,13 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   // 초대 관련 상태 (더 이상 사용하지 않음)
 
-  // API 훅들
+  // API 훅들 - dmChatRoomId가 있을 때만 호출
   const {
     data: chatRoomDetail,
     isLoading: isDetailLoading,
     isError: isDetailError,
     error: detailError,
-  } = useDmChatRoomDetail(dmChatRoomId || -1);
+  } = useDmChatRoomDetail(dmChatRoomId);
 
   const {
     data: messagesData,
@@ -81,7 +82,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useDmMessages(dmChatRoomId || -1);
+  } = useDmMessages(dmChatRoomId);
 
   const sendMessageMutation = useSendDmMessage();
   const toggleNotificationMutation = useToggleDmChatRoomNotification();
@@ -251,6 +252,8 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   // 사이드 패널 애니메이션
   useEffect(() => {
+    let isMounted = true;
+
     if (showRoomInfo && !isClosing) {
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -275,11 +278,17 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        setShowRoomInfo(false);
-        setIsClosing(false);
-        slideAnim.setValue(width);
+        if (isMountedRef.current) {
+          setShowRoomInfo(false);
+          setIsClosing(false);
+          slideAnim.setValue(width);
+        }
       });
     }
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [showRoomInfo, isClosing, fadeAnim, slideAnim]);
 
   // 메시지 전송 핸들러 - 낙관적 업데이트로 즉시 UI 반영
@@ -335,16 +344,18 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }
   };
 
-  const handleMenuPress = () => {
-    setShowRoomInfo(true);
-    setIsClosing(false);
-  };
-
-  const closeRoomInfo = () => {
+  const handleMenuPress = useCallback(() => {
     if (!isClosing) {
+      setShowRoomInfo(true);
+      setIsClosing(false);
+    }
+  }, [isClosing]);
+
+  const closeRoomInfo = useCallback(() => {
+    if (!isClosing && showRoomInfo) {
       setIsClosing(true);
     }
-  };
+  }, [isClosing, showRoomInfo]);
 
   const handleLeaveRoom = () => {
     closeRoomInfo();
@@ -454,6 +465,13 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     handleSendMessage,
     t,
   ]);
+
+  // 컴포넌트 언마운트 시 정리
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // 현재 사용자 ID 초기화
   useEffect(() => {
@@ -624,6 +642,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   );
   const chatRoomName = otherUser?.user?.userNickname || '알 수 없는 사용자';
 
+
   // 날짜 계산 (메시지가 있으면 첫 번째 메시지 날짜, 없으면 오늘 날짜)
   const getDisplayDate = () => {
     if (messages && messages.length > 0 && messages[0]?.createdAt) {
@@ -704,6 +723,8 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
               roomIcon={undefined}
               memberCount={chatRoomDetail.data.participants.length}
               isDirectMessage={true}
+              postTitle={chatRoomDetail.data.postTitle}
+              postId={chatRoomDetail.data.postId}
               members={chatRoomDetail.data.participants.map(
                 (participant: DmChatRoomParticipant) => ({
                   id: participant.user.userId?.toString() || 'unknown',

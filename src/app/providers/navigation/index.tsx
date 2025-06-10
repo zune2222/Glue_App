@@ -27,11 +27,13 @@ import {
   ProfileMainScreen,
   ProfileEditScreen,
   MyPageScreen,
+  PrivacySettingsScreen,
   MyProfileDetailScreen,
   GroupHistoryScreen,
   LikedGroupsScreen,
   UserProfileDetail,
   GuestbookScreen,
+  DescriptionEditScreen,
 } from '@features/Profile';
 
 // 설정 화면 임포트
@@ -45,6 +47,7 @@ import {
 
 // 헤더 컴포넌트 임포트
 import CustomHeader from '@widgets/header/ui/CustomHeader';
+import {BackButtonHeader} from '@widgets/header/ui';
 
 // 알림 패널 임포트
 import {NotificationsScreen} from '@features/notifications';
@@ -197,10 +200,17 @@ const renderProfileIcon = ({color}: {color: string}) => (
   <ProfileIcon color={color} size={28} />
 );
 
+// 헤더 컴포넌트들을 미리 생성
+const ProfileDetailHeader = () => <BackButtonHeader title="내 프로필 상세" />;
+const GroupHistoryHeader = () => <BackButtonHeader title="모임 히스토리" />;
+const LikedGroupsHeader = () => <BackButtonHeader title="좋아요 목록" />;
+const PrivacySettingsHeader = () => <BackButtonHeader title="공개범위 설정" />;
+const GuestbookHeader = () => <BackButtonHeader title="방명록" />;
+
 // 커스텀 헤더 랜더러
 const ProfileNavigator = () => (
   <ProfileStack.Navigator
-    initialRouteName="MyPage" // ← 여기 추가!
+    initialRouteName="MyPage"
     screenOptions={{
       headerShown: true,
       header: () => <CustomHeader title="마이페이지" />,
@@ -213,26 +223,6 @@ const ProfileNavigator = () => (
     <ProfileStack.Screen
       name="MyPage"
       component={MyPageScreen}
-      options={{headerShown: false}}
-    />
-    <ProfileStack.Screen
-      name="ProfileDetail"
-      component={MyProfileDetailScreen}
-      options={{title: '내 프로필 상세', headerBackTitle: '뒤로'}}
-    />
-    <ProfileStack.Screen
-      name="GroupHistory"
-      component={GroupHistoryScreen}
-      options={{title: '모임 히스토리', headerBackTitle: '뒤로'}}
-    />
-    <ProfileStack.Screen
-      name="LikedGroups"
-      component={LikedGroupsScreen}
-      options={{title: '좋아요 목록', headerBackTitle: '뒤로'}}
-    />
-    <ProfileStack.Screen
-      name="Guestbook"
-      component={GuestbookScreen as any}
       options={{headerShown: false}}
     />
   </ProfileStack.Navigator>
@@ -320,6 +310,52 @@ const MainNavigator = () => (
         headerShown: false,
       }}
     />
+    <MainStack.Screen
+      name="DescriptionEdit"
+      component={DescriptionEditScreen}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <MainStack.Screen
+      name="ProfileDetail"
+      component={MyProfileDetailScreen}
+      options={{
+        headerShown: true,
+        header: ProfileDetailHeader,
+      }}
+    />
+    <MainStack.Screen
+      name="GroupHistory"
+      component={GroupHistoryScreen}
+      options={{
+        headerShown: true,
+        header: GroupHistoryHeader,
+      }}
+    />
+    <MainStack.Screen
+      name="LikedGroups"
+      component={LikedGroupsScreen}
+      options={{
+        headerShown: true,
+        header: LikedGroupsHeader,
+      }}
+    />
+    <MainStack.Screen
+      name="PrivacySettings"
+      component={PrivacySettingsScreen}
+      options={{
+        headerShown: true,
+        header: PrivacySettingsHeader,
+      }}
+    />
+    <MainStack.Screen
+      name="Guestbook"
+      component={GuestbookScreen as any}
+      options={{
+        headerShown: false,
+      }}
+    />
   </MainStack.Navigator>
 );
 
@@ -365,11 +401,6 @@ export const AppNavigator = () => {
       <GroupStack.Screen
         name="UserProfile"
         component={UserProfileDetail}
-        options={{headerShown: false}}
-      />
-      <GroupStack.Screen
-        name="Guestbook"
-        component={GuestbookScreen}
         options={{headerShown: false}}
       />
       <MessagesStack.Screen

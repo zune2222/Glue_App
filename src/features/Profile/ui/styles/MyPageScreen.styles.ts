@@ -62,4 +62,12 @@ export const styles = StyleSheet.create({
     color: '#666666',
     marginTop: spacing.xs,
   },
+  // 스켈레톤 스타일
+  skeletonElement: {
+    backgroundColor: '#e9ecef',
+  },
+  skeletonText: {
+    backgroundColor: '#e9ecef',
+    borderRadius: 4,
+  },
 });

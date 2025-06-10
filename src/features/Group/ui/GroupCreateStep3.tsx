@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {
@@ -28,6 +29,7 @@ const GroupCreateStep3 = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -300,7 +302,7 @@ const GroupCreateStep3 = () => {
         </View>
       </ScrollView>
 
-      <View style={styles.bottomContainer}>
+      <View style={[styles.bottomContainer, Platform.OS === 'android' && {paddingBottom: insets.bottom + 20}]}>
         <TouchableOpacity
           style={[
             styles.nextButton,

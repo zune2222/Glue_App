@@ -54,6 +54,71 @@ export interface ProfileMeResponse {
   };
 }
 
+// 타인 프로필 조회 API 응답 타입
+export interface UserProfileResponse {
+  httpStatus: {
+    error: boolean;
+    is4xxClientError: boolean;
+    is5xxServerError: boolean;
+    is1xxInformational: boolean;
+    is2xxSuccessful: boolean;
+    is3xxRedirection: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: {
+    userId: number;
+    profileImageUrl: string;
+    nickName: string;
+    description: string;
+    gender: number;
+    birthDate: string;
+    school: number;
+    mainLanguage: number;
+    mainLanguageLevel: number;
+    learningLanguage: number;
+    learningLanguageLevel: number;
+    major: number;
+  };
+}
+
+// 공개 범위 설정 관련 타입 정의
+export interface VisibilityResponse {
+  httpStatus: {
+    error: boolean;
+    is4xxClientError: boolean;
+    is5xxServerError: boolean;
+    is1xxInformational: boolean;
+    is2xxSuccessful: boolean;
+    is3xxRedirection: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: {
+    currentMajorVisibility: number;
+    currentMeetingHistoryVisibility: number;
+    currentLikeListVisibility: number;
+    currentGuestBookVisibility: number;
+  };
+}
+
+export interface VisibilityUpdateResponse {
+  httpStatus: {
+    error: boolean;
+    is4xxClientError: boolean;
+    is5xxServerError: boolean;
+    is1xxInformational: boolean;
+    is2xxSuccessful: boolean;
+    is3xxRedirection: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: {};
+}
+
 // Axios 인스턴스 생성
 const profileApi = axios.create({
   baseURL: config.API_URL,
@@ -147,6 +212,268 @@ export const getProfileMe = async (): Promise<ProfileMeResponse['result']> => {
       const errorMessage =
         error.response.data?.message ||
         '프로필 정보를 가져오는데 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 타인 프로필 조회 API
+export const getUserProfile = async (
+  userId: number,
+): Promise<UserProfileResponse['result']> => {
+  try {
+    const response = await profileApi.get<UserProfileResponse>(
+      `/api/users/profile/${userId}`,
+    );
+
+    if (response.data.isSuccess) {
+      return response.data.result;
+    } else {
+      throw new Error(
+        response.data.message ||
+          '사용자 프로필 정보를 가져오는데 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 404) {
+        throw new Error('사용자 정보를 찾을 수 없습니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message ||
+        '사용자 프로필 정보를 가져오는데 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 한 줄 소개 수정 API
+export const updateDescription = async (description: string): Promise<any> => {
+  try {
+    const response = await profileApi.post('/api/users/description', {
+      description,
+    });
+
+    if (response.data.isSuccess) {
+      return response.data;
+    } else {
+      throw new Error(
+        response.data.message || '한 줄 소개 수정에 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message || '한 줄 소개 수정에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 공개 범위 설정 조회 API
+export const getVisibilitySettings = async (): Promise<
+  VisibilityResponse['result']
+> => {
+  try {
+    const response = await profileApi.get<VisibilityResponse>(
+      '/api/users/visibility',
+    );
+
+    if (response.data.isSuccess) {
+      return response.data.result;
+    } else {
+      throw new Error(
+        response.data.message || '공개 범위 설정을 가져오는데 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message ||
+        '공개 범위 설정을 가져오는데 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 학과 공개여부 설정 API
+export const updateMajorVisibility = async (
+  currentVisible: number,
+): Promise<void> => {
+  try {
+    const response = await profileApi.put<VisibilityUpdateResponse>(
+      `/api/users/major-visibility?currentVisible=${currentVisible}`,
+    );
+
+    if (!response.data.isSuccess) {
+      throw new Error(
+        response.data.message || '학과 공개 설정에 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message || '학과 공개 설정에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 모임 히스토리 공개여부 설정 API
+export const updateMeetingHistoryVisibility = async (
+  currentVisible: number,
+): Promise<void> => {
+  try {
+    const response = await profileApi.put<VisibilityUpdateResponse>(
+      `/api/users/meeting-history-visibility?currentVisible=${currentVisible}`,
+    );
+
+    if (!response.data.isSuccess) {
+      throw new Error(
+        response.data.message || '모임 히스토리 공개 설정에 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message ||
+        '모임 히스토리 공개 설정에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 좋아요 목록 공개여부 설정 API
+export const updateLikeListVisibility = async (
+  currentVisible: number,
+): Promise<void> => {
+  try {
+    const response = await profileApi.put<VisibilityUpdateResponse>(
+      `/api/users/like-list-visibility?currentVisible=${currentVisible}`,
+    );
+
+    if (!response.data.isSuccess) {
+      throw new Error(
+        response.data.message || '좋아요 목록 공개 설정에 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message || '좋아요 목록 공개 설정에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 방명록 공개여부 설정 API
+export const updateGuestbookVisibility = async (
+  currentVisible: number,
+): Promise<void> => {
+  try {
+    const response = await profileApi.put<VisibilityUpdateResponse>(
+      `/api/users/guestbook-visibility?currentVisible=${currentVisible}`,
+    );
+
+    if (!response.data.isSuccess) {
+      throw new Error(
+        response.data.message || '방명록 공개 설정에 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message || '방명록 공개 설정에 실패했습니다.';
       throw new Error(errorMessage);
     }
 

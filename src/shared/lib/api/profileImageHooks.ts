@@ -1,17 +1,25 @@
-import {useMutation} from '@tanstack/react-query';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {updateProfileImage} from './profileImageApi';
 import type {UpdateProfileImageRequest, ApiResponse} from './profileImageApi';
 import {useImageUpload} from './uploadHooks';
 
 // 프로필 이미지 업데이트 훅
 export const useUpdateProfileImage = () => {
+  const queryClient = useQueryClient();
+  
   return useMutation<ApiResponse<any>, Error, UpdateProfileImageRequest>({
     mutationFn: updateProfileImage,
+    onSuccess: () => {
+      // 프로필 관련 캐시 무효화
+      queryClient.invalidateQueries({queryKey: ['myPage']});
+      queryClient.invalidateQueries({queryKey: ['profileMe']});
+    },
   });
 };
 
 // 전체 프로필 이미지 업로드 + 업데이트 프로세스 훅
 export const useProfileImageUploadAndUpdate = () => {
+  const queryClient = useQueryClient();
   const imageUpload = useImageUpload();
   const updateImage = useUpdateProfileImage();
 
@@ -59,6 +67,11 @@ export const useProfileImageUploadAndUpdate = () => {
         console.error('프로필 이미지 업로드 및 업데이트 실패:', error);
         throw error;
       }
+    },
+    onSuccess: () => {
+      // 업로드 성공 시 프로필 관련 캐시 무효화
+      queryClient.invalidateQueries({queryKey: ['myPage']});
+      queryClient.invalidateQueries({queryKey: ['profileMe']});
     },
   });
 };
