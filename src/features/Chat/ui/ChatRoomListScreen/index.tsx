@@ -12,30 +12,37 @@ import {
 import {useFocusEffect} from '@react-navigation/native';
 import {styles} from './styles';
 import {ChatRoom} from '../../entities/types';
-import {ChatRoomItem, TabHeader, MessageFilter} from '../../components';
+import {TabHeader, MessageFilter} from '../../components';
 import {useTranslation} from 'react-i18next';
 import {dummyProfile} from '@shared/assets/images';
-import {useHostedDmRooms, useParticipatedDmRooms} from '../../api/hooks';
-import {DmChatRoom} from '../../api/api';
+import {
+  useHostedDmRooms,
+  useParticipatedDmRooms,
+  useGroupChatRooms,
+} from '../../api/hooks';
+import {DmChatRoom, GroupChatRoom} from '../../api/api';
 import {toastService} from '@shared/lib/notifications/toast';
 
 interface ChatRoomListScreenProps {
-  chatRooms: ChatRoom[];
-  onChatRoomPress: (roomId: string) => void;
+  chatRooms: ChatRoom[]; // 이제 사용하지 않지만 하위 호환성을 위해 유지
+  onGroupChatRoomPress?: (groupChatroomId: number) => void;
   onDmChatRoomPress?: (dmRoomId: number) => void;
+  navigation?: any; // React Navigation 객체
 }
 
 type FilterType = 'host' | 'guest' | 'all';
 
 const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
-  chatRooms,
-  onChatRoomPress,
+  chatRooms: _chatRooms,
+  onGroupChatRoomPress,
   onDmChatRoomPress,
+  navigation,
 }) => {
   const {t} = useTranslation();
   const [activeTab, setActiveTab] = useState<'chat' | 'message'>('chat');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [directMessages, setDirectMessages] = useState<DmChatRoom[]>([]);
+  const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoom[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // 호스트 DM 채팅방 목록 조회 훅
@@ -56,10 +63,21 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
     refetch: refetchParticipatedRooms,
   } = useParticipatedDmRooms();
 
-  // 모든 DM 채팅방 데이터 로딩 상태
+  // 그룹 채팅방 목록 조회 훅
+  const {
+    data: groupChatRoomsData,
+    isLoading: isGroupChatRoomsLoading,
+    isError: isGroupChatRoomsError,
+    error: groupChatRoomsError,
+    refetch: refetchGroupChatRooms,
+  } = useGroupChatRooms();
+
+  // 모든 채팅방 데이터 로딩 상태
   useEffect(() => {
-    setIsLoading(isHostedLoading || isParticipatedLoading);
-  }, [isHostedLoading, isParticipatedLoading]);
+    setIsLoading(
+      isHostedLoading || isParticipatedLoading || isGroupChatRoomsLoading,
+    );
+  }, [isHostedLoading, isParticipatedLoading, isGroupChatRoomsLoading]);
 
   // 새로고침 상태
   const [refreshing, setRefreshing] = useState(false);
@@ -68,13 +86,17 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refetchHostedRooms(), refetchParticipatedRooms()]);
+      await Promise.all([
+        refetchHostedRooms(),
+        refetchParticipatedRooms(),
+        refetchGroupChatRooms(),
+      ]);
     } catch (error) {
       console.error('새로고침 실패:', error);
     } finally {
       setRefreshing(false);
     }
-  }, [refetchHostedRooms, refetchParticipatedRooms]);
+  }, [refetchHostedRooms, refetchParticipatedRooms, refetchGroupChatRooms]);
 
   // 화면 포커스 시 데이터 새로고침
   useFocusEffect(
@@ -83,8 +105,16 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
         // 쪽지 탭이 활성화된 상태에서 화면에 포커스될 때만 새로고침
         refetchHostedRooms();
         refetchParticipatedRooms();
+      } else if (activeTab === 'chat') {
+        // 모임톡 탭이 활성화된 상태에서 화면에 포커스될 때 새로고침
+        refetchGroupChatRooms();
       }
-    }, [activeTab, refetchHostedRooms, refetchParticipatedRooms]),
+    }, [
+      activeTab,
+      refetchHostedRooms,
+      refetchParticipatedRooms,
+      refetchGroupChatRooms,
+    ]),
   );
 
   // 에러 발생시 토스트 표시
@@ -95,7 +125,17 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
     if (isParticipatedError && participatedError) {
       toastService.error('오류', participatedError.message);
     }
-  }, [isHostedError, hostedError, isParticipatedError, participatedError]);
+    if (isGroupChatRoomsError && groupChatRoomsError) {
+      toastService.error('오류', groupChatRoomsError.message);
+    }
+  }, [
+    isHostedError,
+    hostedError,
+    isParticipatedError,
+    participatedError,
+    isGroupChatRoomsError,
+    groupChatRoomsError,
+  ]);
 
   // 필터에 따라 DM 채팅방 목록 업데이트
   useEffect(() => {
@@ -143,6 +183,25 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
     }
   }, [activeTab, activeFilter, hostedDmRooms, participatedDmRooms]);
 
+  // 그룹 채팅방 데이터 업데이트
+  useEffect(() => {
+    if (activeTab === 'chat' && groupChatRoomsData?.data) {
+      // 최신 메시지 순으로 정렬
+      const sortedGroupChats = [...groupChatRoomsData.data].sort((a, b) => {
+        // lastMessageTime이 null인 경우 가장 아래로
+        if (!a.lastMessageTime) return 1;
+        if (!b.lastMessageTime) return -1;
+
+        return (
+          new Date(b.lastMessageTime).getTime() -
+          new Date(a.lastMessageTime).getTime()
+        );
+      });
+
+      setGroupChatRooms(sortedGroupChats);
+    }
+  }, [activeTab, groupChatRoomsData]);
+
   // 탭 변경 핸들러
   const handleTabChange = (tab: 'chat' | 'message') => {
     setActiveTab(tab);
@@ -163,14 +222,88 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
     }
   };
 
-  // 모임톡 데이터 필터링 (그룹 채팅만)
-  const groupChats = chatRooms.filter(room => room.type === 'group');
+  // 그룹 채팅방 클릭 핸들러
+  const handleGroupChatRoomPress = (groupChatroomId: number) => {
+    console.log('[ChatRoomList] 그룹 채팅방 클릭됨:', groupChatroomId);
+
+    // 해당 그룹 채팅방 정보 찾기
+    const selectedRoom = groupChatRooms.find(
+      room => room.groupChatroomId === groupChatroomId,
+    );
+    const meetingTitle = selectedRoom?.meeting?.meetingTitle || '모임톡';
+
+    // 네비게이션이 있으면 직접 GroupChatRoomScreen으로 이동
+    if (navigation) {
+      navigation.navigate('GroupChatRoomScreen', {
+        groupChatroomId: groupChatroomId,
+        meetingTitle: meetingTitle,
+      });
+    } else if (onGroupChatRoomPress) {
+      // 네비게이션이 없으면 기존 콜백 사용
+      onGroupChatRoomPress(groupChatroomId);
+    } else {
+      console.warn(
+        '[ChatRoomList] navigation과 onGroupChatRoomPress 콜백이 모두 없습니다.',
+      );
+    }
+  };
+
+  // 간단한 날짜 포맷팅 함수
+  const formatSafeTime = (dateString: string | null) => {
+    if (!dateString) return '';
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+
+      const now = new Date();
+      const isToday = now.toDateString() === date.toDateString();
+
+      if (isToday) {
+        return date.toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        });
+      } else {
+        return date.toLocaleDateString('ko-KR', {
+          month: 'numeric',
+          day: 'numeric',
+        });
+      }
+    } catch (error) {
+      return '';
+    }
+  };
+
+  // 초대장 메시지를 읽기 쉬운 형태로 변환하는 함수
+  const formatLastMessage = (lastMessage: string | null) => {
+    if (!lastMessage) return null; // null 반환으로 상위에서 기본값 처리하도록
+
+    // [INVITATION] 접두사가 있는 초대장 메시지인지 확인
+    if (lastMessage.startsWith('[INVITATION]')) {
+      try {
+        // JSON 부분 추출
+        const jsonPart = lastMessage.replace('[INVITATION]', '');
+        const invitationData = JSON.parse(jsonPart);
+
+        // 초대장 정보를 기반으로 읽기 쉬운 메시지 생성
+        return `📧 ${invitationData.senderName || '호스트'}님이 ${
+          invitationData.inviteeName || '사용자'
+        }님을 모임에 초대했습니다`;
+      } catch (error) {
+        // JSON 파싱 실패 시 기본 메시지
+        console.error('초대장 메시지 파싱 실패:', error);
+        return '📧 모임 초대장을 보냈습니다';
+      }
+    }
+
+    // 일반 메시지는 그대로 반환
+    return lastMessage;
+  };
 
   // DM 채팅방 아이템 렌더링
   const renderDmChatRoomItem = (room: DmChatRoom) => {
-    // 디버깅: otherUser 구조 확인
-    console.log('DM 채팅방 otherUser 구조:', room.otherUser);
-
     return (
       <TouchableOpacity
         key={room.dmChatRoomId}
@@ -194,18 +327,50 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
               '알 수 없는 사용자'}
           </Text>
           <Text style={styles.messagePreview}>
-            {room.lastMessage || '새로운 채팅방이 생성되었습니다.'}
+            {formatLastMessage(room.lastMessage) ||
+              '새로운 채팅방이 생성되었습니다.'}
           </Text>
         </View>
         <View style={styles.messageTimeContainer}>
           <Text style={styles.messageTime}>
-            {room.lastMessageTime
-              ? new Date(room.lastMessageTime).toLocaleTimeString('ko-KR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true,
-                })
-              : ''}
+            {formatSafeTime(room.lastMessageTime)}
+          </Text>
+          {room.hasUnreadMessages && <View style={styles.unreadIndicator} />}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  // 그룹 채팅방 아이템 렌더링
+  const renderGroupChatRoomItem = (room: GroupChatRoom) => {
+    return (
+      <TouchableOpacity
+        key={room.groupChatroomId}
+        style={styles.directMessageItem}
+        onPress={() => handleGroupChatRoomPress(room.groupChatroomId)}
+        activeOpacity={0.7}>
+        <Image
+          source={
+            room.meeting.meetingImageUrl &&
+            room.meeting.meetingImageUrl.trim() !== ''
+              ? {uri: room.meeting.meetingImageUrl}
+              : dummyProfile
+          }
+          resizeMode={'cover'}
+          style={styles.profileImage}
+        />
+        <View style={styles.messageContent}>
+          <Text style={styles.senderName}>
+            {room.meeting.meetingTitle || '알 수 없는 모임'}
+          </Text>
+          <Text style={styles.messagePreview}>
+            {formatLastMessage(room.lastMessage) ||
+              '새로운 모임톡이 시작되었습니다.'}
+          </Text>
+        </View>
+        <View style={styles.messageTimeContainer}>
+          <Text style={styles.messageTime}>
+            {formatSafeTime(room.lastMessageTime)}
           </Text>
           {room.hasUnreadMessages && <View style={styles.unreadIndicator} />}
         </View>
@@ -241,6 +406,14 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
           </View>
         )}
 
+        {/* 모임톡 로딩 표시 */}
+        {isLoading && activeTab === 'chat' && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#1CBFDC" />
+            <Text style={styles.loadingText}>모임톡 목록을 불러오는 중...</Text>
+          </View>
+        )}
+
         {/* 쪽지 화면일 때 */}
         {activeTab === 'message' && !isLoading ? (
           // API로부터 가져온 DM 채팅방 목록
@@ -256,17 +429,11 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
             )}
           </View>
         ) : (
-          // 기존 모임톡 목록 (API에서 온 데이터가 아님)
+          // 모임톡 목록 (API에서 가져온 데이터)
           !isLoading && (
             <View>
-              {groupChats.length > 0 ? (
-                groupChats.map(room => (
-                  <ChatRoomItem
-                    key={room.id}
-                    room={room}
-                    onPress={onChatRoomPress}
-                  />
-                ))
+              {groupChatRooms.length > 0 ? (
+                groupChatRooms.map(room => renderGroupChatRoomItem(room))
               ) : (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyText}>

@@ -4,8 +4,8 @@ import {useTranslation} from 'react-i18next';
 import {CategorySectionProps} from '../../model/types';
 import MeetingCard from './MeetingCard';
 import {Text} from '../../../../shared/ui/typography/Text';
-import FireIcon from '../../../../shared/assets/images/fire-icon.svg';
-import {getPopularPosts, PopularPost} from '../../api/carouselApi';
+import LanguageIcon from '../../../../shared/assets/images/language.svg';
+import {getLanguageMatchPosts, PopularPost} from '../../api/carouselApi';
 
 interface TransformedMeetingCard {
   category: string;
@@ -44,29 +44,29 @@ const CategorySection = ({title}: Omit<CategorySectionProps, 'cards'>) => {
   };
 
   useEffect(() => {
-    const fetchPopularPosts = async () => {
+    const fetchLanguageMatchPosts = async () => {
       try {
         setIsLoading(true);
-        const response = await getPopularPosts(2); // 2개만 가져오기
+        const response = await getLanguageMatchPosts(2); // 2개만 가져오기
         if (response.success && response.data?.posts) {
           const transformedCards = response.data.posts.map(transformPostToCard);
           setCards(transformedCards);
         }
       } catch (error) {
-        console.error('인기 게시글 로드 실패:', error);
+        console.error('언어 교환 모임 로드 실패:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPopularPosts();
+    fetchLanguageMatchPosts();
   }, []);
 
   return (
-    <>
+    <View style={styles.container}>
       <View style={styles.titleContainer}>
         <View style={styles.titleIconContainer}>
-          <FireIcon width={24} height={24} />
+          <LanguageIcon width={24} height={24} />
           <Text
             variant="subtitle1"
             weight="bold"
@@ -102,11 +102,18 @@ const CategorySection = ({title}: Omit<CategorySectionProps, 'cards'>) => {
           </View>
         )}
       </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#F9FAFB',
+    paddingVertical: 16,
+    width: '100%',
+    flex: 1,
+    minHeight: 400,
+  },
   titleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',

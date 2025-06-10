@@ -17,6 +17,11 @@ export interface ChatRoomInfoProps {
   // 알림 설정 관련 추가
   isNotificationEnabled?: boolean;
   onNotificationToggle?: () => void;
+  // 게시글 관련 추가
+  meetingId?: number;
+  navigation?: any;
+  // 초대 관련 추가
+  onInvite?: () => void;
 }
 
 export interface Member {

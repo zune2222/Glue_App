@@ -14,6 +14,7 @@ import {Bell, Exit, Mail, Pen} from '@shared/assets/images';
 import {ChatRoomInfoProps} from './types';
 import MemberItem from './components/MemberItem';
 import {secureStorage} from '@shared/lib/security';
+import {useCheckMeetingParticipation} from '../../api/hooks';
 
 const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -23,16 +24,42 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   memberCount,
   category = '공부', // 기본값 설정
   postTitle = '영어 공부할 모임 모집합니다', // 기본값 설정
+  isDirectMessage = false, // 기본값 설정
   members,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onClose,
   onLeaveRoom,
   isNotificationEnabled = true,
   onNotificationToggle,
+  meetingId,
+  navigation,
+  onInvite,
 }) => {
   const {t} = useTranslation();
   const [_currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [isCurrentUserHost, setIsCurrentUserHost] = useState(false);
+  const [otherUserId, setOtherUserId] = useState<number | null>(null);
+
+  // 상대방의 모임 참가 여부 확인
+  const {data: participationData} = useCheckMeetingParticipation(
+    meetingId || 0,
+    otherUserId || 0,
+    // DM 채팅방이고, 호스트이고, 상대방 사용자 ID가 있고, meetingId가 있을 때만 쿼리 실행
+    isDirectMessage && isCurrentUserHost && !!otherUserId && !!meetingId,
+  );
+
+  // 디버깅용 로그
+  console.log('🔍 ChatRoomInfo 초대 버튼 표시 조건:', {
+    isDirectMessage,
+    isCurrentUserHost,
+    otherUserId,
+    meetingId,
+    isParticipating: participationData?.data?.isParticipating,
+    shouldShowInviteButton:
+      isDirectMessage &&
+      isCurrentUserHost &&
+      !participationData?.data?.isParticipating,
+  });
 
   // 현재 사용자 ID 가져오고 호스트 여부 확인
   useEffect(() => {
@@ -47,6 +74,16 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
             member => member.id === userId.toString(),
           );
           setIsCurrentUserHost(currentUserMember?.isHost || false);
+
+          // DM 채팅방인 경우 상대방 사용자 ID 찾기
+          if (isDirectMessage) {
+            const otherUser = members.find(
+              member => member.id !== userId.toString(),
+            );
+            if (otherUser) {
+              setOtherUserId(parseInt(otherUser.id, 10));
+            }
+          }
         }
       } catch (error) {
         console.error('사용자 정보 확인 오류:', error);
@@ -54,7 +91,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
     };
 
     checkCurrentUserHost();
-  }, [members]);
+  }, [members, isDirectMessage]);
 
   const handleToggleNotification = () => {
     if (onNotificationToggle) {
@@ -81,6 +118,18 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
     );
   };
 
+  const handleGoToPost = () => {
+    if (meetingId && navigation) {
+      console.log('게시글로 이동:', meetingId);
+      navigation.navigate('GroupDetail', {postId: meetingId});
+    } else {
+      console.warn('meetingId 또는 navigation이 없습니다:', {
+        meetingId,
+        navigation,
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -103,7 +152,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
         </Text>
 
         {/* 모든 채팅방에서 게시글 이동 버튼 표시 */}
-        <TouchableOpacity style={styles.postButton} onPress={() => {}}>
+        <TouchableOpacity style={styles.postButton} onPress={handleGoToPost}>
           <Text variant="body1" weight="bold" color="#9DA2AF">
             {t('messages.chatInfo.goToPost')}
           </Text>
@@ -126,20 +175,24 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
             />
           </View>
 
-          {/* 호스트만 초대 메뉴 표시 */}
-          {isCurrentUserHost && (
-            <View style={styles.menuItem}>
-              <Mail style={styles.menuIcon} />
-              <Text variant="body2" color="#303030" style={styles.menuText}>
-                {t('messages.chatInfo.invite')}
-              </Text>
-              <TouchableOpacity style={styles.inviteButton} onPress={() => {}}>
-                <Text variant="caption" weight="bold" color="#F9FAFB">
-                  {t('messages.chatInfo.inviteButton')}
+          {/* DM 채팅방이고 호스트이고 상대방이 아직 참가하지 않았을 때만 초대 메뉴 표시 */}
+          {isDirectMessage &&
+            isCurrentUserHost &&
+            !participationData?.data?.isParticipating && (
+              <View style={styles.menuItem}>
+                <Mail style={styles.menuIcon} />
+                <Text variant="body2" color="#303030" style={styles.menuText}>
+                  {t('messages.chatInfo.invite')}
                 </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+                <TouchableOpacity
+                  style={styles.inviteButton}
+                  onPress={onInvite}>
+                  <Text variant="caption" weight="bold" color="#F9FAFB">
+                    {t('messages.chatInfo.inviteButton')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
 
           {/* 호스트만 수정 메뉴 표시 */}
           {isCurrentUserHost && (

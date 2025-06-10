@@ -20,6 +20,7 @@ import {GroupStackParamList} from '@features/Group/model/types';
 
 // 채팅 화면 컴포넌트 임포트
 import {ChatRoomListScreen, ChatRoomScreen} from '@features/Chat';
+import GroupChatRoomScreen from '@features/Chat/ui/GroupChatRoomScreen';
 
 // 프로필 화면 컴포넌트 임포트
 import {
@@ -112,11 +113,11 @@ const MessagesNavigator = () => (
         <ChatRoomListScreen
           {...props}
           chatRooms={[]} // 빈 배열로 초기화, 실제 데이터는 ChatRoomListScreen 내부에서 API로 로드
-          onChatRoomPress={roomId => {
-            props.navigation.navigate('ChatRoom', {roomId});
-          }}
           onDmChatRoomPress={dmRoomId => {
             props.navigation.navigate('ChatRoom', {dmChatRoomId: dmRoomId});
+          }}
+          onGroupChatRoomPress={groupChatroomId => {
+            props.navigation.navigate('GroupChatRoomScreen', {groupChatroomId});
           }}
         />
       )}
@@ -362,6 +363,11 @@ export const AppNavigator = () => {
       <MessagesStack.Screen
         name="ChatRoom"
         component={ChatRoomScreen}
+        options={{headerShown: false}}
+      />
+      <MessagesStack.Screen
+        name="GroupChatRoomScreen"
+        component={GroupChatRoomScreen}
         options={{headerShown: false}}
       />
     </RootStack.Navigator>

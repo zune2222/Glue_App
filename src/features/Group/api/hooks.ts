@@ -12,6 +12,7 @@ import {
   DmChatRoomCreateResult,
   ReportPostRequest,
   ReportPostResponse,
+  GroupChatJoinResponse,
   createGroupPost,
   getPosts,
   getGroupDetail,
@@ -20,6 +21,7 @@ import {
   bumpPost,
   createDmChatRoom,
   reportPost,
+  joinGroupChatRoom,
 } from './api';
 import {useQueryClient, InvalidateQueryFilters} from '@tanstack/react-query';
 
@@ -233,6 +235,25 @@ export const useReportPost = () => {
       },
       onError: error => {
         console.error('게시글 신고 실패:', error.message);
+      },
+    },
+  );
+};
+
+/**
+ * 그룹 채팅방 참여를 위한 React Query 훅
+ * @returns useApiMutation 훅의 반환값
+ */
+export const useJoinGroupChatRoom = () => {
+  return useApiMutation<GroupChatJoinResponse, number>(
+    'joinGroupChatRoom',
+    (meetingId: number) => joinGroupChatRoom(meetingId),
+    {
+      onSuccess: response => {
+        console.log('그룹 채팅방 참여 성공:', response.data);
+      },
+      onError: error => {
+        console.error('그룹 채팅방 참여 실패:', error.message);
       },
     },
   );

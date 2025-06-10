@@ -458,10 +458,12 @@
     "popular": "Popular Groups in Real-time",
     "koreanUsers": "Groups Looking for Korean Speakers",
     "englishUsers": "Groups Looking for English Speakers",
+    "languageExchange": "Korean ↔ English Exchange Groups",
     "nearby": "Nearby Groups",
     "seeAll": "See All",
     "welcome": "Welcome",
     "emptyState": "No groups yet",
+    "loading": "Loading...",
     "createFirst": "Create your first group"
   },
   "error": {

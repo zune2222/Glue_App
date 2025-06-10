@@ -19,12 +19,14 @@ import {
   ChatInput,
   DateDivider,
   ChatRoomInfo,
+  InvitationBubble,
 } from '../../components';
 import {
   useDmChatRoomDetail,
   useDmMessages,
   useSendDmMessage,
   useToggleDmChatRoomNotification,
+  useCreateMeetingInvitation,
 } from '../../api/hooks';
 import {DmMessageResponse, DmChatRoomParticipant} from '../../api/api';
 import {toastService} from '@shared/lib/notifications/toast';
@@ -59,6 +61,8 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   // 현재 사용자 ID 상태
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
+  // 초대 관련 상태 (더 이상 사용하지 않음)
+
   // API 훅들
   const {
     data: chatRoomDetail,
@@ -79,6 +83,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   const sendMessageMutation = useSendDmMessage();
   const toggleNotificationMutation = useToggleDmChatRoomNotification();
+  const createInvitationMutation = useCreateMeetingInvitation();
 
   // 에러 처리
   useEffect(() => {
@@ -276,48 +281,51 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   }, [showRoomInfo, isClosing, fadeAnim, slideAnim]);
 
   // 메시지 전송 핸들러 - 낙관적 업데이트로 즉시 UI 반영
-  const handleSendMessage = async (text: string) => {
-    if (!dmChatRoomId || !currentUserId) {
-      toastService.error('오류', '채팅방 정보가 없습니다.');
-      return;
-    }
+  const handleSendMessage = useCallback(
+    async (text: string) => {
+      if (!dmChatRoomId || !currentUserId) {
+        toastService.error('오류', '채팅방 정보가 없습니다.');
+        return;
+      }
 
-    // 임시 메시지 ID 생성 (음수로 설정하여 실제 메시지와 구분)
-    const tempMessageId = -Date.now();
+      // 임시 메시지 ID 생성 (음수로 설정하여 실제 메시지와 구분)
+      const tempMessageId = -Date.now();
 
-    // 낙관적 업데이트: 즉시 UI에 메시지 추가
-    const tempMessage: DmMessageResponse = {
-      dmMessageId: tempMessageId,
-      dmChatRoomId,
-      senderId: currentUserId,
-      content: text,
-      isRead: false, // 임시 메시지는 읽지 않음으로 설정
-      createdAt: new Date().toISOString(),
-      isTemp: true, // 임시 메시지 표시
-    };
-
-    // 임시 메시지 즉시 추가
-    setMessages(prev => [tempMessage, ...prev]);
-
-    try {
-      // REST API를 통한 메시지 전송
-      await sendMessageMutation.mutateAsync({
+      // 낙관적 업데이트: 즉시 UI에 메시지 추가
+      const tempMessage: DmMessageResponse = {
+        dmMessageId: tempMessageId,
         dmChatRoomId,
+        senderId: currentUserId,
         content: text,
-      });
+        isRead: false, // 임시 메시지는 읽지 않음으로 설정
+        createdAt: new Date().toISOString(),
+        isTemp: true, // 임시 메시지 표시
+      };
 
-      // 전송 성공 시 WebSocket으로 실제 메시지가 들어와서 임시 메시지를 자동으로 교체함
-    } catch (error: any) {
-      console.error('메시지 전송 실패:', error);
+      // 임시 메시지 즉시 추가
+      setMessages(prev => [tempMessage, ...prev]);
 
-      // 전송 실패 시 임시 메시지 제거
-      setMessages(prev =>
-        prev.filter(msg => msg.dmMessageId !== tempMessageId),
-      );
+      try {
+        // REST API를 통한 메시지 전송
+        await sendMessageMutation.mutateAsync({
+          dmChatRoomId,
+          content: text,
+        });
 
-      toastService.error('전송 실패', '메시지 전송에 실패했습니다.');
-    }
-  };
+        // 전송 성공 시 WebSocket으로 실제 메시지가 들어와서 임시 메시지를 자동으로 교체함
+      } catch (error: any) {
+        console.error('메시지 전송 실패:', error);
+
+        // 전송 실패 시 임시 메시지 제거
+        setMessages(prev =>
+          prev.filter(msg => msg.dmMessageId !== tempMessageId),
+        );
+
+        toastService.error('전송 실패', '메시지 전송에 실패했습니다.');
+      }
+    },
+    [dmChatRoomId, currentUserId, setMessages, sendMessageMutation],
+  );
 
   const handleBackPress = () => {
     if (navigation) {
@@ -359,6 +367,8 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     toggleNotificationMutation.mutate({dmChatRoomId});
   };
 
+  // ============ 초대 관련 함수들 ============
+
   // 사용자 정보 가져오기 헬퍼 함수
   const getUserById = useCallback(
     (userId: number) => {
@@ -380,6 +390,63 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     },
     [chatRoomDetail?.data?.participants],
   );
+
+  // 모임 초대장 생성 및 채팅 메시지 전송 핸들러
+  const handleCreateInvitation = useCallback(async () => {
+    if (!chatRoomDetail?.data?.meetingId || !currentUserId) {
+      toastService.error('오류', '모임 정보나 사용자 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    // 현재 사용자가 아닌 다른 참가자를 찾기 (초대 대상)
+    const invitee = chatRoomDetail.data.participants.find(
+      (participant: DmChatRoomParticipant) =>
+        participant.user.userId !== currentUserId,
+    );
+
+    if (!invitee) {
+      toastService.error('오류', '초대할 사용자를 찾을 수 없습니다.');
+      return;
+    }
+
+    try {
+      // 초대장 생성 - 실제 초대 대상 사용자 ID 사용
+      const invitationResponse = await createInvitationMutation.mutateAsync({
+        meetingId: chatRoomDetail.data.meetingId,
+        inviteeId: invitee.user.userId, // 실제 초대 대상 사용자 ID
+      });
+
+      // 초대장 정보를 JSON 형식으로 채팅 메시지에 전송
+      const invitationMessage = JSON.stringify({
+        type: 'invitation',
+        invitationId: invitationResponse.data.invitationId,
+        code: invitationResponse.data.code,
+        expiresAt: invitationResponse.data.expiresAt,
+        status: invitationResponse.data.status,
+        meetingId: invitationResponse.data.meetingId,
+        inviteeId: invitationResponse.data.inviteeId,
+        senderName: getUserById(currentUserId)?.userName || '알 수 없는 사용자',
+        inviteeName: invitee.user.userNickname || '알 수 없는 사용자',
+        maxUses: invitationResponse.data.maxUses,
+        usedCount: invitationResponse.data.usedCount,
+      });
+
+      // 특별한 형식으로 채팅 메시지 전송
+      await handleSendMessage(`[INVITATION]${invitationMessage}`);
+
+      toastService.success('성공', '초대장이 채팅방에 전송되었습니다!');
+    } catch (error) {
+      console.error('초대 생성 실패:', error);
+      toastService.error('오류', '초대장 생성에 실패했습니다.');
+    }
+  }, [
+    chatRoomDetail?.data?.meetingId,
+    chatRoomDetail?.data?.participants,
+    currentUserId,
+    createInvitationMutation,
+    getUserById,
+    handleSendMessage,
+  ]);
 
   // 현재 사용자 ID 초기화
   useEffect(() => {
@@ -418,6 +485,34 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
         return null;
       }
 
+      // 메시지 내용이 초대장 형식인지 확인 ([INVITATION]으로 시작하는지)
+      if (message.content && message.content.startsWith('[INVITATION]')) {
+        try {
+          // [INVITATION] 접두사를 제거하고 JSON 파싱
+          const invitationDataStr = message.content.replace('[INVITATION]', '');
+          const invitationData = JSON.parse(invitationDataStr);
+
+          return (
+            <InvitationBubble
+              invitationData={invitationData}
+              isCurrentUser={messageSenderId === currentUserId}
+              currentUserId={currentUserId || 0}
+              sender={{
+                name: user.userName || '알 수 없는 사용자',
+                profileImage:
+                  user.profileImageUrl && user.profileImageUrl.trim() !== ''
+                    ? user.profileImageUrl
+                    : undefined,
+              }}
+            />
+          );
+        } catch (error) {
+          console.error('초대 메시지 파싱 오류:', error);
+          // 파싱 실패 시 일반 메시지로 표시
+        }
+      }
+
+      // 일반 텍스트 메시지는 ChatMessage로 렌더링
       return (
         <ChatMessage
           id={message.dmMessageId?.toString() || ''}
@@ -615,6 +710,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
                 chatRoomDetail.data.isPushNotificationOn === 1
               }
               onNotificationToggle={handleNotificationToggle}
+              meetingId={chatRoomDetail.data.meetingId}
+              navigation={navigation}
+              onInvite={handleCreateInvitation}
             />
           </Animated.View>
         </Animated.View>

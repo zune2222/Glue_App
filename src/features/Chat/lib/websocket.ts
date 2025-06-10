@@ -2,7 +2,7 @@ import 'text-encoding-polyfill';
 import {Client, IMessage} from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import {config} from '@shared/config/env';
-import {DmMessageResponse} from '../api/api';
+import {DmMessageResponse, GroupMessageResponse} from '../api/api';
 import {secureStorage} from '@shared/lib/security';
 
 export type WebSocketStatus =
@@ -15,11 +15,15 @@ class WebSocketService {
   private client: Client | null = null;
   private status: WebSocketStatus = 'disconnected';
   private messageListener: ((message: DmMessageResponse) => void) | null = null;
+  private groupMessageListener:
+    | ((message: GroupMessageResponse) => void)
+    | null = null;
   private statusChangeListener: ((status: WebSocketStatus) => void) | null =
     null;
   private userId: number | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+  private groupChatRoomSubscriptions = new Map<number, any>(); // 그룹 채팅방 구독 관리
 
   constructor() {
     // WebSocket 서비스 초기화
@@ -194,6 +198,9 @@ class WebSocketService {
 
   // 연결 해제
   disconnect(): void {
+    // 모든 그룹 채팅방 구독 해제
+    this.unsubscribeFromAllGroupChatRooms();
+
     if (this.client) {
       this.client.deactivate();
       this.client = null;
@@ -208,6 +215,93 @@ class WebSocketService {
     listener: ((message: DmMessageResponse) => void) | null,
   ): void {
     this.messageListener = listener;
+  }
+
+  // 그룹 메시지 리스너 설정
+  setGroupMessageListener(
+    listener: ((message: GroupMessageResponse) => void) | null,
+  ): void {
+    this.groupMessageListener = listener;
+  }
+
+  // 그룹 채팅방 구독
+  subscribeToGroupChatRoom(groupChatroomId: number): boolean {
+    if (!this.client?.connected) {
+      console.error('[WebSocketService] WebSocket이 연결되지 않음');
+      return false;
+    }
+
+    // 이미 구독 중인지 확인
+    if (this.groupChatRoomSubscriptions.has(groupChatroomId)) {
+      console.log(
+        `[WebSocketService] 그룹 채팅방 ${groupChatroomId} 이미 구독 중`,
+      );
+      return true;
+    }
+
+    try {
+      const subscriptionPath = `/topic/group/${groupChatroomId}`;
+      const subscription = this.client.subscribe(
+        subscriptionPath,
+        (message: IMessage) => {
+          try {
+            const groupMessage: GroupMessageResponse = JSON.parse(message.body);
+            this.groupMessageListener?.(groupMessage);
+          } catch (error) {
+            console.error('[WebSocketService] 그룹 메시지 파싱 에러:', error);
+          }
+        },
+      );
+
+      this.groupChatRoomSubscriptions.set(groupChatroomId, subscription);
+      console.log(
+        `[WebSocketService] 그룹 채팅방 ${groupChatroomId} 구독 완료`,
+      );
+      return true;
+    } catch (error) {
+      console.error(
+        `[WebSocketService] 그룹 채팅방 ${groupChatroomId} 구독 실패:`,
+        error,
+      );
+      return false;
+    }
+  }
+
+  // 그룹 채팅방 구독 해제
+  unsubscribeFromGroupChatRoom(groupChatroomId: number): void {
+    const subscription = this.groupChatRoomSubscriptions.get(groupChatroomId);
+    if (subscription) {
+      try {
+        subscription.unsubscribe();
+        this.groupChatRoomSubscriptions.delete(groupChatroomId);
+        console.log(
+          `[WebSocketService] 그룹 채팅방 ${groupChatroomId} 구독 해제 완료`,
+        );
+      } catch (error) {
+        console.error(
+          `[WebSocketService] 그룹 채팅방 ${groupChatroomId} 구독 해제 실패:`,
+          error,
+        );
+      }
+    }
+  }
+
+  // 모든 그룹 채팅방 구독 해제
+  unsubscribeFromAllGroupChatRooms(): void {
+    this.groupChatRoomSubscriptions.forEach((subscription, groupChatroomId) => {
+      try {
+        subscription.unsubscribe();
+        console.log(
+          `[WebSocketService] 그룹 채팅방 ${groupChatroomId} 구독 해제 완료`,
+        );
+      } catch (error) {
+        console.error(
+          `[WebSocketService] 그룹 채팅방 ${groupChatroomId} 구독 해제 실패:`,
+          error,
+        );
+      }
+    });
+    this.groupChatRoomSubscriptions.clear();
   }
 
   // 상태 변경 리스너 설정

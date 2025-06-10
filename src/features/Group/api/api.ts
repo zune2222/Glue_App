@@ -139,6 +139,40 @@ export interface ReportPostResponse {
   message: string;
 }
 
+// 그룹 채팅방 참여자 타입
+export interface GroupChatParticipant {
+  [key: string]: any; // 참여자 정보는 서버에서 정의된 구조에 따라 달라질 수 있음
+}
+
+// 그룹 채팅방 미팅 정보 타입
+export interface GroupChatMeeting {
+  meetingId: number;
+  meetingTitle: string;
+  meetingImageUrl: string;
+  currentParticipants: number;
+}
+
+// 그룹 채팅방 정보 타입
+export interface GroupChatRoom {
+  groupChatroomId: number;
+  meeting: GroupChatMeeting;
+  participants: GroupChatParticipant;
+  createdAt: string;
+  pushNotificationOn: number;
+}
+
+// 그룹 채팅방 상태 타입
+export interface GroupChatStatus {
+  code: number;
+  message: string;
+}
+
+// 그룹 채팅방 참여 응답 타입
+export interface GroupChatJoinResponse {
+  chatroom: GroupChatRoom;
+  status: GroupChatStatus;
+}
+
 /**
  * 모임 게시글 목록을 가져오는 API 함수
  * @param params 게시글 목록 요청 파라미터
@@ -672,6 +706,72 @@ export const reportPost = async (
       // 기본 에러 메시지
       const errorMessage =
         error.response.data?.message || '게시글 신고에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};
+
+/**
+ * 그룹 채팅방에 참여하는 API 함수
+ * @param meetingId 미팅 ID
+ * @returns API 응답 데이터
+ */
+export const joinGroupChatRoom = async (
+  meetingId: number,
+): Promise<ApiResponse<GroupChatJoinResponse>> => {
+  const endpoint = `/api/group/rooms/create/${meetingId}`;
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 그룹 채팅방 참여: ${url}`);
+
+  try {
+    // JWT 토큰 가져오기
+    const token = await secureStorage.getToken();
+    if (!token) {
+      throw new Error('인증 토큰이 없습니다. 로그인이 필요합니다.');
+    }
+
+    // API 요청 보내기
+    const response = await apiClient.get(endpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('그룹 채팅방 참여 응답:', response.data);
+
+    // 서버 응답 처리
+    return {
+      data: response.data,
+      success: response.data.status.code === 200,
+      message: response.data.status.message || '',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error('잘못된 요청입니다. 미팅 ID를 확인해주세요.');
+      } else if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 403) {
+        throw new Error('그룹 채팅방에 참여할 권한이 없습니다.');
+      } else if (status === 404) {
+        throw new Error('존재하지 않는 미팅입니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '그룹 채팅방 참여에 실패했습니다.';
       throw new Error(errorMessage);
     }
 

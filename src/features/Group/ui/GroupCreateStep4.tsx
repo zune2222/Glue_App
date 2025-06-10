@@ -20,7 +20,7 @@ import {colors} from '../../../app/styles/colors';
 import {Text} from '../../../shared/ui/typography/Text';
 import GroupCreateHeader from './components/GroupCreateHeader';
 import {CalendarOpacityIcon, ClockIcon} from '../../../shared/assets/images';
-import {useCreateGroupPost} from '../api/hooks';
+import {useCreateGroupPost, useJoinGroupChatRoom} from '../api/hooks';
 import {toastService} from '../../../shared/lib/notifications/toast';
 
 // Daum Postcode 결과 데이터 타입
@@ -68,7 +68,12 @@ const GroupCreateStep4 = () => {
   const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
 
   // API 호출을 위한 훅 사용
-  const {mutate: createPost, isPending} = useCreateGroupPost();
+  const {mutate: createPost, isPending: isCreatingPost} = useCreateGroupPost();
+  const {mutate: joinChatRoom, isPending: isJoiningChat} =
+    useJoinGroupChatRoom();
+
+  // 전체 로딩 상태
+  const isPending = isCreatingPost || isJoiningChat;
 
   const handleBack = () => {
     navigation.goBack();
@@ -152,41 +157,86 @@ const GroupCreateStep4 = () => {
       onSuccess: response => {
         console.log('모임 게시글 생성 성공:', response.data);
 
-        // 성공 토스트 표시
-        toastService.success(
-          t('group.create.success.title'),
-          t('group.create.success.message'),
-        );
-
-        // 게시글 ID 추출
+        // 게시글 ID와 모임 ID 추출
         const postId = response.data?.postId;
+        const meetingId = response.data?.postId;
 
-        if (postId) {
-          // 먼저 메인 화면의 Group 탭으로 이동
-          navigation.reset({
-            index: 0,
-            routes: [
-              {
-                name: 'Main',
-                params: {
-                  screen: 'MainTabs',
-                  params: {
-                    screen: 'Group',
+        if (postId && meetingId) {
+          // 게시글 생성 후 자동으로 그룹 채팅방 참여
+          joinChatRoom(meetingId, {
+            onSuccess: chatResponse => {
+              console.log('그룹 채팅방 참여 성공:', chatResponse.data);
+
+              // 성공 토스트 표시
+              toastService.success(
+                t('group.create.success.title'),
+                '모임이 생성되고 채팅방에 참여되었습니다!',
+              );
+
+              // 먼저 메인 화면의 Group 탭으로 이동
+              navigation.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: 'Main',
                     params: {
-                      screen: 'GroupList',
+                      screen: 'MainTabs',
+                      params: {
+                        screen: 'Group',
+                        params: {
+                          screen: 'GroupList',
+                        },
+                      },
                     },
                   },
-                },
-              },
-            ],
-          });
+                ],
+              });
 
-          // 잠시 후 상세 화면으로 이동
-          setTimeout(() => {
-            navigation.navigate('GroupDetail', {postId});
-          }, 100);
+              // 잠시 후 상세 화면으로 이동
+              setTimeout(() => {
+                navigation.navigate('GroupDetail', {postId});
+              }, 100);
+            },
+            onError: chatError => {
+              console.error('그룹 채팅방 참여 실패:', chatError);
+
+              // 채팅방 참여는 실패했지만 게시글은 성공했으므로 부분 성공 메시지
+              toastService.success(
+                t('group.create.success.title'),
+                '모임이 생성되었습니다. (채팅방 참여는 나중에 시도해주세요)',
+              );
+
+              // 그래도 상세 화면으로 이동
+              navigation.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: 'Main',
+                    params: {
+                      screen: 'MainTabs',
+                      params: {
+                        screen: 'Group',
+                        params: {
+                          screen: 'GroupList',
+                        },
+                      },
+                    },
+                  },
+                ],
+              });
+
+              setTimeout(() => {
+                navigation.navigate('GroupDetail', {postId});
+              }, 100);
+            },
+          });
         } else {
           // ID를 받지 못한 경우 그룹 목록으로 이동
+          toastService.success(
+            t('group.create.success.title'),
+            t('group.create.success.message'),
+          );
+
           navigation.reset({
             index: 0,
             routes: [
@@ -451,7 +501,13 @@ const GroupCreateStep4 = () => {
       {isPending && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={colors.batteryChargedBlue} />
-          <Text style={styles.loadingText}>{t('common.loading')}</Text>
+          <Text style={styles.loadingText}>
+            {isCreatingPost
+              ? '모임을 생성하고 있습니다...'
+              : isJoiningChat
+              ? '채팅방에 참여하고 있습니다...'
+              : t('common.loading')}
+          </Text>
         </View>
       )}
 

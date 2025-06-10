@@ -458,10 +458,12 @@
     "popular": "실시간 인기 모임글",
     "koreanUsers": "한국어 사용자를 찾는 모임",
     "englishUsers": "영어 사용자를 찾는 모임",
+    "languageExchange": "한국어 ↔ 영어 교환 모임",
     "nearby": "주변 모임",
-    "seeAll": "전체보기",
+    "seeAll": "더보기",
     "welcome": "환영합니다",
     "emptyState": "아직 모임이 없습니다",
+    "loading": "로딩 중...",
     "createFirst": "첫 모임을 만들어보세요"
   },
   "error": {
