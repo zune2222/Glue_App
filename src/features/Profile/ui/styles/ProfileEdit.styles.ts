@@ -57,9 +57,6 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },
-  cameraIcon: {
-    fontSize: 16,
-  },
   nickname: {
     fontSize: 24,
     fontWeight: '600',

@@ -55,37 +55,46 @@ export interface GetPostsParams {
   categoryId?: number;
 }
 
-// 모임 상세 응답 타입 (서버 DTO에 맞춤)
+// 모임 상세 응답 타입 (새로운 API 구조에 맞춰 확장)
 export interface GetPostResponse {
   meeting: {
-    meetingId: number;
+    meetingTitle: string;
     categoryId: number;
-    creator: {
+    meetingPlaceName: string;
+    meetingTime: string;
+    mainLanguageId: number;
+    exchangeLanguageId: number;
+    maxParticipants: number;
+    // 기존 필드들 (하위 호환성을 위해 유지)
+    meetingId?: number;
+    creator?: {
       userId: number;
       userNickname: string;
       profileImageUrl: string | null;
     };
-    meetingTime: string;
-    currentParticipants: number;
-    maxParticipants: number;
-    languageId: number;
-    meetingStatus: number;
-    participants: Array<{
+    currentParticipants?: number;
+    languageId?: number;
+    meetingStatus?: number;
+    participants?: Array<{
       userId: number;
       nickname: string;
       profileImageUrl: string | null;
     }>;
-    createdAt: string;
-    updatedAt: string;
+    createdAt?: string;
+    updatedAt?: string;
   };
   post: {
-    postId: number;
     title: string;
     content: string;
-    viewCount: number;
-    bumpedAt: string | null;
+    imageUrls: string[];
+    // 좋아요 기능을 위한 필수 필드들 추가
+    postId: number;
     likeCount: number;
-    postImageUrl: Array<{
+    isLiked: boolean;
+    // 기존 필드들 (하위 호환성을 위해 유지)
+    viewCount?: number;
+    bumpedAt?: string | null;
+    postImageUrl?: Array<{
       postImageId: number;
       imageUrl: string;
       imageOrder: number;
@@ -459,6 +468,12 @@ export const joinGroup = async (
   }
 };
 
+// 좋아요 토글 응답 타입
+export interface LikeToggleResponse {
+  isLiked: boolean;
+  likeCount: number;
+}
+
 /**
  * 게시글 좋아요를 토글하는 API 함수
  * @param postId 게시글 ID
@@ -466,7 +481,7 @@ export const joinGroup = async (
  */
 export const toggleLike = async (
   postId: number,
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResponse<LikeToggleResponse>> => {
   const endpoint = `/api/posts/${postId}/like`;
   const url = `${config.API_URL}${endpoint}`;
   console.log(`[API 요청] 좋아요 토글: ${url}`);
@@ -489,7 +504,7 @@ export const toggleLike = async (
 
     // 서버 응답 처리
     return {
-      data: undefined,
+      data: response.data.result,
       success: response.data.isSuccess,
       message: response.data.message || '',
     };

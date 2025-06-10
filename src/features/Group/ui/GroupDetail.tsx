@@ -129,7 +129,11 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
       setIsSubmitting(true);
 
       // 내 아이디와 작성자 아이디를 userIds 배열에 포함
-      const creatorId = response.data.meeting.creator.userId;
+      const creatorId = response.data.meeting.creator?.userId;
+      if (!creatorId || !response.data.meeting.meetingId) {
+        console.error('필수 정보가 누락되었습니다.');
+        return;
+      }
       const userIds = [currentUserId, creatorId];
 
       createDmChatRoomMutate(
@@ -248,7 +252,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
   const {meeting, post} = response.data;
   const creator = meeting.creator;
   const mainImageUrl =
-    post.postImageUrl.length > 0 ? post.postImageUrl[0].imageUrl : null;
+    post.postImageUrl && post.postImageUrl.length > 0 ? post.postImageUrl[0].imageUrl : null;
 
   // 카테고리 ID가 있으면 번역된 텍스트로 변환
   const categoryText = meeting.categoryId
@@ -267,7 +271,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
   return (
     <SafeAreaView style={commonStyles.container}>
       <GroupHeader
-        creatorId={creator.userId}
+        creatorId={creator?.userId || 0}
         postId={post.postId}
         onReportPress={handleReportPress}
       />
@@ -275,11 +279,11 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
         {/* 작성자 정보 */}
         <GroupAuthorInfo
           category={categoryText}
-          authorName={creator.userNickname}
-          date={meeting.createdAt}
-          viewCounts={post.viewCount}
-          avatarUrl={creator.profileImageUrl || null}
-          userId={creator.userId}
+          authorName={creator?.userNickname || ''}
+          date={meeting.createdAt || ''}
+          viewCounts={post.viewCount || 0}
+          avatarUrl={creator?.profileImageUrl || null}
+          userId={creator?.userId || 0}
           onAuthorPress={handleAuthorPress}
           categoryBgColor={categoryBgColor}
           categoryTextColor={categoryTextColor}
@@ -305,16 +309,20 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
         {/* 모임 정보 */}
         <GroupInfo
           capacity={meeting.maxParticipants}
-          currentParticipants={meeting.currentParticipants}
-          language={meeting.languageId}
+          currentParticipants={meeting.currentParticipants || 0}
+          language={meeting.languageId || meeting.mainLanguageId}
           minForeigners={0} // TODO: 백엔드 API에 추가 필요
           meetingDate={meeting.meetingTime}
-          participants={meeting.participants}
+          participants={meeting.participants || []}
           onParticipantPress={handleAuthorPress}
         />
 
         {/* 좋아요 정보 */}
-        <GroupLikes likeCount={post.likeCount} postId={post.postId} />
+        <GroupLikes 
+          likeCount={post.likeCount} 
+          postId={post.postId} 
+          isLiked={post.isLiked}
+        />
 
         {/* 하단 버튼 영역 */}
         {!isMyPost && (

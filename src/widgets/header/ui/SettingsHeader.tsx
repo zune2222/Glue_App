@@ -5,7 +5,7 @@ import {Text} from '@shared/ui/typography/Text';
 import {useTranslation} from 'react-i18next';
 import {ChevronLeft} from '@shared/assets/images';
 
-const ProfileEditHeader: React.FC = () => {
+const SettingsHeader: React.FC = () => {
   const navigation = useNavigation();
   const {t} = useTranslation();
 
@@ -21,7 +21,7 @@ const ProfileEditHeader: React.FC = () => {
         </TouchableOpacity>
 
         {/* 타이틀 */}
-        <Text style={styles.title}>{t('profile.editProfile.title')}</Text>
+        <Text style={styles.title}>{t('settings.title') || '설정'}</Text>
 
         {/* 우측 빈 공간 (균형을 위해) */}
         <View style={styles.placeholder} />
@@ -29,8 +29,6 @@ const ProfileEditHeader: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-export default ProfileEditHeader;
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -43,23 +41,20 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     paddingHorizontal: 19,
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 4,
   },
   title: {
     fontSize: 18,
-    fontWeight: 'semibold',
-    color: '#1C1C1E',
-    textAlign: 'center',
+    fontWeight: '600',
+    color: '#333333',
     flex: 1,
+    textAlign: 'center',
   },
   placeholder: {
-    width: 40,
+    width: 32, // 뒤로가기 버튼과 같은 크기로 균형 맞춤
   },
 });
+
+export default SettingsHeader;

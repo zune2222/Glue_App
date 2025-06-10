@@ -10,14 +10,22 @@ import {
 } from 'react-native';
 import {Text} from '@shared/ui/typography/Text';
 import {useMyPage} from '../model/useMyPage';
+import {useProfileMe} from '../model/useProfileMe';
 import {styles} from './styles/ProfileEdit.styles';
 import {useTranslation} from 'react-i18next';
 import {changeLanguage, Language, LANGUAGE_NAMES} from '@shared/lib/i18n';
 import {SelectModal, SelectOption} from '@shared/ui/SelectModal';
 import ProfileEditHeader from '@widgets/header/ui/ProfileEditHeader';
+import CameraIcon from '@shared/assets/images/camera.svg';
 
 const ProfileEditScreen = () => {
   const {myPageInfo, isLoading, isError, error} = useMyPage();
+  const {
+    profileMe,
+    isLoading: isProfileMeLoading,
+    isError: isProfileMeError,
+    error: profileMeError,
+  } = useProfileMe();
   const {t, i18n} = useTranslation();
 
   // 편집 가능한 필드들의 상태
@@ -54,8 +62,8 @@ const ProfileEditScreen = () => {
     }
   };
 
-  // 로딩 상태
-  if (isLoading) {
+  // 로딩 상태 (두 API 모두 로딩 중인지 확인)
+  if (isLoading || isProfileMeLoading) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -68,13 +76,15 @@ const ProfileEditScreen = () => {
     );
   }
 
-  // 에러 상태
-  if (isError) {
+  // 에러 상태 (두 API 중 하나라도 에러인지 확인)
+  if (isError || isProfileMeError) {
     return (
       <View style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
-            {error?.message || t('profile.editProfile.loadProfileError')}
+            {error?.message ||
+              profileMeError?.message ||
+              t('profile.editProfile.loadProfileError')}
           </Text>
         </View>
       </View>
@@ -90,19 +100,25 @@ const ProfileEditScreen = () => {
           <View style={styles.avatarContainer}>
             <Image
               source={
-                myPageInfo?.profileImageUrl
-                  ? {uri: myPageInfo.profileImageUrl}
+                profileMe?.profileImageUrl || myPageInfo?.profileImageUrl
+                  ? {
+                      uri:
+                        profileMe?.profileImageUrl ||
+                        myPageInfo?.profileImageUrl,
+                    }
                   : defaultAvatar
               }
               style={styles.avatar}
               resizeMode="cover"
             />
             <TouchableOpacity style={styles.cameraButton}>
-              <Text style={styles.cameraIcon}>📷</Text>
+              <CameraIcon width={16} height={16} />
             </TouchableOpacity>
           </View>
           <Text style={styles.nickname}>
-            {myPageInfo?.userNickname || t('profile.defaultUser')}
+            {profileMe?.nickName ||
+              myPageInfo?.userNickname ||
+              t('profile.defaultUser')}
           </Text>
         </View>
 
@@ -130,7 +146,8 @@ const ProfileEditScreen = () => {
             />
           ) : (
             <Text style={styles.descriptionText}>
-              {myPageInfo?.description ||
+              {profileMe?.description ||
+                myPageInfo?.description ||
                 t('profile.editProfile.defaultIntroduction')}
             </Text>
           )}
@@ -146,7 +163,9 @@ const ProfileEditScreen = () => {
             <Text style={styles.infoLabel}>
               {t('profile.editProfile.name')}
             </Text>
-            <Text style={styles.infoValue}>김우주</Text>
+            <Text style={styles.infoValue}>
+              {profileMe?.realName || '김우주'}
+            </Text>
           </View>
 
           <View style={styles.infoRow}>
@@ -154,7 +173,9 @@ const ProfileEditScreen = () => {
               {t('profile.editProfile.nickname')}
             </Text>
             <Text style={styles.infoValue}>
-              {myPageInfo?.userNickname || t('profile.defaultUser')}
+              {profileMe?.nickName ||
+                myPageInfo?.userNickname ||
+                t('profile.defaultUser')}
             </Text>
           </View>
 
@@ -162,7 +183,9 @@ const ProfileEditScreen = () => {
             <Text style={styles.infoLabel}>
               {t('profile.editProfile.birthDate')}
             </Text>
-            <Text style={styles.infoValue}>2002.04.08</Text>
+            <Text style={styles.infoValue}>
+              {profileMe?.birthDate || '2002.04.08'}
+            </Text>
           </View>
 
           <View style={styles.infoRow}>
@@ -170,7 +193,9 @@ const ProfileEditScreen = () => {
               {t('profile.editProfile.gender')}
             </Text>
             <Text style={styles.infoValue}>
-              {t('profile.editProfile.female')}
+              {profileMe?.gender === 1
+                ? t('profile.editProfile.male')
+                : t('profile.editProfile.female')}
             </Text>
           </View>
 
@@ -214,7 +239,9 @@ const ProfileEditScreen = () => {
             <Text style={styles.infoLabel}>
               {t('profile.editProfile.email')}
             </Text>
-            <Text style={styles.infoValue}>abcdefg1234@pusan.ac.kr</Text>
+            <Text style={styles.infoValue}>
+              {profileMe?.email || 'abcdefg1234@pusan.ac.kr'}
+            </Text>
           </View>
         </View>
       </ScrollView>

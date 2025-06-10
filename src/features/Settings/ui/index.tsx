@@ -7,7 +7,7 @@ import {
   Alert,
 } from 'react-native';
 import {Text} from '../../../shared/ui/typography/Text';
-import CustomHeader from '../../../widgets/header/ui/CustomHeader';
+import SettingsHeader from '../../../widgets/header/ui/SettingsHeader';
 import {useTranslation} from 'react-i18next';
 import {changeLanguage, Language, LANGUAGE_NAMES} from '@shared/lib/i18n';
 import {SelectModal, SelectOption} from '@shared/ui/SelectModal';
@@ -78,7 +78,7 @@ const SettingsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <CustomHeader title="설정" />
+      <SettingsHeader />
 
       <ScrollView style={styles.content}>
         {/* 앱 설정 섹션 */}
@@ -88,9 +88,12 @@ const SettingsScreen = () => {
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => setIsLanguageModalVisible(true)}>
-            <Text style={styles.menuLabel}>{t('settings.languageSettings')}</Text>
+            <Text style={styles.menuLabel}>
+              {t('settings.languageSettings')}
+            </Text>
             <Text style={styles.menuValue}>
-              {LANGUAGE_NAMES[i18n.language as Language] || LANGUAGE_NAMES[Language.KOREAN]}
+              {LANGUAGE_NAMES[i18n.language as Language] ||
+                LANGUAGE_NAMES[Language.KOREAN]}
             </Text>
           </TouchableOpacity>
         </View>

@@ -235,11 +235,6 @@ const ProfileNavigator = () => (
       component={GuestbookScreen as any}
       options={{headerShown: false}}
     />
-    <ProfileStack.Screen
-      name="Settings"
-      component={SettingsScreen}
-      options={{headerShown: false}}
-    />
   </ProfileStack.Navigator>
 );
 // 메인 탭 네비게이터
@@ -314,6 +309,13 @@ const MainNavigator = () => (
     <MainStack.Screen
       name="ProfileEdit"
       component={ProfileEditScreen}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <MainStack.Screen
+      name="Settings"
+      component={SettingsScreen}
       options={{
         headerShown: false,
       }}
