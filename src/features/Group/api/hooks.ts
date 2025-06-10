@@ -10,6 +10,8 @@ import {
   GetPostsResponse,
   DmChatRoomCreateRequest,
   DmChatRoomCreateResult,
+  ReportRequest,
+  ReportResponse,
   ReportPostRequest,
   ReportPostResponse,
   GroupChatJoinResponse,
@@ -20,6 +22,7 @@ import {
   toggleLike,
   bumpPost,
   createDmChatRoom,
+  report,
   reportPost,
   joinGroupChatRoom,
 } from './api';
@@ -222,7 +225,26 @@ export const useCreateDmChatRoom = () => {
 };
 
 /**
- * 게시글 신고를 위한 React Query 훅
+ * 새로운 신고 API를 위한 React Query 훅
+ * @returns useApiMutation 훅의 반환값
+ */
+export const useReport = () => {
+  return useApiMutation<ReportResponse, ReportRequest>(
+    'report',
+    (data: ReportRequest) => report(data),
+    {
+      onSuccess: response => {
+        console.log('신고 성공:', response.data);
+      },
+      onError: error => {
+        console.error('신고 실패:', error.message);
+      },
+    },
+  );
+};
+
+/**
+ * 게시글 신고를 위한 React Query 훅 (기존 호환성을 위해 유지)
  * @returns useApiMutation 훅의 반환값
  */
 export const useReportPost = () => {

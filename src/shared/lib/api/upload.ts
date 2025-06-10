@@ -47,6 +47,8 @@ export const getPresignedUrl = async (
   params: PresignedUrlRequest,
 ): Promise<PresignedUrlResponse> => {
   try {
+    console.log('프리사인URL 요청 시작:', params);
+    
     const response = await uploadApi.get('/v1/upload/presigned-url', {
       params: {
         bucketObject: params.bucketObject,
@@ -54,9 +56,28 @@ export const getPresignedUrl = async (
       },
     });
 
+    console.log('프리사인URL 응답 성공:', response.data);
     return response.data;
   } catch (error) {
     console.error('Presigned URL 요청 실패:', error);
+    
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const message = error.response?.data?.message || error.message;
+      
+      if (status === 401) {
+        throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+      } else if (status === 403) {
+        throw new Error('파일 업로드 권한이 없습니다.');
+      } else if (status === 400) {
+        throw new Error(`잘못된 요청입니다: ${message}`);
+      } else if (status === 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        throw new Error(`업로드 준비 중 오류가 발생했습니다: ${message}`);
+      }
+    }
+    
     throw error;
   }
 };

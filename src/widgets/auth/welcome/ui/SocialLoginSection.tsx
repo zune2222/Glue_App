@@ -168,8 +168,12 @@ export const SocialLoginSection = () => {
             fcmToken,
           });
 
-          if (!authorizationCode) {
-            throw new Error(t('auth.appleNoAuthCodeError'));
+          if (!identityToken) {
+            throw new Error(t('auth.appleNoTokenError'));
+          }
+
+          if (!fcmToken) {
+            throw new Error('FCM 토큰을 가져올 수 없습니다.');
           }
 
           // 토스트 메시지
@@ -180,9 +184,9 @@ export const SocialLoginSection = () => {
           });
 
           try {
-            // 애플 인증 코드로 서버에 로그인 시도
+            // 애플 identityToken으로 서버에 로그인 시도
             const response = await appleSignin.mutateAsync({
-              authorizationCode,
+              idToken: identityToken,
               fcmToken,
             });
 
@@ -222,17 +226,20 @@ export const SocialLoginSection = () => {
                 // 새로운 애플 인증 요청 (회원가입용)
                 const newAppleAuthResponse = await appleAuth.performRequest({
                   requestedOperation: appleAuth.Operation.LOGIN,
-                  requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+                  requestedScopes: [
+                    appleAuth.Scope.EMAIL,
+                    appleAuth.Scope.FULL_NAME,
+                  ],
                 });
 
                 const {
-                  authorizationCode: newAuthCode,
+                  identityToken: newIdentityToken,
                   fullName: newFullName,
                   email: newEmail,
                 } = newAppleAuthResponse;
 
-                if (!newAuthCode) {
-                  throw new Error(t('auth.appleNoAuthCodeError'));
+                if (!newIdentityToken) {
+                  throw new Error(t('auth.appleNoTokenError'));
                 }
 
                 // 애플은 fullName이 { familyName, givenName, middleName, namePrefix, nameSuffix } 구조
@@ -245,8 +252,8 @@ export const SocialLoginSection = () => {
                 navigation.navigate('Auth', {
                   screen: 'SignUp',
                   params: {
-                    // 새로운 인증 코드 사용
-                    authorizationCode: newAuthCode,
+                    // identityToken 사용
+                    idToken: newIdentityToken,
                     email: newEmail,
                     userName,
                     fcmToken,

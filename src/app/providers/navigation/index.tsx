@@ -33,6 +33,9 @@ import {
   UserProfileDetail,
   GuestbookScreen,
 } from '@features/Profile';
+
+// 설정 화면 임포트
+import {SettingsScreen} from '@features/Settings';
 // 인증 화면 임포트
 import {
   WelcomeScreen,
@@ -228,13 +231,13 @@ const ProfileNavigator = () => (
       options={{title: '좋아요 목록', headerBackTitle: '뒤로'}}
     />
     <ProfileStack.Screen
-      name="ProfileEdit"
-      component={ProfileEditScreen}
-      options={{title: '프로필 수정', headerBackTitle: '취소'}}
+      name="Guestbook"
+      component={GuestbookScreen as any}
+      options={{headerShown: false}}
     />
     <ProfileStack.Screen
-      name="Guestbook"
-      component={GuestbookScreen}
+      name="Settings"
+      component={SettingsScreen}
       options={{headerShown: false}}
     />
   </ProfileStack.Navigator>
@@ -307,6 +310,13 @@ const MainNavigator = () => (
     <MainStack.Screen
       name="NotificationsScreen"
       component={NotificationsScreen}
+    />
+    <MainStack.Screen
+      name="ProfileEdit"
+      component={ProfileEditScreen}
+      options={{
+        headerShown: false,
+      }}
     />
   </MainStack.Navigator>
 );

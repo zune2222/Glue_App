@@ -46,8 +46,8 @@ export const useAppleSignup = () => {
 export const useAppleSignin = () => {
   return useApiMutation(
     'appleSignin',
-    (variables: {authorizationCode: string; fcmToken?: string}) =>
-      signinWithApple(variables.authorizationCode, variables.fcmToken),
+    (variables: {idToken: string; fcmToken: string}) =>
+      signinWithApple(variables.idToken, variables.fcmToken),
   );
 };
 

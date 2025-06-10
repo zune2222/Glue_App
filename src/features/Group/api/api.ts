@@ -128,12 +128,24 @@ export interface DmChatRoomCreateResult {
 }
 
 // 신고하기 요청 타입
+export interface ReportRequest {
+  reportedId: number;
+  reasonId: number;
+}
+
+// 신고하기 응답 타입
+export interface ReportResponse {
+  reportId: number;
+  message: string;
+}
+
+// 기존 게시글 신고 요청 타입 (호환성을 위해 유지)
 export interface ReportPostRequest {
   postId: number;
   reason: string;
 }
 
-// 신고하기 응답 타입
+// 기존 게시글 신고 응답 타입 (호환성을 위해 유지)
 export interface ReportPostResponse {
   reportId: number;
   message: string;
@@ -643,7 +655,75 @@ export const createDmChatRoom = async (
 };
 
 /**
- * 게시글을 신고하는 API 함수
+ * 새로운 신고 API 함수
+ * @param data 신고하기 요청 데이터
+ * @returns API 응답 데이터
+ */
+export const report = async (
+  data: ReportRequest,
+): Promise<ApiResponse<ReportResponse>> => {
+  const endpoint = '/api/report';
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 신고: ${url}`, data);
+
+  try {
+    // JWT 토큰 가져오기
+    const token = await secureStorage.getToken();
+    if (!token) {
+      throw new Error('인증 토큰이 없습니다. 로그인이 필요합니다.');
+    }
+
+    // API 요청 보내기
+    const response = await apiClient.post(endpoint, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('신고 응답:', response.data);
+
+    // 서버 응답 처리
+    return {
+      data: response.data.result,
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error('잘못된 신고 요청입니다. 입력 정보를 확인해주세요.');
+      } else if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 403) {
+        throw new Error('신고할 권한이 없습니다.');
+      } else if (status === 404) {
+        throw new Error('존재하지 않는 대상입니다.');
+      } else if (status === 409) {
+        throw new Error('이미 신고한 대상입니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '신고에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};
+
+/**
+ * 게시글을 신고하는 API 함수 (기존 호환성을 위해 유지)
  * @param data 신고하기 요청 데이터
  * @returns API 응답 데이터
  */

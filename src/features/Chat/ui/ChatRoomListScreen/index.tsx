@@ -288,13 +288,14 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
         const invitationData = JSON.parse(jsonPart);
 
         // 초대장 정보를 기반으로 읽기 쉬운 메시지 생성
-        return `📧 ${invitationData.senderName || '호스트'}님이 ${
-          invitationData.inviteeName || '사용자'
-        }님을 모임에 초대했습니다`;
+        return t('invitation.shortMessage', {
+          senderName: invitationData.senderName || t('messages.host'),
+          inviteeName: invitationData.inviteeName || t('messages.guest'),
+        });
       } catch (error) {
         // JSON 파싱 실패 시 기본 메시지
         console.error('초대장 메시지 파싱 실패:', error);
-        return '📧 모임 초대장을 보냈습니다';
+        return t('invitation.shortMessageDefault');
       }
     }
 
@@ -324,11 +325,13 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
           <Text style={styles.senderName}>
             {room.otherUser.userName ||
               (room.otherUser as any).userNickname ||
-              '알 수 없는 사용자'}
+              t('common.unknownUser')}
           </Text>
           <Text style={styles.messagePreview}>
             {formatLastMessage(room.lastMessage) ||
-              '새로운 채팅방이 생성되었습니다.'}
+              t('messages.newChatRoom', {
+                defaultValue: '새로운 채팅방이 생성되었습니다.',
+              })}
           </Text>
         </View>
         <View style={styles.messageTimeContainer}>
@@ -361,11 +364,14 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
         />
         <View style={styles.messageContent}>
           <Text style={styles.senderName}>
-            {room.meeting.meetingTitle || '알 수 없는 모임'}
+            {room.meeting.meetingTitle ||
+              t('group.unknownGroup', {defaultValue: '알 수 없는 모임'})}
           </Text>
           <Text style={styles.messagePreview}>
             {formatLastMessage(room.lastMessage) ||
-              '새로운 모임톡이 시작되었습니다.'}
+              t('messages.newGroupChat', {
+                defaultValue: '새로운 모임톡이 시작되었습니다.',
+              })}
           </Text>
         </View>
         <View style={styles.messageTimeContainer}>
@@ -402,7 +408,11 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
         {isLoading && activeTab === 'message' && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#1CBFDC" />
-            <Text style={styles.loadingText}>쪽지 목록을 불러오는 중...</Text>
+            <Text style={styles.loadingText}>
+              {t('messages.loadingDmList', {
+                defaultValue: '쪽지 목록을 불러오는 중...',
+              })}
+            </Text>
           </View>
         )}
 
@@ -410,7 +420,11 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
         {isLoading && activeTab === 'chat' && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#1CBFDC" />
-            <Text style={styles.loadingText}>모임톡 목록을 불러오는 중...</Text>
+            <Text style={styles.loadingText}>
+              {t('messages.loadingGroupList', {
+                defaultValue: '모임톡 목록을 불러오는 중...',
+              })}
+            </Text>
           </View>
         )}
 

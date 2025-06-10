@@ -151,6 +151,12 @@ const GroupCreateStep4 = () => {
         imageUrls: params.imageUrls || [],
       },
     };
+    
+    console.log('[게시글 생성 API 요청 데이터]', {
+      ...requestData,
+      imageUrlsCount: requestData.post.imageUrls.length,
+      imageUrls: requestData.post.imageUrls,
+    });
 
     // API 호출
     createPost(requestData, {

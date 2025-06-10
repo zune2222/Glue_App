@@ -263,8 +263,8 @@ export const verifyCode = async (
 
 // 애플 로그인 API
 export interface AppleSigninRequest {
-  authorizationCode: string;
-  fcmToken?: string;
+  idToken: string;
+  fcmToken: string;
 }
 
 // 애플 로그인 응답 인터페이스
@@ -273,16 +273,16 @@ export interface AppleSigninResponse {
 }
 
 export const signinWithApple = async (
-  authorizationCode: string,
-  fcmToken?: string,
+  idToken: string,
+  fcmToken: string,
 ): Promise<ApiResponse<AppleSigninResponse>> => {
   const endpoint = '/api/auth/apple/signin';
   const url = `${config.API_URL}${endpoint}`;
-  console.log(`[API 요청] 애플 로그인: ${url}`, {authorizationCode, fcmToken});
+  console.log(`[API 요청] 애플 로그인: ${url}`, {idToken, fcmToken});
 
   try {
     const response = await apiClient.post(endpoint, {
-      authorizationCode,
+      idToken,
       fcmToken,
     });
 
@@ -335,8 +335,7 @@ export const signinWithApple = async (
 
 // 애플 회원가입 API
 export interface AppleSignupRequest {
-  authorizationCode: string;
-  userName: string;
+  idToken: string;
   realName: string;
   nickname: string;
   gender: number;

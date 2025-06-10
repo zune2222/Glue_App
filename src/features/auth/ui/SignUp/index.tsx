@@ -36,7 +36,7 @@ type RootStackParamList = {
   Welcome: undefined;
   SignUp: {
     kakaoOAuthId?: string;
-    authorizationCode?: string;
+    idToken?: string;
     email?: string;
     userName?: string;
     isAppleSignUp?: boolean;
@@ -50,7 +50,7 @@ type SignUpScreenProps = {
   route: {
     params?: {
       kakaoOAuthId?: string;
-      authorizationCode?: string;
+      idToken?: string;
       email?: string;
       userName?: string;
       isAppleSignUp?: boolean;
@@ -67,7 +67,9 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
   );
   const [name, setName] = useState('');
   const [gender, setGender] = useState<string | null>(null);
-  const [birthDate, setBirthDate] = useState<Date | null>(new Date(2002, 5, 24));
+  const [birthDate, setBirthDate] = useState<Date | null>(
+    new Date(2002, 5, 24),
+  );
   const [nativeLanguage, setNativeLanguage] = useState<string | null>(null);
   const [languageLevel, setLanguageLevel] = useState<string | null>(null);
   const [university, setUniversity] = useState<string | null>(null);
@@ -230,7 +232,7 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
           });
           return;
         }
-        
+
         // 중복되지 않으면 다음 단계로 진행
         setStep(step + 1);
       } catch (error) {
@@ -601,10 +603,10 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
 
     try {
       // 카카오 로그인과 애플 로그인 구분
-      if (route.params?.isAppleSignUp && route.params?.authorizationCode) {
+      if (route.params?.isAppleSignUp && route.params?.idToken) {
         // 애플 회원가입 데이터 준비
         const appleSignupData = {
-          authorizationCode: route.params.authorizationCode,
+          idToken: route.params.idToken,
           realName: name,
           nickname: nickname,
           gender: genderValue,
@@ -624,7 +626,6 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
           meetingVisibility: visibility,
           likeVisibility: visibility,
           guestbooksVisibility: visibility,
-          fcmToken: route.params?.fcmToken, // FCM 토큰 추가
         };
 
         // 애플 회원가입 API 호출
@@ -637,6 +638,9 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
           // accessToken 저장
           if (response.data && response.data.accessToken) {
             await secureStorage.saveToken(response.data.accessToken);
+
+            // 토큰이 완전히 저장될 때까지 잠시 대기
+            await new Promise(resolve => setTimeout(resolve, 200));
 
             // 프로필 이미지가 있으면 업로드
             if (profilePhotoUri) {
@@ -723,6 +727,9 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
           // accessToken 저장
           if (response.data && response.data.accessToken) {
             await secureStorage.saveToken(response.data.accessToken);
+
+            // 토큰이 완전히 저장될 때까지 잠시 대기
+            await new Promise(resolve => setTimeout(resolve, 200));
 
             // 프로필 이미지가 있으면 업로드
             if (profilePhotoUri) {

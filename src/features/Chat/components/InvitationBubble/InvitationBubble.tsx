@@ -9,6 +9,7 @@ import {
 } from '../../api/hooks';
 import {toastService} from '@shared/lib/notifications/toast';
 import {dummyProfile} from '@shared/assets/images';
+import {useTranslation} from 'react-i18next';
 
 interface InvitationBubbleProps {
   invitationData: InvitationMessage;
@@ -26,6 +27,7 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
   currentUserId,
   sender,
 }) => {
+  const {t} = useTranslation();
   const acceptInvitationMutation = useAcceptInvitation();
   const joinGroupChatRoomMutation = useJoinGroupChatRoom();
 
@@ -87,7 +89,7 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
   const getStatusInfo = () => {
     if (isExpired) {
       return {
-        statusText: '만료됨',
+        statusText: t('invitation.status.expired'),
         statusColor: '#888888',
         canAccept: false,
       };
@@ -96,13 +98,13 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
     // usedCount를 기준으로 수락 여부 판단
     if (isAccepted) {
       return {
-        statusText: '수락됨',
+        statusText: t('invitation.status.accepted'),
         statusColor: '#34C759',
         canAccept: false,
       };
     } else {
       return {
-        statusText: '대기중',
+        statusText: t('invitation.status.pending'),
         statusColor: '#FF9500',
         canAccept: isInvitee,
       };
@@ -134,19 +136,22 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
 
         console.log('✅ 그룹 채팅방 참여 완료');
         toastService.success(
-          '성공',
-          '모임에 참가하고 그룹 채팅방에 참여했습니다!',
+          t('common.success'),
+          t('invitation.acceptSuccess'),
         );
       } else {
         console.log('✅ 초대 수락만 완료 (meetingId 없음)');
-        toastService.success('성공', '초대를 수락했습니다!');
+        toastService.success(
+          t('common.success'),
+          t('invitation.acceptSuccess'),
+        );
       }
 
       // 수락 후 상태 다시 조회 (React Query가 자동으로 처리하지만 수동으로도 가능)
       // refetch는 자동으로 1분마다 실행되고 있음
     } catch (error) {
       console.error('초대 수락/그룹 채팅방 참여 실패:', error);
-      toastService.error('오류', '초대 처리에 실패했습니다.');
+      toastService.error(t('common.error'), t('invitation.acceptError'));
     }
   };
 
@@ -156,15 +161,15 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
     const expiry = new Date(invitationData.expiresAt);
     const diff = expiry.getTime() - now.getTime();
 
-    if (diff <= 0) return '만료됨';
+    if (diff <= 0) return t('invitation.expired');
 
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     if (hours > 0) {
-      return `${hours}시간 ${minutes}분`;
+      return `${hours}${t('time.hour')} ${minutes}${t('time.minute')}`;
     } else {
-      return `${minutes}분`;
+      return `${minutes}${t('time.minute')}`;
     }
   };
 
@@ -198,7 +203,7 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
               marginBottom: 4,
               marginLeft: 4,
             }}>
-            {sender.name} 👑
+            {sender.name} {t('invitation.senderLabel', {defaultValue: '👑'})}
           </Text>
 
           {/* 초대장 카드 */}
@@ -252,9 +257,7 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
                 lineHeight: 20,
                 marginBottom: 16,
               }}>
-              {sender.name} 님이 'Maratang Warriors' 모임에 초대했습니다. 참여를
-              원하시면 수락 버튼을 눌러주세요. 6시간 내로 모임 참여를 수락하지
-              않으시면 자동으로 초대가 취소됩니다.
+              {t('invitation.inviteMessage', {senderName: sender.name})}
             </Text>
 
             {/* 수락 버튼 */}
@@ -280,12 +283,12 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
                     fontWeight: '600',
                   }}>
                   {acceptInvitationMutation.isPending
-                    ? '초대 수락중...'
+                    ? t('invitation.accepting')
                     : joinGroupChatRoomMutation.isPending
-                    ? '채팅방 참여중...'
+                    ? t('invitation.joiningChat')
                     : isExpired
-                    ? '초대 만료됨'
-                    : '초대 수락하기'}
+                    ? t('invitation.expired')
+                    : t('invitation.acceptInvitation')}
                 </Text>
               </TouchableOpacity>
             )}
@@ -308,7 +311,7 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
                     fontSize: 14,
                     fontWeight: '600',
                   }}>
-                  초대 만료됨
+                  {t('invitation.expired')}
                 </Text>
               </View>
             )}

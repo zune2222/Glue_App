@@ -33,6 +33,7 @@ import {toastService} from '@shared/lib/notifications/toast';
 import {dummyProfile} from '@shared/assets/images';
 import {secureStorage} from '@shared/lib/security';
 import {webSocketService} from '../../lib/websocket';
+import {useTranslation} from 'react-i18next';
 
 interface ChatRoomScreenProps {
   route?: {
@@ -47,6 +48,7 @@ interface ChatRoomScreenProps {
 const {width} = Dimensions.get('window');
 
 const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
+  const {t} = useTranslation();
   const [messages, setMessages] = useState<DmMessageResponse[]>([]);
   const [showRoomInfo, setShowRoomInfo] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -394,7 +396,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   // 모임 초대장 생성 및 채팅 메시지 전송 핸들러
   const handleCreateInvitation = useCallback(async () => {
     if (!chatRoomDetail?.data?.meetingId || !currentUserId) {
-      toastService.error('오류', '모임 정보나 사용자 정보를 찾을 수 없습니다.');
+      toastService.error(t('common.error'), t('invitation.noMeetingInfo'));
       return;
     }
 
@@ -405,7 +407,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     );
 
     if (!invitee) {
-      toastService.error('오류', '초대할 사용자를 찾을 수 없습니다.');
+      toastService.error(t('common.error'), t('invitation.noInviteeFound'));
       return;
     }
 
@@ -425,8 +427,12 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
         status: invitationResponse.data.status,
         meetingId: invitationResponse.data.meetingId,
         inviteeId: invitationResponse.data.inviteeId,
-        senderName: getUserById(currentUserId)?.userName || '알 수 없는 사용자',
-        inviteeName: invitee.user.userNickname || '알 수 없는 사용자',
+        senderName:
+          getUserById(currentUserId)?.userName ||
+          t('common.unknownUser', {defaultValue: '알 수 없는 사용자'}),
+        inviteeName:
+          invitee.user.userNickname ||
+          t('common.unknownUser', {defaultValue: '알 수 없는 사용자'}),
         maxUses: invitationResponse.data.maxUses,
         usedCount: invitationResponse.data.usedCount,
       });
@@ -434,10 +440,10 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       // 특별한 형식으로 채팅 메시지 전송
       await handleSendMessage(`[INVITATION]${invitationMessage}`);
 
-      toastService.success('성공', '초대장이 채팅방에 전송되었습니다!');
+      toastService.success(t('common.success'), t('invitation.createSuccess'));
     } catch (error) {
       console.error('초대 생성 실패:', error);
-      toastService.error('오류', '초대장 생성에 실패했습니다.');
+      toastService.error(t('common.error'), t('invitation.createError'));
     }
   }, [
     chatRoomDetail?.data?.meetingId,
@@ -446,6 +452,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     createInvitationMutation,
     getUserById,
     handleSendMessage,
+    t,
   ]);
 
   // 현재 사용자 ID 초기화
@@ -498,7 +505,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
               isCurrentUser={messageSenderId === currentUserId}
               currentUserId={currentUserId || 0}
               sender={{
-                name: user.userName || '알 수 없는 사용자',
+                name:
+                  user.userName ||
+                  t('common.unknownUser', {defaultValue: '알 수 없는 사용자'}),
                 profileImage:
                   user.profileImageUrl && user.profileImageUrl.trim() !== ''
                     ? user.profileImageUrl
@@ -529,7 +538,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           isMine={messageSenderId === currentUserId}
           sender={{
             id: user?.userId?.toString() || 'unknown',
-            name: user.userName || '알 수 없는 사용자',
+            name:
+              user.userName ||
+              t('common.unknownUser', {defaultValue: '알 수 없는 사용자'}),
             profileImage:
               user.profileImageUrl && user.profileImageUrl.trim() !== ''
                 ? user.profileImageUrl
@@ -539,7 +550,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
         />
       );
     },
-    [currentUserId, getUserById],
+    [currentUserId, getUserById, t],
   );
 
   // 빈 리스트 컴포넌트
@@ -554,11 +565,13 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           minHeight: 200,
         }}>
         <RNText style={{color: '#999'}}>
-          아직 메시지가 없습니다. 첫 메시지를 보내보세요!
+          {t('messages.empty', {
+            defaultValue: '아직 메시지가 없습니다. 첫 메시지를 보내보세요!',
+          })}
         </RNText>
       </View>
     ),
-    [],
+    [t],
   );
 
   // 키 추출 함수
@@ -581,7 +594,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
         ]}>
         <ActivityIndicator size="large" color="#1CBFDC" />
         <RNText style={{marginTop: 10, color: '#666'}}>
-          채팅방 정보를 불러오는 중...
+          {t('common.loading')}
         </RNText>
       </SafeAreaView>
     );

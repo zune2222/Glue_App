@@ -46,9 +46,22 @@ export const useImageUpload = () => {
   >({
     mutationFn: async ({bucketObject, imageUri, fileName}) => {
       try {
+        console.log('이미지 업로드 시작:', {bucketObject, imageUri, fileName});
+        
         // React Native에서 이미지 URI를 Blob으로 변환
         const response = await fetch(imageUri);
+        
+        if (!response.ok) {
+          throw new Error(`이미지를 읽을 수 없습니다: ${response.status} ${response.statusText}`);
+        }
+        
         const blob = await response.blob();
+        
+        if (!blob || blob.size === 0) {
+          throw new Error('이미지 파일이 비어있습니다');
+        }
+        
+        console.log('이미지 Blob 변환 성공:', {size: blob.size, type: blob.type});
 
         // 파일 이름이 없으면 기본 이름 생성
         const finalFileName = fileName || `image_${Date.now()}.jpg`;
@@ -57,6 +70,14 @@ export const useImageUpload = () => {
         return await uploadFile(bucketObject, blob, finalFileName);
       } catch (error) {
         console.error('이미지 업로드 실패:', error);
+        
+        // 더 구체적인 에러 메시지 제공
+        if (error instanceof TypeError && error.message.includes('Network request failed')) {
+          throw new Error('네트워크 연결을 확인해주세요.');
+        } else if (error instanceof Error && error.message.includes('fetch')) {
+          throw new Error('이미지 파일을 읽는 중 오류가 발생했습니다.');
+        }
+        
         throw error;
       }
     },

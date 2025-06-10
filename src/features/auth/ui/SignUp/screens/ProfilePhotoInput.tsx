@@ -69,10 +69,19 @@ const ProfilePhotoInput = ({
       let permission: Permission;
 
       if (type === 'camera') {
-        permission = PERMISSIONS.IOS.CAMERA;
+        permission = Platform.OS === 'ios' 
+          ? PERMISSIONS.IOS.CAMERA 
+          : PERMISSIONS.ANDROID.CAMERA;
       } else {
-        // iOS의 경우 추가 전용 권한 먼저 시도
-        permission = PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY;
+        // 갤러리 권한 설정
+        if (Platform.OS === 'ios') {
+          permission = PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY;
+        } else {
+          // Android 13 이상에서는 READ_MEDIA_IMAGES, 이하에서는 READ_EXTERNAL_STORAGE
+          permission = Number(Platform.Version) >= 33 
+            ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES 
+            : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+        }
       }
 
       const result = await check(permission);

@@ -16,7 +16,7 @@ import GroupLikes from './components/GroupLikes';
 import {Button} from '@shared/ui';
 import {Text} from '@shared/ui/typography';
 import {toastService} from '../../../shared/lib/notifications/toast';
-import {useGroupDetail, useCreateDmChatRoom, useReportPost} from '../api/hooks';
+import {useGroupDetail, useCreateDmChatRoom, useReport} from '../api/hooks';
 import {useTranslation} from 'react-i18next';
 import {secureStorage} from '@shared/lib/security';
 import ReportModal from './components/ReportModal';
@@ -44,7 +44,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
   const {mutate: createDmChatRoomMutate} = useCreateDmChatRoom();
 
   // 신고 훅 사용
-  const {mutate: reportPostMutate} = useReportPost();
+  const {mutate: reportMutate} = useReport();
 
   // 작성자 프로필로 이동하는 핸들러
   const handleAuthorPress = (userId: number) => {
@@ -175,27 +175,37 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
   };
 
   // 신고하기 핸들러
-  const handleReport = (reason: string) => {
+  const handleReport = (reasonId: number) => {
     if (!postId) return;
 
-    reportPostMutate(
+    reportMutate(
       {
-        postId: Number(postId),
-        reason: reason,
+        reportedId: Number(postId),
+        reasonId: reasonId,
       },
       {
-        onSuccess: () => {
-          console.log('게시글 신고 성공');
+        onSuccess: (response) => {
+          console.log('게시글 신고 성공:', response);
           toastService.success(
-            t('common.success'),
             t('group.detail.menu.reportModal.success'),
+            '신고가 정상적으로 접수되었습니다. 검토 후 조치하겠습니다.',
           );
         },
         onError: (error: any) => {
           console.error('게시글 신고 실패:', error.message);
+          // 구체적인 에러 메시지 제공
+          let errorMessage = t('group.detail.menu.reportModal.error');
+          if (error.message.includes('이미 신고한')) {
+            errorMessage = '이미 신고한 게시글입니다.';
+          } else if (error.message.includes('권한이 없습니다')) {
+            errorMessage = '신고할 권한이 없습니다.';
+          } else if (error.message.includes('존재하지 않는')) {
+            errorMessage = '존재하지 않는 게시글입니다.';
+          }
+          
           toastService.error(
-            t('common.error'),
-            error.message || t('group.detail.menu.reportModal.error'),
+            '신고 실패',
+            errorMessage,
           );
         },
       },
