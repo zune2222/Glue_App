@@ -22,7 +22,8 @@
     "sending": "전송 중...",
     "confirm": "확인",
     "success": "성공",
-    "unknownUser": "알 수 없는 사용자"
+    "unknownUser": "알 수 없는 사용자",
+    "withdraw": "탈퇴"
   },
   "time": {
     "am": "오전",
@@ -271,7 +272,18 @@
       "schoolInfo": "학교 정보",
       "school": "학교",
       "department": "학과",
-      "email": "이메일"
+      "email": "이메일",
+      "selectProfileImageOption": "프로필 이미지 선택 방법을 선택해주세요",
+      "camera": "카메라",
+      "gallery": "갤러리",
+      "unavailable": "해당 기능을 사용할 수 없습니다",
+      "blocked": "권한이 차단되어 있습니다. 설정에서 권한을 허용해주세요.",
+      "goToSettings": "설정으로 이동",
+      "settingsError": "설정을 열 수 없습니다",
+      "generalError": "오류가 발생했습니다",
+      "imagePickerError": "이미지 선택에 실패했습니다",
+      "imageUploadSuccess": "프로필 이미지가 성공적으로 업데이트되었습니다",
+      "imageUploadError": "프로필 이미지 업로드에 실패했습니다"
     }
   },
   "board": {
@@ -348,7 +360,23 @@
     "dark": "다크 모드",
     "light": "라이트 모드",
     "system": "시스템 설정",
-    "languageChanged": "언어가 변경되었습니다"
+    "languageChanged": "언어가 변경되었습니다",
+    "usageGuide": "이용 안내",
+    "appVersion": "앱 버전",
+    "inquiry": "문의하기",
+    "announcements": "공지사항",
+    "termsOfService": "서비스 이용약관",
+    "privacyPolicy": "개인정보 처리방침",
+    "openSourceLicense": "오픈소스 라이선스",
+    "others": "기타",
+    "logout": "로그아웃",
+    "withdrawal": "회원탈퇴",
+    "logoutConfirm": "정말 로그아웃하시겠습니까?",
+    "withdrawalConfirm": "정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.",
+    "languageChangeError": "언어 변경 중 오류:",
+    "systemLanguageSelectFallback": "시스템 언어를 선택해 주세요.",
+    "logoutProcessing": "로그아웃 처리",
+    "withdrawalProcessing": "회원탈퇴 처리"
   },
   "notification": {
     "title": "알림 예제",

@@ -15,6 +15,7 @@ import {ChatRoomInfoProps} from './types';
 import MemberItem from './components/MemberItem';
 import {secureStorage} from '@shared/lib/security';
 import {useCheckMeetingParticipation} from '../../api/hooks';
+import {useGroupDetail} from '../../../Group/api/hooks';
 
 const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -22,8 +23,8 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   roomIcon,
   memberCount,
-  category = '공부', // 기본값 설정
-  postTitle = '영어 공부할 모임 모집합니다', // 기본값 설정
+  category: propCategory,
+  postTitle: propPostTitle,
   isDirectMessage = false, // 기본값 설정
   members,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -32,6 +33,7 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   isNotificationEnabled = true,
   onNotificationToggle,
   meetingId,
+  postId,
   navigation,
   onInvite,
 }) => {
@@ -40,6 +42,9 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   const [isCurrentUserHost, setIsCurrentUserHost] = useState(false);
   const [otherUserId, setOtherUserId] = useState<number | null>(null);
 
+  // 실제 모임 상세 정보 가져오기
+  const {data: groupDetailData, isLoading, isError} = useGroupDetail(postId || 0);
+
   // 상대방의 모임 참가 여부 확인
   const {data: participationData} = useCheckMeetingParticipation(
     meetingId || 0,
@@ -47,6 +52,10 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
     // DM 채팅방이고, 호스트이고, 상대방 사용자 ID가 있고, meetingId가 있을 때만 쿼리 실행
     isDirectMessage && isCurrentUserHost && !!otherUserId && !!meetingId,
   );
+
+  // API 데이터에서 카테고리와 제목 추출 (더미 데이터 대신 사용)
+  const category = propCategory || '공부'; // 일단 기본값 유지 (카테고리 매핑 로직 필요)
+  const postTitle = groupDetailData?.data?.post?.title || propPostTitle || '영어 공부할 모임 모집합니다';
 
   // 디버깅용 로그
   console.log('🔍 ChatRoomInfo 초대 버튼 표시 조건:', {
@@ -119,16 +128,44 @@ const ChatRoomInfo: React.FC<ChatRoomInfoProps> = ({
   };
 
   const handleGoToPost = () => {
-    if (meetingId && navigation) {
-      console.log('게시글로 이동:', meetingId);
-      navigation.navigate('GroupDetail', {postId: meetingId});
+    const targetPostId = postId || meetingId;
+    if (targetPostId && navigation) {
+      console.log('게시글로 이동:', targetPostId);
+      navigation.navigate('GroupDetail', {postId: targetPostId});
     } else {
-      console.warn('meetingId 또는 navigation이 없습니다:', {
+      console.warn('postId/meetingId 또는 navigation이 없습니다:', {
+        postId,
         meetingId,
         navigation,
       });
     }
   };
+
+  // 로딩 상태 표시
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text variant="body2" color="#666666">
+            {t('common.loading')}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // 에러 상태 표시
+  if (isError) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text variant="body2" color="#FF0000">
+            {t('common.error')}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -243,6 +280,12 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   categoryButton: {
     backgroundColor: '#DEE9FC',

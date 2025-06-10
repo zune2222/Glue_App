@@ -22,7 +22,8 @@
     "sending": "Sending...",
     "confirm": "Confirm",
     "success": "Success",
-    "unknownUser": "Unknown User"
+    "unknownUser": "Unknown User",
+    "withdraw": "Delete"
   },
   "time": {
     "am": "AM",
@@ -271,7 +272,18 @@
       "schoolInfo": "School Information",
       "school": "School",
       "department": "Department",
-      "email": "Email"
+      "email": "Email",
+      "selectProfileImageOption": "Please select how to choose your profile image",
+      "camera": "Camera",
+      "gallery": "Gallery",
+      "unavailable": "This feature is not available",
+      "blocked": "Permission is blocked. Please enable it in settings.",
+      "goToSettings": "Go to Settings",
+      "settingsError": "Cannot open settings",
+      "generalError": "An error occurred",
+      "imagePickerError": "Failed to select image",
+      "imageUploadSuccess": "Profile image updated successfully",
+      "imageUploadError": "Failed to upload profile image"
     }
   },
   "board": {
@@ -348,7 +360,23 @@
     "dark": "Dark Mode",
     "light": "Light Mode",
     "system": "System Default",
-    "languageChanged": "Language has been changed"
+    "languageChanged": "Language has been changed",
+    "usageGuide": "Usage Guide",
+    "appVersion": "App Version",
+    "inquiry": "Contact Us",
+    "announcements": "Announcements",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "openSourceLicense": "Open Source License",
+    "others": "Others",
+    "logout": "Log out",
+    "withdrawal": "Delete Account",
+    "logoutConfirm": "Are you sure you want to log out?",
+    "withdrawalConfirm": "Are you sure you want to delete your account? All data will be deleted.",
+    "languageChangeError": "Error changing language:",
+    "systemLanguageSelectFallback": "Please select your system language.",
+    "logoutProcessing": "Processing logout",
+    "withdrawalProcessing": "Processing account deletion"
   },
   "notification": {
     "title": "Notification Examples",

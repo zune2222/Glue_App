@@ -809,6 +809,82 @@ export const reportPost = async (
   }
 };
 
+// 모임 상세 정보 응답 타입 (API 문서 기준)
+export interface MeetingDetailResponse {
+  invitationId: number;
+  code: string;
+  expiresAt: string;
+  maxUses: number;
+  usedCount: number;
+  status: number;
+  meetingId: number;
+  inviteeId: number;
+}
+
+/**
+ * 모임 상세 정보를 가져오는 API 함수 (API 문서 기준)
+ * @param meetingId 모임 ID
+ * @returns API 응답 데이터
+ */
+export const getMeetingDetail = async (
+  meetingId: number,
+): Promise<ApiResponse<MeetingDetailResponse>> => {
+  const endpoint = `/api/meetings/${meetingId}`;
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 모임 상세 조회: ${url}`);
+
+  try {
+    // JWT 토큰 가져오기
+    const token = await secureStorage.getToken();
+    if (!token) {
+      throw new Error('인증 토큰이 없습니다. 로그인이 필요합니다.');
+    }
+
+    // API 요청 보내기
+    const response = await apiClient.get(endpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('모임 상세 조회 응답:', response.data);
+
+    // 서버 응답 처리
+    return {
+      data: response.data.result,
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 404) {
+        throw new Error('존재하지 않는 모임입니다.');
+      } else if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 403) {
+        throw new Error('모임 정보를 조회할 권한이 없습니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '모임 상세 조회에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};
+
 /**
  * 그룹 채팅방에 참여하는 API 함수
  * @param meetingId 미팅 ID

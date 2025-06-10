@@ -16,6 +16,7 @@ import {
   ReportPostResponse,
   GroupChatJoinResponse,
   LikeToggleResponse,
+  MeetingDetailResponse,
   createGroupPost,
   getPosts,
   getGroupDetail,
@@ -26,6 +27,7 @@ import {
   report,
   reportPost,
   joinGroupChatRoom,
+  getMeetingDetail,
 } from './api';
 import {useQueryClient, InvalidateQueryFilters} from '@tanstack/react-query';
 
@@ -300,6 +302,23 @@ export const useJoinGroupChatRoom = () => {
       onError: error => {
         console.error('그룹 채팅방 참여 실패:', error.message);
       },
+    },
+  );
+};
+
+/**
+ * 모임 상세 정보를 가져오기 위한 React Query 훅 (API 문서 기준)
+ * @param meetingId 모임 ID
+ * @param enabled 쿼리 활성화 여부
+ * @returns useQuery 훅의 반환값
+ */
+export const useMeetingDetail = (meetingId: number, enabled = true) => {
+  return useApiQuery<MeetingDetailResponse>(
+    ['meetingDetail', String(meetingId)],
+    () => getMeetingDetail(meetingId),
+    {
+      retry: 1,
+      enabled: enabled && meetingId > 0,
     },
   );
 };

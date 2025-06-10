@@ -21,7 +21,7 @@ const uploadApi = axios.create({
 
 // 요청 인터셉터: 인증 토큰 추가
 uploadApi.interceptors.request.use(
-  async (config) => {
+  async config => {
     try {
       const {secureStorage} = await import('@shared/lib/security');
       const token = await secureStorage.getToken();
@@ -37,7 +37,7 @@ uploadApi.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   },
 );
@@ -48,8 +48,8 @@ export const getPresignedUrl = async (
 ): Promise<PresignedUrlResponse> => {
   try {
     console.log('프리사인URL 요청 시작:', params);
-    
-    const response = await uploadApi.get('/v1/upload/presigned-url', {
+
+    const response = await uploadApi.post('/api/aws/presigned-url', null, {
       params: {
         bucketObject: params.bucketObject,
         extension: params.extension,
@@ -60,11 +60,11 @@ export const getPresignedUrl = async (
     return response.data;
   } catch (error) {
     console.error('Presigned URL 요청 실패:', error);
-    
+
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
       const message = error.response?.data?.message || error.message;
-      
+
       if (status === 401) {
         throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
       } else if (status === 403) {
@@ -77,7 +77,7 @@ export const getPresignedUrl = async (
         throw new Error(`업로드 준비 중 오류가 발생했습니다: ${message}`);
       }
     }
-    
+
     throw error;
   }
 };
@@ -89,13 +89,38 @@ export const uploadFileToS3 = async (
   contentType: string,
 ): Promise<void> => {
   try {
-    await axios.put(presignedUrl, file, {
+    console.log('📡 S3 PUT 요청 시작:', {
+      url: presignedUrl.substring(0, 100) + '...',
+      fileSize: file.size,
+      contentType: contentType,
+      fileType: file.constructor.name,
+    });
+
+    const response = await axios.put(presignedUrl, file, {
       headers: {
         'Content-Type': contentType,
       },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    });
+
+    console.log('✅ S3 PUT 응답:', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
     });
   } catch (error) {
-    console.error('S3 파일 업로드 실패:', error);
+    console.error('❌ S3 파일 업로드 실패:', error);
+
+    if (axios.isAxiosError(error)) {
+      console.error('📊 에러 상세정보:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers,
+      });
+    }
+
     throw error;
   }
 };
@@ -107,26 +132,85 @@ export const uploadFile = async (
   fileName: string,
 ): Promise<string> => {
   try {
+    console.log('📤 파일 업로드 프로세스 시작:', {
+      bucketObject,
+      fileName,
+      fileSize: file.size,
+    });
+
     // 파일 확장자 추출
     const extension = fileName.split('.').pop()?.toLowerCase() || 'jpg';
-    
+    console.log('📋 파일 확장자:', extension);
+
     // Presigned URL 요청
+    console.log('🔑 프리사인 URL 요청 중...');
     const {presignedUrl, publicUrl} = await getPresignedUrl({
       bucketObject,
       extension,
     });
+    console.log('✅ 프리사인 URL 받음:', {
+      publicUrl,
+      presignedUrlLength: presignedUrl.length,
+    });
 
-    // 파일 타입 결정
-    const contentType = getContentType(extension);
+    // 파일 타입 결정 - Blob의 실제 타입을 우선 사용
+    let contentType: string;
+    if (file instanceof Blob && file.type) {
+      contentType = file.type;
+      console.log('🎯 Blob의 실제 타입 사용:', contentType);
+    } else {
+      contentType = getContentType(extension);
+      console.log('📝 확장자 기반 타입 사용:', contentType);
+    }
 
     // S3에 파일 업로드
+    console.log('☁️ S3 업로드 시작...');
     await uploadFileToS3(presignedUrl, file, contentType);
+    console.log('🎉 S3 업로드 완료!');
 
     // 업로드된 파일의 공개 URL 반환
     return publicUrl;
   } catch (error) {
-    console.error('파일 업로드 실패:', error);
+    console.error('💥 파일 업로드 실패:', error);
     throw error;
+  }
+};
+
+// 업로드된 이미지 URL 검증
+export const validateUploadedImage = async (
+  imageUrl: string,
+): Promise<boolean> => {
+  try {
+    console.log('🔍 이미지 URL 검증 시작:', imageUrl);
+
+    const response = await fetch(imageUrl, {
+      method: 'HEAD', // 헤더만 요청하여 빠르게 확인
+    });
+
+    if (!response.ok) {
+      console.error(
+        '❌ 이미지 URL 접근 실패:',
+        response.status,
+        response.statusText,
+      );
+      return false;
+    }
+
+    const contentType = response.headers.get('Content-Type');
+    const contentLength = response.headers.get('Content-Length');
+
+    console.log('✅ 이미지 URL 검증 성공:', {
+      status: response.status,
+      contentType,
+      contentLength,
+      isImage: contentType?.startsWith('image/'),
+    });
+
+    // Content-Type이 이미지인지 확인
+    return contentType?.startsWith('image/') || false;
+  } catch (error) {
+    console.error('💥 이미지 URL 검증 실패:', error);
+    return false;
   }
 };
 

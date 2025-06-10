@@ -19,6 +19,7 @@ export interface ChatRoomInfoProps {
   onNotificationToggle?: () => void;
   // 게시글 관련 추가
   meetingId?: number;
+  postId?: number; // 실제 API 데이터 가져오기 위한 postId 추가
   navigation?: any;
   // 초대 관련 추가
   onInvite?: () => void;

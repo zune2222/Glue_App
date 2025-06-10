@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Alert,
+  Platform,
 } from 'react-native';
 import {Text} from '@shared/ui/typography/Text';
 import {useMyPage} from '../model/useMyPage';
@@ -14,9 +16,25 @@ import {useProfileMe} from '../model/useProfileMe';
 import {styles} from './styles/ProfileEdit.styles';
 import {useTranslation} from 'react-i18next';
 import {changeLanguage, Language, LANGUAGE_NAMES} from '@shared/lib/i18n';
-import {SelectModal, SelectOption} from '@shared/ui/SelectModal';
+import {CenterModal, CenterModalOption} from '@shared/ui/CenterModal';
 import ProfileEditHeader from '@widgets/header/ui/ProfileEditHeader';
 import CameraIcon from '@shared/assets/images/camera.svg';
+import {dummyProfile} from '@shared/assets/images';
+import {useProfileImageUploadAndUpdate} from '@shared/lib/api/profileImageHooks';
+import {
+  launchImageLibrary,
+  launchCamera,
+  ImagePickerResponse,
+  Asset,
+} from 'react-native-image-picker';
+import {
+  PERMISSIONS,
+  RESULTS,
+  request,
+  check,
+  Permission,
+  openSettings,
+} from 'react-native-permissions';
 
 const ProfileEditScreen = () => {
   const {myPageInfo, isLoading, isError, error} = useMyPage();
@@ -27,17 +45,19 @@ const ProfileEditScreen = () => {
     error: profileMeError,
   } = useProfileMe();
   const {t, i18n} = useTranslation();
+  const profileImageUpload = useProfileImageUploadAndUpdate();
 
   // 편집 가능한 필드들의 상태
   const [description, setDescription] = useState('');
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+  const [localImageUri, setLocalImageUri] = useState<string | null>(null);
 
-  // 기본 프로필 이미지
-  const defaultAvatar = require('@shared/assets/images/logo.png');
+  // 기본 프로필 이미지 (더미 이미지 사용)
+  const defaultAvatar = dummyProfile;
 
   // 언어 옵션 생성
-  const languageOptions: SelectOption[] = [
+  const languageOptions: CenterModalOption[] = [
     {
       label: LANGUAGE_NAMES[Language.KOREAN],
       value: Language.KOREAN,
@@ -49,7 +69,7 @@ const ProfileEditScreen = () => {
   ];
 
   // 언어 변경 핸들러
-  const handleLanguageChange = async (option: SelectOption) => {
+  const handleLanguageChange = async (option: CenterModalOption) => {
     try {
       const success = await changeLanguage(option.value as Language);
       if (success) {
@@ -59,6 +79,173 @@ const ProfileEditScreen = () => {
       }
     } catch (languageError) {
       console.error('언어 변경 중 오류:', languageError);
+    }
+  };
+
+  // 프로필 이미지 선택 핸들러
+  const handleSelectProfileImage = () => {
+    Alert.alert(
+      t('common.select'),
+      t('profile.editProfile.selectProfileImageOption'),
+      [
+        {
+          text: t('profile.editProfile.camera'),
+          onPress: () => checkPermissionAndProceed('camera'),
+        },
+        {
+          text: t('profile.editProfile.gallery'),
+          onPress: () => checkPermissionAndProceed('gallery'),
+        },
+        {
+          text: t('common.cancel'),
+          style: 'cancel',
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
+  // 권한 확인 및 처리
+  const checkPermissionAndProceed = async (type: 'camera' | 'gallery') => {
+    try {
+      let permission: Permission;
+
+      if (type === 'camera') {
+        permission =
+          Platform.OS === 'ios'
+            ? PERMISSIONS.IOS.CAMERA
+            : PERMISSIONS.ANDROID.CAMERA;
+      } else {
+        // 갤러리 권한 설정
+        if (Platform.OS === 'ios') {
+          permission = PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY;
+        } else {
+          // Android 13 이상에서는 READ_MEDIA_IMAGES, 이하에서는 READ_EXTERNAL_STORAGE
+          permission =
+            Number(Platform.Version) >= 33
+              ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
+              : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+        }
+      }
+
+      const result = await check(permission);
+
+      switch (result) {
+        case RESULTS.UNAVAILABLE:
+          Alert.alert(t('common.error'), t('profile.editProfile.unavailable'));
+          break;
+        case RESULTS.DENIED:
+          const requestResult = await request(permission);
+          if (requestResult === RESULTS.GRANTED) {
+            type === 'camera' ? openCamera() : openGallery();
+          }
+          break;
+        case RESULTS.LIMITED:
+        case RESULTS.GRANTED:
+          type === 'camera' ? openCamera() : openGallery();
+          break;
+        case RESULTS.BLOCKED:
+          Alert.alert(
+            t('common.permission'),
+            t('profile.editProfile.blocked'),
+            [
+              {
+                text: t('common.ok'),
+                onPress: () => console.log('사용자가 설정으로 이동하지 않음'),
+              },
+              {
+                text: t('profile.editProfile.goToSettings'),
+                onPress: () => {
+                  openSettings().catch(() =>
+                    Alert.alert(
+                      t('common.error'),
+                      t('profile.editProfile.settingsError'),
+                    ),
+                  );
+                },
+              },
+            ],
+          );
+          break;
+      }
+    } catch (error) {
+      console.log('권한 확인 중 오류 발생:', error);
+      Alert.alert(t('common.error'), t('profile.editProfile.generalError'));
+    }
+  };
+
+  // 카메라 열기
+  const openCamera = () => {
+    launchCamera(
+      {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 500,
+        maxWidth: 500,
+      },
+      (response: ImagePickerResponse) => {
+        handleImagePickerResponse(response);
+      },
+    );
+  };
+
+  // 갤러리 열기
+  const openGallery = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 500,
+        maxWidth: 500,
+      },
+      (response: ImagePickerResponse) => {
+        handleImagePickerResponse(response);
+      },
+    );
+  };
+
+  // 이미지 선택 응답 처리
+  const handleImagePickerResponse = (response: ImagePickerResponse) => {
+    if (response.didCancel) {
+      console.log('사용자가 이미지 선택을 취소했습니다');
+    } else if (response.errorCode) {
+      console.log('ImagePicker Error: ', response.errorMessage);
+      Alert.alert(t('common.error'), t('profile.editProfile.imagePickerError'));
+    } else if (response.assets && response.assets.length > 0) {
+      const selectedAsset: Asset = response.assets[0];
+      const uri = selectedAsset.uri;
+
+      if (uri) {
+        // 로컬 이미지 미리보기 설정
+        setLocalImageUri(uri);
+
+        // 서버에 업로드
+        uploadProfileImage(uri);
+      }
+    }
+  };
+
+  // 프로필 이미지 업로드
+  const uploadProfileImage = async (imageUri: string) => {
+    try {
+      const fileName = `profile_${Date.now()}.jpg`;
+      await profileImageUpload.mutateAsync({
+        imageUri,
+        fileName,
+        maxWidth: 800, // 프로필 이미지는 좀 더 작게
+        maxHeight: 800, // 프로필 이미지는 좀 더 작게
+        quality: 90, // 프로필은 품질을 좀 더 높게
+      });
+
+      Alert.alert(
+        t('common.success'),
+        t('profile.editProfile.imageUploadSuccess'),
+      );
+    } catch (error) {
+      console.error('프로필 이미지 업로드 실패:', error);
+      Alert.alert(t('common.error'), t('profile.editProfile.imageUploadError'));
+      // 업로드 실패 시 로컬 이미지 상태 되돌리기
+      setLocalImageUri(null);
     }
   };
 
@@ -100,7 +287,9 @@ const ProfileEditScreen = () => {
           <View style={styles.avatarContainer}>
             <Image
               source={
-                profileMe?.profileImageUrl || myPageInfo?.profileImageUrl
+                localImageUri
+                  ? {uri: localImageUri}
+                  : profileMe?.profileImageUrl || myPageInfo?.profileImageUrl
                   ? {
                       uri:
                         profileMe?.profileImageUrl ||
@@ -111,8 +300,15 @@ const ProfileEditScreen = () => {
               style={styles.avatar}
               resizeMode="cover"
             />
-            <TouchableOpacity style={styles.cameraButton}>
-              <CameraIcon width={16} height={16} />
+            <TouchableOpacity
+              style={styles.cameraButton}
+              onPress={handleSelectProfileImage}
+              disabled={profileImageUpload.isPending}>
+              {profileImageUpload.isPending ? (
+                <ActivityIndicator size="small" color="#007AFF" />
+              ) : (
+                <CameraIcon width={16} height={16} />
+              )}
             </TouchableOpacity>
           </View>
           <Text style={styles.nickname}>
@@ -123,9 +319,9 @@ const ProfileEditScreen = () => {
         </View>
 
         {/* 한줄소개 섹션 */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
+        <View style={styles.descriptionCard}>
+          <View style={styles.descriptionCardHeader}>
+            <Text style={styles.descriptionCardTitle}>
               {t('profile.editProfile.introduction')}
             </Text>
             <TouchableOpacity
@@ -137,7 +333,7 @@ const ProfileEditScreen = () => {
 
           {isDescriptionEditing ? (
             <TextInput
-              style={styles.textInput}
+              style={styles.descriptionCardInput}
               value={description || myPageInfo?.description || ''}
               onChangeText={setDescription}
               placeholder={t('profile.editProfile.introductionPlaceholder')}
@@ -145,7 +341,7 @@ const ProfileEditScreen = () => {
               numberOfLines={3}
             />
           ) : (
-            <Text style={styles.descriptionText}>
+            <Text style={styles.descriptionCardContent}>
               {profileMe?.description ||
                 myPageInfo?.description ||
                 t('profile.editProfile.defaultIntroduction')}
@@ -202,7 +398,7 @@ const ProfileEditScreen = () => {
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>{t('settings.systemLanguage')}</Text>
             <View style={styles.infoRowRight}>
-              <Text style={styles.infoValue}>
+              <Text style={[styles.infoValue, {paddingLeft: 0}]}>
                 {LANGUAGE_NAMES[i18n.language as Language] ||
                   LANGUAGE_NAMES[Language.KOREAN]}
               </Text>
@@ -247,8 +443,10 @@ const ProfileEditScreen = () => {
       </ScrollView>
 
       {/* 언어 선택 모달 */}
-      <SelectModal
-        title={t('settings.systemLanguageSelect')}
+      <CenterModal
+        title={
+          t('settings.systemLanguageSelect') || '시스템 언어를 선택해 주세요.'
+        }
         options={languageOptions}
         isVisible={isLanguageModalVisible}
         onClose={() => setIsLanguageModalVisible(false)}

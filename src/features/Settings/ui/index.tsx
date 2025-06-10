@@ -10,14 +10,14 @@ import {Text} from '../../../shared/ui/typography/Text';
 import SettingsHeader from '../../../widgets/header/ui/SettingsHeader';
 import {useTranslation} from 'react-i18next';
 import {changeLanguage, Language, LANGUAGE_NAMES} from '@shared/lib/i18n';
-import {SelectModal, SelectOption} from '@shared/ui/SelectModal';
+import {CenterModal, CenterModalOption} from '@shared/ui/CenterModal';
 
 const SettingsScreen = () => {
   const {t, i18n} = useTranslation();
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
 
   // 언어 옵션 생성
-  const languageOptions: SelectOption[] = [
+  const languageOptions: CenterModalOption[] = [
     {
       label: LANGUAGE_NAMES[Language.KOREAN],
       value: Language.KOREAN,
@@ -29,7 +29,7 @@ const SettingsScreen = () => {
   ];
 
   // 언어 변경 핸들러
-  const handleLanguageChange = async (option: SelectOption) => {
+  const handleLanguageChange = async (option: CenterModalOption) => {
     try {
       const success = await changeLanguage(option.value as Language);
       if (success) {
@@ -38,20 +38,20 @@ const SettingsScreen = () => {
         // 예: Toast 메시지 표시, 앱 재시작 등
       }
     } catch (error) {
-      console.error('언어 변경 중 오류:', error);
+      console.error(t('settings.languageChangeError'), error);
     }
   };
 
   // 로그아웃 처리
   const handleLogout = () => {
-    Alert.alert('로그아웃', '정말 로그아웃하시겠습니까?', [
-      {text: '취소', style: 'cancel'},
+    Alert.alert(t('settings.logout'), t('settings.logoutConfirm'), [
+      {text: t('common.cancel'), style: 'cancel'},
       {
-        text: '로그아웃',
+        text: t('settings.logout'),
         style: 'destructive',
         onPress: () => {
           // TODO: 로그아웃 로직 구현
-          console.log('로그아웃 처리');
+          console.log(t('settings.logoutProcessing'));
         },
       },
     ]);
@@ -60,16 +60,16 @@ const SettingsScreen = () => {
   // 회원탈퇴 처리
   const handleWithdrawal = () => {
     Alert.alert(
-      '회원탈퇴',
-      '정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.',
+      t('settings.withdrawal'),
+      t('settings.withdrawalConfirm'),
       [
-        {text: '취소', style: 'cancel'},
+        {text: t('common.cancel'), style: 'cancel'},
         {
-          text: '탈퇴',
+          text: t('common.withdraw'),
           style: 'destructive',
           onPress: () => {
             // TODO: 회원탈퇴 로직 구현
-            console.log('회원탈퇴 처리');
+            console.log(t('settings.withdrawalProcessing'));
           },
         },
       ],
@@ -83,15 +83,15 @@ const SettingsScreen = () => {
       <ScrollView style={styles.content}>
         {/* 앱 설정 섹션 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings.appSettings')}</Text>
+          <Text variant="subtitle1" weight="semiBold" style={styles.sectionTitle}>{t('settings.appSettings')}</Text>
 
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => setIsLanguageModalVisible(true)}>
-            <Text style={styles.menuLabel}>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
               {t('settings.languageSettings')}
             </Text>
-            <Text style={styles.menuValue}>
+            <Text variant="body1" weight="regular" style={styles.menuValue}>
               {LANGUAGE_NAMES[i18n.language as Language] ||
                 LANGUAGE_NAMES[Language.KOREAN]}
             </Text>
@@ -100,78 +100,78 @@ const SettingsScreen = () => {
 
         {/* 이용 안내 섹션 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>이용 안내</Text>
+          <Text variant="subtitle1" weight="semiBold" style={styles.sectionTitle}>{t('settings.usageGuide')}</Text>
 
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuLabel}>앱 버전</Text>
-            <Text style={styles.menuValue}>1.0.0</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.appVersion')}</Text>
+            <Text variant="body1" weight="regular" style={styles.menuValue}>1.0.0</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
               // TODO: 문의하기 화면으로 이동
-              console.log('문의하기 클릭');
+              console.log(t('settings.inquiry') + ' 클릭');
             }}>
-            <Text style={styles.menuLabel}>문의하기</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.inquiry')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
               // TODO: 공지사항 화면으로 이동
-              console.log('공지사항 클릭');
+              console.log(t('settings.announcements') + ' 클릭');
             }}>
-            <Text style={styles.menuLabel}>공지사항</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.announcements')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
               // TODO: 서비스 이용약관 화면으로 이동
-              console.log('서비스 이용약관 클릭');
+              console.log(t('settings.termsOfService') + ' 클릭');
             }}>
-            <Text style={styles.menuLabel}>서비스 이용약관</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.termsOfService')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
               // TODO: 개인정보 처리방침 화면으로 이동
-              console.log('개인정보 처리방침 클릭');
+              console.log(t('settings.privacyPolicy') + ' 클릭');
             }}>
-            <Text style={styles.menuLabel}>개인정보 처리방침</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.privacyPolicy')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.menuItem, styles.lastMenuItem]}
             onPress={() => {
               // TODO: 오픈소스 라이선스 화면으로 이동
-              console.log('오픈소스 라이선스 클릭');
+              console.log(t('settings.openSourceLicense') + ' 클릭');
             }}>
-            <Text style={styles.menuLabel}>오픈소스 라이선스</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.openSourceLicense')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* 기타 섹션 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>기타</Text>
+          <Text variant="subtitle1" weight="semiBold" style={styles.sectionTitle}>{t('settings.others')}</Text>
 
           <TouchableOpacity style={styles.menuItem} onPress={handleWithdrawal}>
-            <Text style={styles.menuLabel}>회원탈퇴</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.withdrawal')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.menuItem, styles.lastMenuItem]}
             onPress={handleLogout}>
-            <Text style={styles.menuLabel}>로그아웃</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.logout')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
       {/* 언어 선택 모달 */}
-      <SelectModal
-        title={t('settings.languageSelect')}
+      <CenterModal
+        title={t('settings.languageSelect') || t('settings.systemLanguageSelectFallback')}
         options={languageOptions}
         isVisible={isLanguageModalVisible}
         onClose={() => setIsLanguageModalVisible(false)}
@@ -195,9 +195,6 @@ const styles = {
     marginTop: 40,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600' as const,
-    color: '#333333',
     marginBottom: 20,
   },
   menuItem: {
@@ -212,11 +209,9 @@ const styles = {
     borderBottomWidth: 0,
   },
   menuLabel: {
-    fontSize: 16,
     color: '#333333',
   },
   menuValue: {
-    fontSize: 16,
     color: '#666666',
   },
 };

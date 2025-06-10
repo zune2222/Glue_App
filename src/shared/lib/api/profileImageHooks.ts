@@ -21,15 +21,21 @@ export const useProfileImageUploadAndUpdate = () => {
     {
       imageUri: string;
       fileName?: string;
+      maxWidth?: number;
+      maxHeight?: number;
+      quality?: number;
     }
   >({
-    mutationFn: async ({imageUri, fileName}) => {
+    mutationFn: async ({imageUri, fileName, maxWidth, maxHeight, quality}) => {
       try {
         // 1. S3에 이미지 업로드
         const publicUrl = await imageUpload.mutateAsync({
           bucketObject: 'profile_images',
           imageUri: imageUri,
           fileName: fileName || `profile_${Date.now()}.jpg`,
+          maxWidth,
+          maxHeight,
+          quality,
         });
 
         // 2. 프로필 이미지 URL 업데이트

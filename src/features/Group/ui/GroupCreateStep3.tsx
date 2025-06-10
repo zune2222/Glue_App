@@ -33,7 +33,9 @@ const GroupCreateStep3 = () => {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
-  const [uploadingImages, setUploadingImages] = useState<{[key: number]: boolean}>({});
+  const [uploadingImages, setUploadingImages] = useState<{
+    [key: number]: boolean;
+  }>({});
 
   // 이미지 업로드 훅
   const {mutate: uploadImage} = useImageUpload();
@@ -125,7 +127,7 @@ const GroupCreateStep3 = () => {
           // 이미지를 로컬 배열에 추가
           const newImages = [...images, selectedImage.uri];
           setImages(newImages);
-          
+
           // 즉시 S3에 업로드 시작
           uploadImageToS3(selectedImage.uri, newImages.length - 1);
         }
@@ -135,7 +137,7 @@ const GroupCreateStep3 = () => {
 
   const uploadImageToS3 = async (imageUri: string, index: number) => {
     console.log(`[이미지 업로드 시작] 인덱스: ${index}, URI: ${imageUri}`);
-    
+
     // 업로드 시작 상태 설정
     setUploadingImages(prev => ({...prev, [index]: true}));
 
@@ -147,11 +149,16 @@ const GroupCreateStep3 = () => {
         bucketObject: 'post_images',
         imageUri: imageUri,
         fileName: fileName,
+        maxWidth: 1200, // 최대 가로 크기
+        maxHeight: 1200, // 최대 세로 크기
+        quality: 85, // 품질 (0-100, 높을수록 좋은 품질)
       },
       {
         onSuccess: (publicUrl: string) => {
-          console.log(`[이미지 업로드 성공] 인덱스: ${index}, 공개 URL: ${publicUrl}`);
-          
+          console.log(
+            `[이미지 업로드 성공] 인덱스: ${index}, 공개 URL: ${publicUrl}`,
+          );
+
           // 업로드된 URL을 배열에 추가
           setUploadedImageUrls(prev => {
             const newUrls = [...prev];
@@ -159,33 +166,33 @@ const GroupCreateStep3 = () => {
             console.log(`[업로드된 이미지 URLs 업데이트]`, newUrls);
             return newUrls;
           });
-          
+
           // 업로드 완료 상태 설정
           setUploadingImages(prev => {
             const newState = {...prev};
             delete newState[index];
             return newState;
           });
-          
+
           toastService.success(`이미지 ${index + 1}이 업로드되었습니다.`);
         },
         onError: (error: Error) => {
           console.error(`[이미지 업로드 실패] 인덱스: ${index}, 오류:`, error);
-          
+
           // 업로드 실패 시 이미지 제거
           setImages(prev => {
             const filtered = prev.filter((_, i) => i !== index);
             console.log(`[이미지 제거 후 남은 이미지들]`, filtered);
             return filtered;
           });
-          
+
           // 업로드 상태 제거
           setUploadingImages(prev => {
             const newState = {...prev};
             delete newState[index];
             return newState;
           });
-          
+
           toastService.error(
             '이미지 업로드 실패',
             error.message || '다시 시도해주세요.',
@@ -198,7 +205,7 @@ const GroupCreateStep3 = () => {
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
     setUploadedImageUrls(prev => prev.filter((_, i) => i !== index));
-    
+
     // 업로드 중인 상태도 제거
     setUploadingImages(prev => {
       const newState = {...prev};
@@ -273,7 +280,7 @@ const GroupCreateStep3 = () => {
                 </TouchableOpacity>
               </View>
             ))}
-            
+
             {/* 이미지 추가 버튼 (5장 미만일 때만 표시) */}
             {images.length < 5 && (
               <TouchableOpacity
@@ -281,9 +288,7 @@ const GroupCreateStep3 = () => {
                 onPress={handleAddImage}>
                 <View style={styles.addImageContent}>
                   <CameraIcon style={styles.cameraIcon} />
-                  <Text style={styles.addImageText}>
-                    {images.length}/5
-                  </Text>
+                  <Text style={styles.addImageText}>{images.length}/5</Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -295,11 +300,17 @@ const GroupCreateStep3 = () => {
         <TouchableOpacity
           style={[
             styles.nextButton,
-            title.trim() !== '' && content.trim() !== '' && Object.keys(uploadingImages).length === 0
+            title.trim() !== '' &&
+            content.trim() !== '' &&
+            Object.keys(uploadingImages).length === 0
               ? styles.activeButton
               : styles.inactiveButton,
           ]}
-          disabled={title.trim() === '' || content.trim() === '' || Object.keys(uploadingImages).length > 0}
+          disabled={
+            title.trim() === '' ||
+            content.trim() === '' ||
+            Object.keys(uploadingImages).length > 0
+          }
           onPress={handleNext}>
           <Text style={styles.nextButtonText}>{t('common.next')}</Text>
         </TouchableOpacity>
