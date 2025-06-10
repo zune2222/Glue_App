@@ -228,7 +228,23 @@ const ProfileEditScreen = () => {
   // 프로필 이미지 업로드
   const uploadProfileImage = async (imageUri: string) => {
     try {
-      const fileName = `profile_${Date.now()}.jpg`;
+      console.log('🔥🔥🔥 [프로필 이미지 업로드 시작] 🔥🔥🔥');
+      console.log('📱 원본 이미지 URI:', imageUri);
+      console.log('🎯 리사이저 설정:', {
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 90,
+        적용상태: 'ENABLED',
+      });
+
+      // URL 안전한 파일명 생성 (한글, 특수문자 제거)
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const fileName = `profile_${timestamp}_${randomId}.jpg`;
+
+      console.log('🔧 URL 안전 파일명:', fileName);
+      console.log('⏳ profileImageUpload.mutateAsync 호출 중...');
+
       await profileImageUpload.mutateAsync({
         imageUri,
         fileName,
@@ -237,12 +253,14 @@ const ProfileEditScreen = () => {
         quality: 90, // 프로필은 품질을 좀 더 높게
       });
 
+      console.log('✅✅✅ [프로필 이미지 업로드 완료] ✅✅✅');
+
       Alert.alert(
         t('common.success'),
         t('profile.editProfile.imageUploadSuccess'),
       );
     } catch (error) {
-      console.error('프로필 이미지 업로드 실패:', error);
+      console.error('💥💥💥 [프로필 이미지 업로드 실패] 💥💥💥', error);
       Alert.alert(t('common.error'), t('profile.editProfile.imageUploadError'));
       // 업로드 실패 시 로컬 이미지 상태 되돌리기
       setLocalImageUri(null);

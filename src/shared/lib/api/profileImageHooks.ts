@@ -28,11 +28,21 @@ export const useProfileImageUploadAndUpdate = () => {
   >({
     mutationFn: async ({imageUri, fileName, maxWidth, maxHeight, quality}) => {
       try {
+        // URL 안전한 파일명 생성 (한글, 특수문자 제거)
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 8);
+        const safeFileName = `profile_${timestamp}_${randomId}.jpg`;
+
+        console.log('🔧 URL 안전 파일명 생성:', {
+          original: fileName,
+          safe: safeFileName,
+        });
+
         // 1. S3에 이미지 업로드
         const publicUrl = await imageUpload.mutateAsync({
           bucketObject: 'profile_images',
           imageUri: imageUri,
-          fileName: fileName || `profile_${Date.now()}.jpg`,
+          fileName: safeFileName, // 안전한 파일명 사용
           maxWidth,
           maxHeight,
           quality,

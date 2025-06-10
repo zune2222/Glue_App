@@ -6,7 +6,14 @@ import {
   validateUploadedImage,
 } from './upload';
 import type {PresignedUrlRequest, PresignedUrlResponse} from './upload';
-import ImageResizer from '@bam.tech/react-native-image-resizer';
+
+let ImageResizer: any = null;
+try {
+  ImageResizer = require('@bam.tech/react-native-image-resizer').default;
+  console.log('✅ ImageResizer imported successfully');
+} catch (error) {
+  console.error('❌ ImageResizer import failed:', error);
+}
 
 // Presigned URL 요청 훅
 export const usePresignedUrl = () => {
@@ -66,14 +73,30 @@ export const useImageUpload = () => {
           bucketObject,
           imageUri,
           fileName,
-        });
-
-        // 1단계: 이미지 리사이징 및 압축
-        console.log('🔄 이미지 리사이징 시작...', {
           maxWidth,
           maxHeight,
           quality,
         });
+
+        // ImageResizer 사용 가능 여부 확인
+        if (!ImageResizer) {
+          console.warn('⚠️ ImageResizer not available, proceeding without resizing');
+          // 리사이저가 없으면 원본 이미지 사용
+          const response = await fetch(imageUri);
+
+          if (!response.ok) {
+            throw new Error(`이미지를 읽을 수 없습니다: ${response.status} ${response.statusText}`);
+          }
+
+          const blob = await response.blob();
+          const finalFileName = fileName || `image_${Date.now()}.jpg`;
+
+          return await uploadFile(bucketObject, blob, finalFileName);
+        }
+
+        // 1단계: 이미지 리사이징 및 압축
+        console.log('🔄 이미지 리사이징 시작...', {maxWidth, maxHeight, quality});
+
         const resizedImage = await ImageResizer.createResizedImage(
           imageUri,
           maxWidth,
@@ -92,9 +115,7 @@ export const useImageUpload = () => {
         console.log('✅ 이미지 리사이징 완료:', {
           originalUri: imageUri,
           resizedUri: resizedImage.uri,
-          originalSize: resizedImage.size
-            ? `${(resizedImage.size / 1024 / 1024).toFixed(2)}MB`
-            : 'unknown',
+          originalSize: resizedImage.size ? `${(resizedImage.size / 1024 / 1024).toFixed(2)}MB` : 'unknown',
           width: resizedImage.width,
           height: resizedImage.height,
         });
@@ -104,14 +125,8 @@ export const useImageUpload = () => {
         const response = await fetch(resizedImage.uri);
 
         if (!response.ok) {
-          console.error(
-            '❌ fetch 응답 실패:',
-            response.status,
-            response.statusText,
-          );
-          throw new Error(
-            `이미지를 읽을 수 없습니다: ${response.status} ${response.statusText}`,
-          );
+          console.error('❌ fetch 응답 실패:', response.status, response.statusText);
+          throw new Error(`이미지를 읽을 수 없습니다: ${response.status} ${response.statusText}`);
         }
 
         const blob = await response.blob();
@@ -143,9 +158,7 @@ export const useImageUpload = () => {
 
         if (!isValid) {
           console.error('❌ 업로드된 이미지가 손상되었거나 접근할 수 없습니다');
-          throw new Error(
-            '업로드된 이미지를 확인할 수 없습니다. 다시 시도해주세요.',
-          );
+          throw new Error('업로드된 이미지를 확인할 수 없습니다. 다시 시도해주세요.');
         }
 
         console.log('✅ 이미지 검증 완료!');
@@ -154,13 +167,9 @@ export const useImageUpload = () => {
       } catch (error) {
         console.error('💥 이미지 업로드 실패:', error);
 
-        // ImageResizer 관련 에러 처리
+        // 기본 에러 처리
         if (error instanceof Error) {
-          if (error.message.includes('Image resizer')) {
-            throw new Error(
-              '이미지 처리 중 오류가 발생했습니다. 다른 이미지를 시도해주세요.',
-            );
-          } else if (error.message.includes('Network request failed')) {
+          if (error.message.includes('Network request failed')) {
             throw new Error('네트워크 연결을 확인해주세요.');
           } else if (error.message.includes('fetch')) {
             throw new Error('이미지 파일을 읽는 중 오류가 발생했습니다.');

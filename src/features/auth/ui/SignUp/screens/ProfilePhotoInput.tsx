@@ -69,18 +69,20 @@ const ProfilePhotoInput = ({
       let permission: Permission;
 
       if (type === 'camera') {
-        permission = Platform.OS === 'ios' 
-          ? PERMISSIONS.IOS.CAMERA 
-          : PERMISSIONS.ANDROID.CAMERA;
+        permission =
+          Platform.OS === 'ios'
+            ? PERMISSIONS.IOS.CAMERA
+            : PERMISSIONS.ANDROID.CAMERA;
       } else {
         // 갤러리 권한 설정
         if (Platform.OS === 'ios') {
           permission = PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY;
         } else {
           // Android 13 이상에서는 READ_MEDIA_IMAGES, 이하에서는 READ_EXTERNAL_STORAGE
-          permission = Number(Platform.Version) >= 33 
-            ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES 
-            : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+          permission =
+            Number(Platform.Version) >= 33
+              ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
+              : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
         }
       }
 
@@ -187,7 +189,11 @@ const ProfilePhotoInput = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text variant="h2" color={colors.richBlack} style={styles.title}>
+        <Text
+          variant="h2"
+          weight="semiBold"
+          color={colors.richBlack}
+          style={styles.title}>
           {t('signup.profilePhoto.title')}
         </Text>
         <Text variant="body2" color={colors.charcoal} style={styles.subtitle}>

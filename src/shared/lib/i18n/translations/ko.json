@@ -146,8 +146,8 @@
       "placeholder": "나를 한 줄로 표현해보세요"
     },
     "nativeLanguage": {
-      "title": "모국어를 선택해주세요",
-      "subtitle": "이 중 모국어가 없는 경우, 가장 친숙한 언어를 선택해 주세요.",
+      "title": "주로 사용하는 언어를\n선택해주세요",
+      "subtitle": "평소에 많이 사용하고 가장 친숙한 언어를 선택해 주세요.",
       "korean": "한국어",
       "english": "영어",
       "japanese": "일본어",
@@ -157,7 +157,7 @@
       "spanish": "스페인어"
     },
     "languageLevel": {
-      "title": "선택한 모국어에 대한\n언어 수준을 설정해 주세요",
+      "title": "선택한 사용 언어에 대한\n언어 수준을 설정해 주세요",
       "subtitle": "교환 언어 수준은 언제든지 다시 설정할 수 있어요.",
       "beginner": "초급",
       "elementary": "기초",
@@ -167,7 +167,7 @@
     },
     "exchangeLanguage": {
       "title": "교환하고 싶은 언어를\n선택해주세요",
-      "subtitle": "교환하고 싶은 언어를 선택해주세요.",
+      "subtitle": "교환 언어는 언제든지 다시 설정할 수 있어요.",
       "korean": "한국어",
       "english": "영어",
       "japanese": "일본어",

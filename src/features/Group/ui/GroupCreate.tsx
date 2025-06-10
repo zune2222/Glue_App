@@ -16,12 +16,13 @@ import {
 } from '../../../shared/assets/images';
 import {colors} from '../../../app/styles/colors';
 import {Text} from '../../../shared/ui/typography/Text';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const GroupCreate = () => {
   const navigation = useNavigation<any>();
   const {t} = useTranslation();
   const [selectedType, setSelectedType] = useState<string | null>(null);
-
+  const insets = useSafeAreaInsets();
   const handleNext = () => {
     if (selectedType) {
       // 다음 페이지(Step2)로 이동
@@ -107,7 +108,7 @@ const GroupCreate = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      <View style={styles.bottomContainer}>
+      <View style={[styles.bottomContainer, {paddingBottom: insets.bottom}]}>
         <TouchableOpacity
           style={[styles.nextButton, selectedType ? styles.activeButton : null]}
           disabled={!selectedType}

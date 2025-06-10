@@ -141,7 +141,11 @@ const GroupCreateStep3 = () => {
     // 업로드 시작 상태 설정
     setUploadingImages(prev => ({...prev, [index]: true}));
 
-    const fileName = `post_image_${Date.now()}_${index}.jpg`;
+    // URL 안전한 파일명 생성 (한글, 특수문자 제거)
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(2, 8);
+    const fileName = `post_${timestamp}_${index}_${randomId}.jpg`;
+
     console.log(`[이미지 업로드] 파일명: ${fileName}, 버킷: post_images`);
 
     uploadImage(
