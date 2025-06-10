@@ -8,6 +8,7 @@ export {PrivacySettingsScreen} from './ui/PrivacySettingsScreen';
 export {MyProfileDetailScreen} from './ui/MyProfileDetailScreen';
 export {GroupHistoryScreen} from './ui/GroupHistoryScreen';
 export {LikedGroupsScreen} from './ui/LikedGroupsScreen';
+export {MyParticipatingMeetingsScreen} from './ui/MyParticipatingMeetingsScreen';
 export {default as UserProfileDetail} from './ui/UserProfileDetail';
 export {default as GuestbookScreen} from './ui/GuestbookScreen';
 export {default as DescriptionEditScreen} from './ui/DescriptionEditScreen';

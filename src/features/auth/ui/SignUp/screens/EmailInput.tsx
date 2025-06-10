@@ -5,7 +5,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
 } from 'react-native';
 import {colors} from '@app/styles/colors';
 import {useTranslation} from 'react-i18next';
@@ -27,15 +26,9 @@ const EmailInput = ({
   const [errorMessage, setErrorMessage] = useState('');
   const {t} = useTranslation();
 
-  // 이메일 유효성 검사 - @pusan.ac.kr 도메인만 허용 (개발 모드에서는 test@test.com도 허용)
+  // 이메일 유효성 검사 - @pusan.ac.kr 도메인만 허용
   const isValidEmail = (email: string) => {
     const pusanEmailRegex = /^[^\s@]+@pusan\.ac\.kr$/;
-    const devTestEmail = /^test@test\.com$/;
-
-    // 개발 모드에서는 test@test.com도 허용
-    if (__DEV__ && devTestEmail.test(email)) {
-      return true;
-    }
 
     return pusanEmailRegex.test(email);
   };
@@ -109,17 +102,6 @@ const EmailInput = ({
           </Text>
         )}
       </View>
-
-      {/* 개발 모드에서만 보이는 빠른 테스트 버튼 */}
-      {__DEV__ && (
-        <TouchableOpacity
-          style={styles.devButton}
-          onPress={() => handleEmailChange('test@test.com')}>
-          <Text variant="button" color={colors.batteryChargedBlue}>
-            [DEV] 테스트 이메일 자동 입력
-          </Text>
-        </TouchableOpacity>
-      )}
     </KeyboardAvoidingView>
   );
 };
@@ -165,15 +147,6 @@ const styles = StyleSheet.create({
   errorText: {
     textAlign: 'left',
     fontSize: 12,
-  },
-  devButton: {
-    backgroundColor: colors.antiFlashWhite,
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: colors.batteryChargedBlue,
   },
 });
 

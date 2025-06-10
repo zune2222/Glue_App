@@ -168,17 +168,6 @@ const SignUpScreen = ({navigation, route}: SignUpScreenProps) => {
 
     // 이메일 화면에서 다음 버튼 클릭 시 인증 코드 발송
     if (step === 11) {
-      // 개발 모드에서 test@test.com이면 인증 건너뛰기
-      if (__DEV__ && email === 'test@test.com') {
-        Toast.show({
-          type: 'success',
-          text1: '[DEV] 인증이 건너뛰어졌습니다',
-          position: 'bottom',
-        });
-        setStep(step + 1);
-        return;
-      }
-
       try {
         // 인증 코드 발송 중 알림
         Toast.show({

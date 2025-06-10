@@ -21,7 +21,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({title: _title}) => {
         <View style={styles.placeholder} />
         <View style={styles.actions}>
           <TouchableOpacity
-            onPress={() => navigation.navigate('NotificationsPanel')}
+            onPress={() => navigation.navigate('NotificationsScreen')}
             style={styles.iconButton}
             hitSlop={touchHitSlop}>
             <BellIcon width={24} height={24} />

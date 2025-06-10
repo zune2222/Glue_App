@@ -31,6 +31,7 @@ import {
   MyProfileDetailScreen,
   GroupHistoryScreen,
   LikedGroupsScreen,
+  MyParticipatingMeetingsScreen,
   UserProfileDetail,
   GuestbookScreen,
   DescriptionEditScreen,
@@ -204,8 +205,10 @@ const renderProfileIcon = ({color}: {color: string}) => (
 const ProfileDetailHeader = () => <BackButtonHeader title="내 프로필 상세" />;
 const GroupHistoryHeader = () => <BackButtonHeader title="모임 히스토리" />;
 const LikedGroupsHeader = () => <BackButtonHeader title="좋아요 목록" />;
+const MyParticipatingMeetingsHeader = () => <BackButtonHeader title="내가 참여 중인 모임" />;
 const PrivacySettingsHeader = () => <BackButtonHeader title="공개범위 설정" />;
 const GuestbookHeader = () => <BackButtonHeader title="방명록" />;
+const NotificationsHeader = () => <BackButtonHeader title="알림" />;
 
 // 커스텀 헤더 랜더러
 const ProfileNavigator = () => (
@@ -295,6 +298,10 @@ const MainNavigator = () => (
     <MainStack.Screen
       name="NotificationsScreen"
       component={NotificationsScreen}
+      options={{
+        headerShown: true,
+        header: NotificationsHeader,
+      }}
     />
     <MainStack.Screen
       name="ProfileEdit"
@@ -339,6 +346,14 @@ const MainNavigator = () => (
       options={{
         headerShown: true,
         header: LikedGroupsHeader,
+      }}
+    />
+    <MainStack.Screen
+      name="MyParticipatingMeetings"
+      component={MyParticipatingMeetingsScreen}
+      options={{
+        headerShown: true,
+        header: MyParticipatingMeetingsHeader,
       }}
     />
     <MainStack.Screen

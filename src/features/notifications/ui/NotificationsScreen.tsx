@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Text,
 } from 'react-native';
-import {Header, TabBar, NotificationItem} from './components';
+import {TabBar, NotificationItem} from './components';
 import {NotificationIconType} from './components/NotificationItem';
 import {useNewsNotifications, useNoticeNotifications} from '../api/hooks';
 
@@ -142,7 +142,6 @@ const NotificationsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
       <TabBar activeTab={activeTab} onTabChange={handleTabChange} />
       <ScrollView style={styles.scrollView}>
         <View style={styles.notificationsContainer}>

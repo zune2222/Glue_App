@@ -316,7 +316,7 @@ export const MyPageScreen = () => {
             />
             <MyInfoItem
               label={t('profile.myParticipatingGroups')}
-              onPress={() => navigation.navigate('LikedGroups')}
+              onPress={() => navigation.navigate('MyParticipatingMeetings')}
             />
             <MyInfoItem
               label={t('profile.myLikes')}

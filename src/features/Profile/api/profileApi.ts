@@ -119,6 +119,93 @@ export interface VisibilityUpdateResponse {
   result: {};
 }
 
+// 좋아요 목록 조회 API 응답 타입
+export interface LikesResponse {
+  httpStatus: {
+    error: boolean;
+    is4xxClientError: boolean;
+    is5xxServerError: boolean;
+    is1xxInformational: boolean;
+    is2xxSuccessful: boolean;
+    is3xxRedirection: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: {
+    posts: Array<{
+      postId: number;
+      viewCount: number;
+      categoryId: number;
+      title: string;
+      content: string;
+      likeCount: number;
+      currentParticipants: number;
+      maxParticipants: number;
+      createdAt: string;
+      thumbnailUrl: string;
+    }>;
+  };
+}
+
+// 모임 히스토리 조회 API 응답 타입
+export interface MeetingsHistoryResponse {
+  httpStatus: {
+    error: boolean;
+    is4xxClientError: boolean;
+    is5xxServerError: boolean;
+    is1xxInformational: boolean;
+    is2xxSuccessful: boolean;
+    is3xxRedirection: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: {
+    hostedMeetings: Array<{
+      postId: number;
+      meetingThumbnail: string;
+      meetingTitle: string;
+      categoryId: number;
+    }>;
+    joinedMeetings: Array<{
+      postId: number;
+      meetingThumbnail: string;
+      meetingTitle: string;
+      categoryId: number;
+    }>;
+  };
+}
+
+// 내가 참여 중인 모임 조회 API 응답 타입
+export interface MyMeetingsResponse {
+  httpStatus: {
+    error: boolean;
+    is3xxRedirection: boolean;
+    is4xxClientError: boolean;
+    is5xxServerError: boolean;
+    is2xxSuccessful: boolean;
+    is1xxInformational: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: {
+    hostedMeetings: Array<{
+      meetingId: number;
+      meetingTitle: string;
+      meetingImageUrl: string;
+      currentParticipants: number;
+    }>;
+    joinedMeetings: Array<{
+      meetingId: number;
+      meetingTitle: string;
+      meetingImageUrl: string;
+      currentParticipants: number;
+    }>;
+  };
+}
+
 // Axios 인스턴스 생성
 const profileApi = axios.create({
   baseURL: config.API_URL,
@@ -474,6 +561,125 @@ export const updateGuestbookVisibility = async (
 
       const errorMessage =
         error.response.data?.message || '방명록 공개 설정에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 좋아요 목록 조회 API
+export const getUserLikes = async (
+  targetUserId: number,
+): Promise<LikesResponse['result']> => {
+  try {
+    const response = await profileApi.get<LikesResponse>(
+      `/api/users/likes?targetUserId=${targetUserId}`,
+    );
+
+    if (response.data.isSuccess) {
+      return response.data.result;
+    } else {
+      throw new Error(
+        response.data.message || '좋아요 목록을 가져오는데 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 404) {
+        throw new Error('좋아요 목록을 찾을 수 없습니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message ||
+        '좋아요 목록을 가져오는데 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 모임 히스토리 조회 API
+export const getMeetingsHistory = async (
+  targetUserId: number,
+): Promise<MeetingsHistoryResponse['result']> => {
+  try {
+    const response = await profileApi.get<MeetingsHistoryResponse>(
+      `/api/users/meetings-history?targetUserId=${targetUserId}`,
+    );
+
+    if (response.data.isSuccess) {
+      return response.data.result;
+    } else {
+      throw new Error(
+        response.data.message || '모임 히스토리를 가져오는데 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 404) {
+        throw new Error('모임 히스토리를 찾을 수 없습니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message ||
+        '모임 히스토리를 가져오는데 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
+// 내가 참여 중인 모임 조회 API
+export const getMyMeetings = async (): Promise<MyMeetingsResponse['result']> => {
+  try {
+    const response = await profileApi.get<MyMeetingsResponse>('/api/meetings/my');
+
+    if (response.data.isSuccess) {
+      return response.data.result;
+    } else {
+      throw new Error(
+        response.data.message || '참여 중인 모임을 가져오는데 실패했습니다.',
+      );
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 404) {
+        throw new Error('참여 중인 모임을 찾을 수 없습니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message ||
+        '참여 중인 모임을 가져오는데 실패했습니다.';
       throw new Error(errorMessage);
     }
 
