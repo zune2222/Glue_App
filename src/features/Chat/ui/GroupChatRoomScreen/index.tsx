@@ -11,7 +11,9 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   PanResponder,
+  AppState,
 } from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
 import {useQueryClient} from '@tanstack/react-query';
 import {styles} from './styles';
 import {
@@ -52,7 +54,7 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
   const queryClient = useQueryClient();
   const scrollViewRef = useRef<FlatList<GroupMessageResponse>>(null);
 
-  const [_stickyDate, setStickyDate] = useState<string>('');
+  const [_stickyDate, _setStickyDate] = useState<string>('');
 
   // 채팅방 정보 모달 관련 상태
   const [showRoomInfo, setShowRoomInfo] = useState(false);
@@ -78,6 +80,7 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch: refetchMessages,
   } = useGroupMessages(groupChatroomId || -1);
 
   // 메시지 전송 뮤테이션 훅
@@ -88,6 +91,7 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
     data: groupChatRoomDetail,
     isError: isGroupDetailError,
     error: groupDetailError,
+    refetch: refetchGroupDetail,
   } = useGroupChatRoomDetail(groupChatroomId || -1);
 
   // 알림 토글 뮤테이션 훅
@@ -95,6 +99,10 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
 
   // 채팅방 나가기 뮤테이션 훅
   const leaveChatRoomMutation = useLeaveGroupChatRoom();
+
+  // 메시지 캐싱을 위한 상태
+  const [messageCache, setMessageCache] = useState<Set<number>>(new Set());
+  const [_pendingMessages, setPendingMessages] = useState<Set<string>>(new Set());
 
   // WebSocket 메시지 리스너 설정 - React Query 캐시에 직접 추가
   useEffect(() => {
@@ -108,10 +116,26 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
 
       // 현재 채팅방의 메시지만 처리
       if (groupMessage.groupChatroomId === groupChatroomId) {
-        // 내가 보낸 메시지는 낙관적 업데이트로 이미 추가되었으므로 WebSocket으로 받은 것은 무시
-        if (groupMessage.sender?.userId === currentUserId) {
+        // 메시지 ID가 없으면 무시
+        if (!groupMessage.groupMessageId) {
+          console.warn('[GroupChatRoomScreen] 메시지 ID가 없는 메시지 무시:', groupMessage);
           return;
         }
+
+        // 이미 캐시된 메시지인지 확인
+        if (messageCache.has(groupMessage.groupMessageId)) {
+          console.log('[GroupChatRoomScreen] 이미 캐시된 메시지 무시:', groupMessage.groupMessageId);
+          return;
+        }
+
+        // 내가 보낸 메시지는 낙관적 업데이트로 이미 추가되었으므로 WebSocket으로 받은 것은 무시
+        if (groupMessage.sender?.userId === currentUserId) {
+          console.log('[GroupChatRoomScreen] 내가 보낸 메시지 WebSocket 응답 무시:', groupMessage.groupMessageId);
+          return;
+        }
+
+        // 메시지 캐시에 추가
+        setMessageCache(prev => new Set([...prev, groupMessage.groupMessageId!]));
 
         const queryKey = ['groupMessages', groupChatroomId.toString()];
 
@@ -121,7 +145,7 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
 
           const newPages = [...old.pages];
           if (newPages.length > 0) {
-            // 중복 체크
+            // 중복 체크 (추가 안전장치)
             const firstPageData = newPages[0].data || [];
             const exists = firstPageData.find(
               (msg: GroupMessageResponse) =>
@@ -134,6 +158,7 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
                 ...newPages[0],
                 data: [groupMessage, ...firstPageData],
               };
+              console.log('[GroupChatRoomScreen] 새 메시지 캐시에 추가:', groupMessage.groupMessageId);
             }
           }
 
@@ -161,7 +186,7 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
       webSocketService.setGroupMessageListener(null);
       webSocketService.unsubscribeFromGroupChatRoom(groupChatroomId);
     };
-  }, [groupChatroomId, queryClient, currentUserId]);
+  }, [groupChatroomId, queryClient, currentUserId, messageCache]);
 
   // 날짜 포맷팅 함수를 먼저 선언
   const formatDateForDivider = useCallback((dateString: string) => {
@@ -222,10 +247,16 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
     // 모든 페이지의 메시지를 하나의 배열로 합치기
     const combined = messagesData.pages.flatMap(page => page.data || []);
 
-    // 중복 제거
+    // 중복 제거 (더 엄격하게)
     const uniqueMessages = combined.filter(
-      (message, index, array) =>
-        array.findIndex(m => m.groupMessageId === message.groupMessageId) === index,
+      (message, index, array) => {
+        // 메시지 ID가 없는 경우 제외
+        if (!message.groupMessageId) return false;
+        
+        // 동일한 메시지 ID의 첫 번째 인스턴스만 유지
+        const firstIndex = array.findIndex(m => m.groupMessageId === message.groupMessageId);
+        return firstIndex === index;
+      }
     );
 
     // 시간순으로 정렬 후 역순으로 배치 (inverted FlatList용)
@@ -234,6 +265,21 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }, [messagesData]);
+
+  // 메시지 데이터가 변경될 때마다 캐시 업데이트
+  useEffect(() => {
+    const currentMessageIds = messages
+      .map(msg => msg.groupMessageId)
+      .filter((id): id is number => id !== undefined);
+    
+    if (currentMessageIds.length > 0) {
+      setMessageCache(prev => {
+        const newCache = new Set(prev);
+        currentMessageIds.forEach(id => newCache.add(id));
+        return newCache;
+      });
+    }
+  }, [messages]);
 
   // 현재 사용자 ID 설정
   useEffect(() => {
@@ -251,6 +297,35 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
     initCurrentUser();
   }, []);
 
+  // 화면 포커스 시 데이터 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      if (groupChatroomId) {
+        console.log('[GroupChatRoomScreen] 화면 포커스 - 데이터 새로고침');
+        // 메시지 목록과 채팅방 상세 정보 새로고침
+        refetchMessages();
+        refetchGroupDetail();
+      }
+    }, [groupChatroomId, refetchMessages, refetchGroupDetail]),
+  );
+
+  // 앱 상태 변화 감지 (백그라운드에서 포그라운드로 돌아올 때)
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'active' && groupChatroomId) {
+        console.log('[GroupChatRoomScreen] 앱 활성화 - 데이터 새로고침');
+        refetchMessages();
+        refetchGroupDetail();
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    
+    return () => {
+      subscription?.remove();
+    };
+  }, [groupChatroomId, refetchMessages, refetchGroupDetail]);
+
   // 메시지 전송 핸들러 - React Query 뮤테이션 사용 (이미 낙관적 업데이트 구현됨)
   const handleSendMessage = useCallback(
     async (text: string) => {
@@ -260,13 +335,44 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
       }
 
       try {
+        // 중복 방지를 위한 임시 메시지 ID 생성
+        const tempMessageId = `temp_${currentUserId}_${Date.now()}_${Math.random()}`;
+        
+        // 전송 중인 메시지로 마킹
+        setPendingMessages(prev => new Set([...prev, tempMessageId]));
+        
+        console.log('[GroupChatRoomScreen] 메시지 전송 시작:', tempMessageId);
+
         // useSendGroupMessage 훅이 이미 낙관적 업데이트를 처리함
-        await sendGroupMessageMutation.mutateAsync({
+        const result = await sendGroupMessageMutation.mutateAsync({
           groupChatroomId,
           content: text,
         });
+
+        // 성공 후 전송 완료 처리
+        setPendingMessages(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(tempMessageId);
+          return newSet;
+        });
+
+        // 실제 메시지 ID를 캐시에 추가 (중복 방지)
+        if (result?.data?.groupMessageId) {
+          setMessageCache(prev => new Set([...prev, result.data.groupMessageId]));
+          console.log('[GroupChatRoomScreen] 전송된 메시지 캐시에 추가:', result.data.groupMessageId);
+        }
+
       } catch (error: any) {
         console.error('메시지 전송 실패:', error);
+        
+        // 실패 시 전송 중 상태 제거
+        const tempMessageId = `temp_${currentUserId}_${Date.now()}`;
+        setPendingMessages(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(tempMessageId);
+          return newSet;
+        });
+        
         toastService.error('전송 실패', '메시지 전송에 실패했습니다.');
       }
     },
@@ -386,9 +492,25 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
   // 이전 메시지 로드 핸들러 - 맨 아래 도달시 호출
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
+      console.log('[GroupChatRoomScreen] 이전 메시지 로드');
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // 수동 새로고침 핸들러 (pull to refresh)
+  const handleRefresh = useCallback(async () => {
+    if (!groupChatroomId) return;
+    
+    console.log('[GroupChatRoomScreen] 수동 새로고침');
+    try {
+      await Promise.all([
+        refetchMessages(),
+        refetchGroupDetail(),
+      ]);
+    } catch (error) {
+      console.error('[GroupChatRoomScreen] 새로고침 실패:', error);
+    }
+  }, [groupChatroomId, refetchMessages, refetchGroupDetail]);
 
 
   // 메시지 렌더링 함수
@@ -397,6 +519,12 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
       // message 안전성 검사
       if (!message) {
         console.warn('Invalid message:', message);
+        return null;
+      }
+
+      // 메시지 ID 검사
+      if (!message.groupMessageId) {
+        console.warn('Message without ID:', message);
         return null;
       }
 
@@ -410,7 +538,7 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
       // 일반 텍스트 메시지 렌더링
       return (
         <ChatMessage
-          id={message.groupMessageId?.toString() || ''}
+          id={message.groupMessageId.toString()}
           text={message.message || ''}
           timestamp={
             message.createdAt
@@ -505,7 +633,7 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
           keyExtractor={(item: GroupMessageResponse, index: number) => {
             return (
               item.groupMessageId?.toString() ||
-              `msg-${item.sender?.userId}-${index}-${item.createdAt}`
+              `msg-${item.sender?.userId}-${index}-${item.createdAt || Date.now()}`
             );
           }}
           renderItem={renderMessage}
@@ -519,6 +647,8 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
           updateCellsBatchingPeriod={100}
           initialNumToRender={20}
           ListFooterComponent={renderFooter}
+          refreshing={isMessagesLoading && messages.length > 0}
+          onRefresh={handleRefresh}
         />
 
         <ChatInput onSend={handleSendMessage} />

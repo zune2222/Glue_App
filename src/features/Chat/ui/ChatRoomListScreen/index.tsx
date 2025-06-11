@@ -22,6 +22,7 @@ import {
 } from '../../api/hooks';
 import {DmChatRoom, GroupChatRoom} from '../../api/api';
 import {toastService} from '@shared/lib/notifications/toast';
+import {secureStorage} from '@shared/lib/security';
 
 interface ChatRoomListScreenProps {
   chatRooms: ChatRoom[]; // 이제 사용하지 않지만 하위 호환성을 위해 유지
@@ -44,6 +45,7 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
   const [directMessages, setDirectMessages] = useState<DmChatRoom[]>([]);
   const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoom[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   // 호스트 DM 채팅방 목록 조회 훅
   const {
@@ -81,6 +83,21 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
 
   // 새로고침 상태
   const [refreshing, setRefreshing] = useState(false);
+
+  // 현재 사용자 ID 초기화
+  useEffect(() => {
+    const initCurrentUser = async () => {
+      try {
+        const userId = await secureStorage.getUserId();
+        setCurrentUserId(userId);
+        console.log('[ChatRoomListScreen] 현재 사용자 ID:', userId);
+      } catch (error) {
+        console.error('[ChatRoomListScreen] 현재 사용자 ID 가져오기 실패:', error);
+      }
+    };
+
+    initCurrentUser();
+  }, []);
 
   // 새로고침 핸들러
   const onRefresh = useCallback(async () => {
@@ -303,6 +320,41 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
     return lastMessage;
   };
 
+  // 읽지 않음 표시 여부를 결정하는 함수
+  const shouldShowUnreadIndicator = (room: DmChatRoom | GroupChatRoom) => {
+    // hasUnreadMessages가 false면 표시하지 않음
+    if (!room.hasUnreadMessages) {
+      return false;
+    }
+
+    // 현재 사용자 ID가 없으면 API 응답 그대로 사용
+    if (!currentUserId) {
+      return room.hasUnreadMessages;
+    }
+
+    // 마지막 메시지가 없으면 표시하지 않음
+    if (!room.lastMessage) {
+      return false;
+    }
+
+    // DM 채팅방의 경우: 내가 호스트이고 마지막 메시지 시간이 있으면
+    // 내가 보낸 메시지일 가능성이 높으므로 표시하지 않음
+    if ('otherUser' in room) {
+      // 마지막 메시지가 초대장인 경우는 시스템 메시지이므로 표시
+      if (room.lastMessage?.startsWith('[INVITATION]')) {
+        return room.hasUnreadMessages;
+      }
+      
+      // 다른 로직으로 판단하기 어려우므로 일단 API 응답 그대로 사용
+      // TODO: API에서 lastMessageSenderId 제공 시 정확한 판단 가능
+      return room.hasUnreadMessages;
+    }
+
+    // 그룹 채팅방의 경우: API 응답 그대로 사용
+    // TODO: API에서 lastMessageSenderId 제공 시 정확한 판단 가능
+    return room.hasUnreadMessages;
+  };
+
   // DM 채팅방 아이템 렌더링
   const renderDmChatRoomItem = (room: DmChatRoom) => {
     return (
@@ -338,7 +390,7 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
           <Text style={styles.messageTime}>
             {formatSafeTime(room.lastMessageTime)}
           </Text>
-          {room.hasUnreadMessages && <View style={styles.unreadIndicator} />}
+          {shouldShowUnreadIndicator(room) && <View style={styles.unreadIndicator} />}
         </View>
       </TouchableOpacity>
     );
@@ -378,7 +430,7 @@ const ChatRoomListScreen: React.FC<ChatRoomListScreenProps> = ({
           <Text style={styles.messageTime}>
             {formatSafeTime(room.lastMessageTime)}
           </Text>
-          {room.hasUnreadMessages && <View style={styles.unreadIndicator} />}
+          {shouldShowUnreadIndicator(room) && <View style={styles.unreadIndicator} />}
         </View>
       </TouchableOpacity>
     );
