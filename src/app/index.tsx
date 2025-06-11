@@ -1,18 +1,62 @@
 import React, {useEffect, useState} from 'react';
 import {AppProvider} from './providers';
 import {AppNavigator} from './providers/navigation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {View, ActivityIndicator, StyleSheet} from 'react-native';
 import * as RootNavigation from './navigation/RootNavigation';
 import {useTheme} from './providers/theme';
 import {AppToast} from '@/shared/ui/Toast';
 import {fcmService} from '@/shared/lib/firebase';
 import {logger} from '@/shared/lib/logger';
+import {secureStorage} from '@/shared/lib/security';
+import {jwtDecode} from 'jwt-decode';
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const {theme} = useTheme();
+
+  // JWT 토큰 만료 확인 함수
+  const isTokenExpired = (token: string): boolean => {
+    try {
+      const decoded = jwtDecode<{exp: number}>(token);
+      const currentTime = Date.now() / 1000;
+      return decoded.exp < currentTime;
+    } catch (error) {
+      logger.error('JWT 토큰 디코딩 실패:', error);
+      return true;
+    }
+  };
+
+  // 자동 로그인 검증 함수
+  const checkAutoLogin = async (): Promise<boolean> => {
+    try {
+      logger.info('자동 로그인 검증 시작');
+      
+      // 저장된 토큰 가져오기
+      const token = await secureStorage.getToken();
+      
+      if (!token) {
+        logger.info('저장된 토큰 없음 - 로그인 필요');
+        return false;
+      }
+
+      // 토큰 만료 확인
+      if (isTokenExpired(token)) {
+        logger.info('토큰 만료됨 - 토큰 삭제 및 재로그인 필요');
+        await secureStorage.removeToken();
+        return false;
+      }
+
+      logger.info('자동 로그인 성공 - 유효한 토큰 확인됨');
+      return true;
+      
+    } catch (error) {
+      logger.error('자동 로그인 검증 중 오류:', error);
+      // 오류 발생 시 안전을 위해 토큰 삭제
+      await secureStorage.removeToken();
+      return false;
+    }
+  };
 
   useEffect(() => {
     // 앱 초기화 로직
@@ -38,9 +82,9 @@ const App = () => {
             logger.error('FCM 토큰 초기화 오류:', error);
           });
 
-        // 인증 상태 확인
-        const authToken = await AsyncStorage.getItem('auth_token');
-        setIsLoggedIn(!!authToken);
+        // 자동 로그인 처리
+        const autoLoginResult = await checkAutoLogin();
+        setIsLoggedIn(autoLoginResult);
       } catch (error) {
         logger.error('앱 초기화 오류:', error);
       } finally {

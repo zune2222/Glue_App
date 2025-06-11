@@ -448,3 +448,52 @@ export const checkNicknameDuplicate = async (
     throw error;
   }
 };
+
+// 회원 탈퇴 API
+export const signout = async (): Promise<ApiResponse<void>> => {
+  const endpoint = '/api/users/signout';
+  const url = `${config.API_URL}${endpoint}`;
+  console.log(`[API 요청] 회원 탈퇴: ${url}`);
+
+  try {
+    const response = await apiClient.put(endpoint);
+
+    console.log('회원 탈퇴 서버 응답:', response.data);
+
+    // 서버 응답 구조에 맞게 처리
+    return {
+      data: response.data.result,
+      success: response.data.isSuccess,
+      message: response.data.message || '',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // 네트워크 오류
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      // HTTP 상태 코드별 에러 처리
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error('잘못된 요청입니다.');
+      } else if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 403) {
+        throw new Error('회원 탈퇴 권한이 없습니다.');
+      } else if (status === 404) {
+        throw new Error('사용자를 찾을 수 없습니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      // 기본 에러 메시지
+      const errorMessage =
+        error.response.data?.message || '회원 탈퇴에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    // 기타 에러
+    throw error;
+  }
+};

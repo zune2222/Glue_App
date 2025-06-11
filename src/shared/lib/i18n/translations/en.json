@@ -381,7 +381,11 @@
     "languageChangeError": "Error changing language:",
     "systemLanguageSelectFallback": "Please select your system language.",
     "logoutProcessing": "Processing logout",
-    "withdrawalProcessing": "Processing account deletion"
+    "logoutSuccess": "Successfully logged out",
+    "logoutError": "Failed to logout",
+    "withdrawalProcessing": "Processing account deletion",
+    "withdrawalSuccess": "Account has been successfully deleted",
+    "withdrawalError": "Failed to delete account"
   },
   "notification": {
     "title": "Notification Examples",

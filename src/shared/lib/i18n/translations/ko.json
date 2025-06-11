@@ -381,7 +381,11 @@
     "languageChangeError": "언어 변경 중 오류:",
     "systemLanguageSelectFallback": "시스템 언어를 선택해 주세요.",
     "logoutProcessing": "로그아웃 처리",
-    "withdrawalProcessing": "회원탈퇴 처리"
+    "logoutSuccess": "로그아웃되었습니다",
+    "logoutError": "로그아웃에 실패했습니다",
+    "withdrawalProcessing": "회원탈퇴 처리",
+    "withdrawalSuccess": "회원 탈퇴가 완료되었습니다",
+    "withdrawalError": "회원 탈퇴에 실패했습니다"
   },
   "notification": {
     "title": "알림 예제",

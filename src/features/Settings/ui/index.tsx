@@ -4,17 +4,25 @@ import {
   ScrollView,
   View,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import {Text} from '../../../shared/ui/typography/Text';
 import SettingsHeader from '../../../widgets/header/ui/SettingsHeader';
 import {useTranslation} from 'react-i18next';
 import {changeLanguage, Language, LANGUAGE_NAMES} from '@shared/lib/i18n';
 import {CenterModal, CenterModalOption} from '@shared/ui/CenterModal';
+import {ConfirmModal} from '@shared/ui/ConfirmModal';
+import {secureStorage} from '@/shared/lib/security';
+import {navigateToAuth} from '@/app/navigation/RootNavigation';
+import {logger} from '@/shared/lib/logger';
+import Toast from 'react-native-toast-message';
+import {useSignout} from '@/features/auth/api/hooks';
 
 const SettingsScreen = () => {
   const {t, i18n} = useTranslation();
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
+  const [isWithdrawalModalVisible, setIsWithdrawalModalVisible] = useState(false);
+  const signoutMutation = useSignout();
 
   // 언어 옵션 생성
   const languageOptions: CenterModalOption[] = [
@@ -44,32 +52,85 @@ const SettingsScreen = () => {
 
   // 로그아웃 처리
   const handleLogout = () => {
-    Alert.alert(t('settings.logout'), t('settings.logoutConfirm'), [
-      {text: t('common.cancel'), style: 'cancel'},
-      {
-        text: t('settings.logout'),
-        style: 'destructive',
-        onPress: () => {
-          // TODO: 로그아웃 로직 구현
-          console.log(t('settings.logoutProcessing'));
-        },
-      },
-    ]);
+    setIsLogoutModalVisible(true);
+  };
+
+  const performLogout = async () => {
+    try {
+      logger.info('로그아웃 시작');
+      
+      // 토큰 삭제
+      const success = await secureStorage.removeToken();
+      
+      if (success) {
+        logger.info('로그아웃 성공 - 토큰 삭제 완료');
+        
+        // 성공 토스트 메시지
+        Toast.show({
+          type: 'success',
+          text1: t('settings.logoutSuccess'),
+          position: 'bottom',
+        });
+        
+        // 로그인 화면으로 이동
+        navigateToAuth();
+      } else {
+        throw new Error('토큰 삭제 실패');
+      }
+    } catch (error) {
+      logger.error('로그아웃 실패:', error);
+      
+      // 실패 토스트 메시지
+      Toast.show({
+        type: 'error',
+        text1: t('settings.logoutError'),
+        text2: (error as Error).message,
+        position: 'bottom',
+      });
+    }
   };
 
   // 회원탈퇴 처리
   const handleWithdrawal = () => {
-    Alert.alert(t('settings.withdrawal'), t('settings.withdrawalConfirm'), [
-      {text: t('common.cancel'), style: 'cancel'},
-      {
-        text: t('common.withdraw'),
-        style: 'destructive',
-        onPress: () => {
-          // TODO: 회원탈퇴 로직 구현
-          console.log(t('settings.withdrawalProcessing'));
-        },
-      },
-    ]);
+    setIsWithdrawalModalVisible(true);
+  };
+
+  const performWithdrawal = async () => {
+    try {
+      logger.info('회원 탈퇴 시작');
+      
+      // 회원 탈퇴 API 호출
+      const response = await signoutMutation.mutateAsync();
+      
+      if (response.success) {
+        logger.info('회원 탈퇴 성공');
+        
+        // 토큰 삭제
+        await secureStorage.removeToken();
+        
+        // 성공 토스트 메시지
+        Toast.show({
+          type: 'success',
+          text1: t('settings.withdrawalSuccess'),
+          position: 'bottom',
+        });
+        
+        // 로그인 화면으로 이동
+        navigateToAuth();
+      } else {
+        throw new Error(response.message || '회원 탈퇴에 실패했습니다.');
+      }
+    } catch (error) {
+      logger.error('회원 탈퇴 실패:', error);
+      
+      // 실패 토스트 메시지
+      Toast.show({
+        type: 'error',
+        text1: t('settings.withdrawalError'),
+        text2: (error as Error).message,
+        position: 'bottom',
+      });
+    }
   };
 
   return (
@@ -209,6 +270,28 @@ const SettingsScreen = () => {
         onClose={() => setIsLanguageModalVisible(false)}
         onSelect={handleLanguageChange}
         selectedValue={i18n.language}
+      />
+
+      {/* 로그아웃 확인 모달 */}
+      <ConfirmModal
+        title={t('settings.logout')}
+        message={t('settings.logoutConfirm')}
+        isVisible={isLogoutModalVisible}
+        onClose={() => setIsLogoutModalVisible(false)}
+        onConfirm={performLogout}
+        confirmText={t('settings.logout')}
+        confirmButtonStyle="primary"
+      />
+
+      {/* 회원탈퇴 확인 모달 */}
+      <ConfirmModal
+        title={t('settings.withdrawal')}
+        message={t('settings.withdrawalConfirm')}
+        isVisible={isWithdrawalModalVisible}
+        onClose={() => setIsWithdrawalModalVisible(false)}
+        onConfirm={performWithdrawal}
+        confirmText={t('common.withdraw')}
+        confirmButtonStyle="destructive"
       />
     </SafeAreaView>
   );

@@ -6,6 +6,7 @@ import {
   signupWithKakao,
   signinWithKakao,
   checkNicknameDuplicate,
+  signout,
 } from './api';
 import {useApiMutation} from '@/shared/lib/api/hooks';
 
@@ -54,4 +55,9 @@ export const useAppleSignin = () => {
 // 닉네임 중복 확인 훅
 export const useCheckNicknameDuplicate = () => {
   return useApiMutation('checkNicknameDuplicate', checkNicknameDuplicate);
+};
+
+// 회원 탈퇴 훅
+export const useSignout = () => {
+  return useApiMutation('signout', signout);
 };

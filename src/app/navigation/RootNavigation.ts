@@ -107,3 +107,24 @@ export function getCurrentRoute() {
   }
   return null;
 }
+
+/**
+ * 인증 화면(로그인)으로 이동하는 함수
+ * 로그아웃 시 사용됩니다.
+ */
+export function navigateToAuth() {
+  if (navigationRef.isReady()) {
+    navigationRef.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Auth',
+          },
+        ],
+      }),
+    );
+  } else {
+    console.error('Navigation is not ready yet!');
+  }
+}
