@@ -51,14 +51,47 @@ const App = () => {
     initializeApp();
 
     // FCM 토큰 갱신 리스너 설정
-    const unsubscribe = fcmService.registerTokenRefreshListener(newToken => {
-      logger.info('FCM 토큰이 갱신되었습니다:', newToken);
-      // 여기서 필요한 경우 서버에 새 토큰을 전송할 수 있습니다
+    const unsubscribeTokenRefresh = fcmService.registerTokenRefreshListener(
+      newToken => {
+        logger.info('FCM 토큰이 갱신되었습니다:', newToken);
+        // 여기서 필요한 경우 서버에 새 토큰을 전송할 수 있습니다
+      },
+    );
+
+    // FCM Foreground 메시지 리스너 설정
+    const unsubscribeForegroundMessage =
+      fcmService.registerForegroundMessageListener(message => {
+        logger.info('Foreground 메시지 수신:', message);
+        // TODO: 필요에 따라 알림 표시 로직 추가
+        // 예: Toast 알림, 인앱 알림 등
+      });
+
+    // FCM Background 메시지 리스너 설정
+    fcmService.registerBackgroundMessageListener(async message => {
+      logger.info('Background 메시지 수신:', message);
+      // TODO: 백그라운드에서 필요한 처리 (로컬 알림 등)
+    });
+
+    // FCM 알림 탭 리스너 설정
+    const unsubscribeNotificationOpened =
+      fcmService.registerNotificationOpenedListener(message => {
+        logger.info('알림 탭으로 앱 실행:', message);
+        // TODO: 필요에 따라 특정 화면으로 네비게이션
+      });
+
+    // 앱이 종료된 상태에서 알림으로 실행된 경우 확인
+    fcmService.getInitialNotification().then(message => {
+      if (message) {
+        logger.info('앱 종료 상태에서 알림으로 실행:', message);
+        // TODO: 필요에 따라 특정 화면으로 네비게이션
+      }
     });
 
     // 컴포넌트 언마운트 시 정리
     return () => {
-      unsubscribe();
+      unsubscribeTokenRefresh();
+      unsubscribeForegroundMessage();
+      unsubscribeNotificationOpened();
     };
   }, []);
 

@@ -215,60 +215,31 @@ export const SocialLoginSection = () => {
             }
           } catch (apiError) {
             if (apiError == 'Error: 존재하지 않는 사용자입니다') {
-              // 회원가입을 위해 새로운 애플 인증 요청
+              // 기존 애플 인증 정보로 회원가입으로 이동
               Toast.show({
                 type: 'info',
                 text1: t('auth.newUserRegistration'),
                 position: 'bottom',
               });
 
-              try {
-                // 새로운 애플 인증 요청 (회원가입용)
-                const newAppleAuthResponse = await appleAuth.performRequest({
-                  requestedOperation: appleAuth.Operation.LOGIN,
-                  requestedScopes: [
-                    appleAuth.Scope.EMAIL,
-                    appleAuth.Scope.FULL_NAME,
-                  ],
-                });
+              // 애플은 fullName이 { familyName, givenName, middleName, namePrefix, nameSuffix } 구조
+              const userName = fullName
+                ? `${fullName.givenName || ''} ${
+                    fullName.familyName || ''
+                  }`.trim()
+                : '';
 
-                const {
-                  identityToken: newIdentityToken,
-                  fullName: newFullName,
-                  email: newEmail,
-                } = newAppleAuthResponse;
-
-                if (!newIdentityToken) {
-                  throw new Error(t('auth.appleNoTokenError'));
-                }
-
-                // 애플은 fullName이 { familyName, givenName, middleName, namePrefix, nameSuffix } 구조
-                const userName = newFullName
-                  ? `${newFullName.givenName || ''} ${
-                      newFullName.familyName || ''
-                    }`.trim()
-                  : '';
-
-                navigation.navigate('Auth', {
-                  screen: 'SignUp',
-                  params: {
-                    // identityToken 사용
-                    idToken: newIdentityToken,
-                    email: newEmail,
-                    userName,
-                    fcmToken,
-                    isAppleSignUp: true,
-                  },
-                });
-              } catch (newAuthError) {
-                console.error('새로운 애플 인증 실패:', newAuthError);
-                Toast.show({
-                  type: 'error',
-                  text1: t('auth.loginError'),
-                  text2: '인증을 다시 시도해주세요.',
-                  position: 'bottom',
-                });
-              }
+              navigation.navigate('Auth', {
+                screen: 'SignUp',
+                params: {
+                  // 기존 identityToken 재사용
+                  idToken: identityToken,
+                  email: email,
+                  userName,
+                  fcmToken,
+                  isAppleSignUp: true,
+                },
+              });
             } else {
               // 그 외 API 에러는 재던지기
               throw apiError;

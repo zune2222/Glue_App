@@ -98,7 +98,10 @@ export const useGroupChatRooms = (cursorId?: number, pageSize: number = 10) => {
  * @param options 추가 옵션
  * @returns useQuery 훅의 반환값
  */
-export const useDmChatRoomDetail = (dmChatRoomId?: number, options?: {enabled?: boolean}) => {
+export const useDmChatRoomDetail = (
+  dmChatRoomId?: number,
+  _options?: {enabled?: boolean},
+) => {
   return useApiQuery<ActualDmChatRoomDetailResponse>(
     ['dmChatRoomDetail', dmChatRoomId?.toString() || 'none'],
     () => getDmChatRoomDetail(dmChatRoomId!),
@@ -117,7 +120,10 @@ export const useDmChatRoomDetail = (dmChatRoomId?: number, options?: {enabled?: 
  * @param options 추가 옵션
  * @returns useInfiniteQuery 훅의 반환값
  */
-export const useDmMessages = (dmChatRoomId?: number, options?: {enabled?: boolean}) => {
+export const useDmMessages = (
+  dmChatRoomId?: number,
+  _options?: {enabled?: boolean},
+) => {
   return useInfiniteQuery<ApiResponse<DmMessageResponse[]>, Error>({
     queryKey: ['dmMessages', dmChatRoomId?.toString() || 'none'],
     queryFn: async ({pageParam}) => {
@@ -139,8 +145,9 @@ export const useDmMessages = (dmChatRoomId?: number, options?: {enabled?: boolea
       return undefined;
     },
     initialPageParam: undefined,
-    staleTime: 0, // 메시지는 항상 최신 상태로 유지
-    refetchOnWindowFocus: true, // 창이 포커스될 때 다시 가져오기
+    staleTime: 0, // 항상 stale로 취급하여 화면 볼 때마다 최신 데이터 확인
+    refetchOnWindowFocus: true, // 창 포커스 시 자동 새로고침
+    refetchOnMount: 'always', // 마운트 시 항상 새로고침
     retry: 1, // 실패 시 1번 재시도
     enabled: Boolean(dmChatRoomId && dmChatRoomId > 0), // 유효한 dmChatRoomId일 때만 쿼리 실행
   });
@@ -173,8 +180,8 @@ export const useGroupMessages = (groupChatroomId: number) => {
       return undefined;
     },
     initialPageParam: undefined,
-    staleTime: 0, // 메시지는 항상 최신 상태로 유지
-    refetchOnWindowFocus: true, // 창이 포커스될 때 다시 가져오기
+    staleTime: 1000 * 60 * 2, // 2분간 캐시 유지
+    refetchOnWindowFocus: false, // 창 포커스 시 자동 새로고침 안함
     retry: 1, // 실패 시 1번 재시도
     enabled: groupChatroomId !== -1 && groupChatroomId > 0, // 유효한 groupChatroomId일 때만 쿼리 실행
   });
@@ -259,23 +266,16 @@ export const useSendDmMessage = () => {
         return {previousMessages};
       },
 
-      onSuccess: (response, {dmChatRoomId}) => {
+      onSuccess: (response, _variables) => {
         console.log('DM 메시지 전송 성공:', response.data);
 
-        // 성공 시 메시지 목록 새로고침 (실제 서버 데이터로 동기화)
-        queryClient.invalidateQueries({
-          queryKey: ['dmMessages', dmChatRoomId.toString()],
-        });
-
-        // 채팅방 목록도 무효화 (마지막 메시지 업데이트를 위해)
+        // WebSocket으로 실시간 업데이트되므로 과도한 캐시 무효화 제거
+        // 채팅방 목록만 업데이트 (마지막 메시지 정보 동기화)
         queryClient.invalidateQueries({
           queryKey: ['hostedDmRooms'],
         });
         queryClient.invalidateQueries({
           queryKey: ['participatedDmRooms'],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['groupChatRooms'],
         });
       },
 
@@ -358,15 +358,11 @@ export const useSendGroupMessage = () => {
         return {previousMessages};
       },
 
-      onSuccess: (response, {groupChatroomId}) => {
+      onSuccess: (response, _variables) => {
         console.log('그룹 메시지 전송 성공:', response.data);
 
-        // 성공 시 메시지 목록 새로고침 (실제 서버 데이터로 동기화)
-        queryClient.invalidateQueries({
-          queryKey: ['groupMessages', groupChatroomId.toString()],
-        });
-
-        // 채팅방 목록도 무효화 (마지막 메시지 업데이트를 위해)
+        // WebSocket으로 실시간 업데이트되므로 과도한 캐시 무효화 제거
+        // 채팅방 목록만 업데이트 (마지막 메시지 정보 동기화)
         queryClient.invalidateQueries({
           queryKey: ['groupChatRooms'],
         });

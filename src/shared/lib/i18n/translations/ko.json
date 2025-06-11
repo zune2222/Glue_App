@@ -570,8 +570,9 @@
     "accepting": "초대 수락중...",
     "joiningChat": "채팅방 참여중...",
     "expired": "초대 만료됨",
+    "timeExpiredLocal": "만료됨 (로컬 시간 기준)",
     "acceptInvitation": "초대 수락하기",
-    "inviteMessage": "{{senderName}} 님이 'Maratang Warriors' 모임에 초대했습니다. 참여를 원하시면 수락 버튼을 눌러주세요. 6시간 내로 모임 참여를 수락하지 않으시면 자동으로 초대가 취소됩니다.",
+    "inviteMessage": "{{senderName}} 님이 모임에 초대했습니다. 참여를 원하시면 수락 버튼을 눌러주세요. 6시간 내로 모임 참여를 수락하지 않으시면 자동으로 초대가 취소됩니다.",
     "shortMessage": "📧 {{senderName}}님이 {{inviteeName}}님을 모임에 초대했습니다",
     "shortMessageDefault": "📧 모임 초대장을 보냈습니다",
     "status": {

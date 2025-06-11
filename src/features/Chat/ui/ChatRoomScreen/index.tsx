@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Text as RNText,
 } from 'react-native';
+import {useQueryClient} from '@tanstack/react-query';
 import {styles} from './styles';
 import {
   ChatHeader,
@@ -49,10 +50,9 @@ const {width} = Dimensions.get('window');
 
 const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   const {t} = useTranslation();
-  const [messages, setMessages] = useState<DmMessageResponse[]>([]);
+  const queryClient = useQueryClient();
   const [showRoomInfo, setShowRoomInfo] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const isMountedRef = useRef(true);
 
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -63,8 +63,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   // 현재 사용자 ID 상태
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-
-  // 초대 관련 상태 (더 이상 사용하지 않음)
 
   // API 훅들 - dmChatRoomId가 있을 때만 호출
   const {
@@ -100,38 +98,18 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     }
   }, [isDetailError, detailError, isMessagesError, messagesError]);
 
-  // 무한 스크롤 메시지 데이터를 평면 배열로 변환
-  const allMessages = useMemo(() => {
+  // 무한 스크롤 메시지 데이터를 평면 배열로 변환 (React Query 캐시에서 직접 사용)
+  const messages = useMemo(() => {
     if (!messagesData?.pages) return [];
 
     // 모든 페이지의 메시지를 하나의 배열로 합치기
-    // 첫 번째 페이지가 최신 메시지, 이후 페이지들이 더 오래된 메시지
     const combined = messagesData.pages.flatMap(page => page.data || []);
 
-    console.log('📊 페이지 합치기 결과:', {
-      pageCount: messagesData.pages.length,
-      totalMessages: combined.length,
-      firstMessage: combined[0]?.dmMessageId,
-      lastMessage: combined[combined.length - 1]?.dmMessageId,
-      pages: messagesData.pages.map(page => ({
-        count: page.data?.length || 0,
-        first: page.data?.[0]?.dmMessageId,
-        last: page.data?.[page.data.length - 1]?.dmMessageId,
-      })),
-    });
-
-    // 서버에서 이미 시간순으로 정렬해서 주므로 별도 정렬 불필요
-    // 단, 중복 제거는 해야 함 (혹시 모를 중복 메시지 방지)
+    // 중복 제거
     const uniqueMessages = combined.filter(
       (message, index, array) =>
         array.findIndex(m => m.dmMessageId === message.dmMessageId) === index,
     );
-
-    console.log('📊 중복 제거 후:', {
-      totalMessages: uniqueMessages.length,
-      firstMessage: uniqueMessages[0]?.dmMessageId,
-      lastMessage: uniqueMessages[uniqueMessages.length - 1]?.dmMessageId,
-    });
 
     // 시간순으로 정렬 후 역순으로 배치 (inverted FlatList용)
     return uniqueMessages.sort(
@@ -140,42 +118,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     );
   }, [messagesData]);
 
-  // 메시지 초기 설정 및 무한 스크롤 처리
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [lastLoadedMessageCount, setLastLoadedMessageCount] = useState(0);
-
+  // WebSocket 메시지 리스너 설정 - React Query 캐시에 직접 추가
   useEffect(() => {
-    if (!allMessages || allMessages.length === 0) return;
-
-    if (isInitialLoad) {
-      // 초기 로드
-      console.log('🔄 초기 메시지 로드:', allMessages.length, '개');
-      setMessages(allMessages);
-      setLastLoadedMessageCount(allMessages.length);
-      setIsInitialLoad(false);
-    } else if (allMessages.length > lastLoadedMessageCount) {
-      // 무한 스크롤로 새 메시지 로드 (기존 메시지 뒤에 추가)
-      const newMessages = allMessages.slice(lastLoadedMessageCount);
-      console.log('📄 무한 스크롤 메시지 추가:', newMessages.length, '개');
-
-      setMessages(prev => {
-        // 새로운 메시지들을 기존 메시지 뒤에 추가 (중복 방지)
-        const existingIds = new Set(prev.map(msg => msg.dmMessageId));
-        const filteredNewMessages = newMessages.filter(
-          msg => !existingIds.has(msg.dmMessageId),
-        );
-        return [...prev, ...filteredNewMessages];
-      });
-
-      setLastLoadedMessageCount(allMessages.length);
-    }
-  }, [allMessages, isInitialLoad, lastLoadedMessageCount]);
-
-  // WebSocket 메시지 리스너 설정 (Provider에서 연결 관리)
-  useEffect(() => {
-    if (!dmChatRoomId) {
-      return;
-    }
+    if (!dmChatRoomId) return;
 
     let isComponentMounted = true;
 
@@ -185,32 +130,31 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
       // 현재 채팅방의 메시지만 처리
       if (dmMessage.dmChatRoomId === dmChatRoomId) {
-        setMessages(prev => {
-          // 중복 메시지 방지 (실제 메시지 ID로 확인)
-          const exists = prev.find(
-            msg => msg.dmMessageId === dmMessage.dmMessageId && !msg.isTemp,
-          );
-          if (exists) {
-            console.log('중복 메시지 무시:', dmMessage.dmMessageId);
-            return prev;
+        const queryKey = ['dmMessages', dmChatRoomId.toString()];
+
+        // React Query 캐시에 직접 메시지 추가
+        queryClient.setQueryData(queryKey, (old: any) => {
+          if (!old?.pages) return old;
+
+          const newPages = [...old.pages];
+          if (newPages.length > 0) {
+            // 중복 체크
+            const firstPageData = newPages[0].data || [];
+            const exists = firstPageData.find(
+              (msg: DmMessageResponse) =>
+                msg.dmMessageId === dmMessage.dmMessageId,
+            );
+
+            if (!exists) {
+              // 첫 번째 페이지 (최신 메시지들)에 새 메시지 추가
+              newPages[0] = {
+                ...newPages[0],
+                data: [dmMessage, ...firstPageData],
+              };
+            }
           }
 
-          // 현재 사용자가 보낸 메시지인 경우 임시 메시지 제거
-          const messageSenderId =
-            dmMessage.senderId || dmMessage.sender?.userId;
-          if (messageSenderId === currentUserId) {
-            // 임시 메시지들을 제거하고 실제 메시지 추가
-            const withoutTempMessages = prev.filter(msg => !msg.isTemp);
-            console.log(
-              '내가 보낸 메시지 - 임시 메시지 제거 후 실제 메시지 추가:',
-              dmMessage.dmMessageId,
-            );
-            return [dmMessage, ...withoutTempMessages];
-          } else {
-            // 다른 사용자가 보낸 메시지는 그냥 추가
-            console.log('다른 사용자 메시지 추가:', dmMessage.dmMessageId);
-            return [dmMessage, ...prev];
-          }
+          return {...old, pages: newPages};
         });
       }
     });
@@ -220,7 +164,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       isComponentMounted = false;
       webSocketService.setMessageListener(null);
     };
-  }, [dmChatRoomId, currentUserId]);
+  }, [dmChatRoomId, queryClient]);
 
   // 패널을 드래그하여 닫을 수 있는 PanResponder 설정
   const panResponder = useRef(
@@ -252,8 +196,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
 
   // 사이드 패널 애니메이션
   useEffect(() => {
-    let isMounted = true;
-
     if (showRoomInfo && !isClosing) {
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -278,20 +220,14 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        if (isMountedRef.current) {
-          setShowRoomInfo(false);
-          setIsClosing(false);
-          slideAnim.setValue(width);
-        }
+        setShowRoomInfo(false);
+        setIsClosing(false);
+        slideAnim.setValue(width);
       });
     }
-
-    return () => {
-      isMountedRef.current = false;
-    };
   }, [showRoomInfo, isClosing, fadeAnim, slideAnim]);
 
-  // 메시지 전송 핸들러 - 낙관적 업데이트로 즉시 UI 반영
+  // 메시지 전송 핸들러 - React Query 뮤테이션 사용 (이미 낙관적 업데이트 구현됨)
   const handleSendMessage = useCallback(
     async (text: string) => {
       if (!dmChatRoomId || !currentUserId) {
@@ -299,43 +235,18 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
         return;
       }
 
-      // 임시 메시지 ID 생성 (음수로 설정하여 실제 메시지와 구분)
-      const tempMessageId = -Date.now();
-
-      // 낙관적 업데이트: 즉시 UI에 메시지 추가
-      const tempMessage: DmMessageResponse = {
-        dmMessageId: tempMessageId,
-        dmChatRoomId,
-        senderId: currentUserId,
-        content: text,
-        isRead: false, // 임시 메시지는 읽지 않음으로 설정
-        createdAt: new Date().toISOString(),
-        isTemp: true, // 임시 메시지 표시
-      };
-
-      // 임시 메시지 즉시 추가
-      setMessages(prev => [tempMessage, ...prev]);
-
       try {
-        // REST API를 통한 메시지 전송
+        // useSendDmMessage 훅이 이미 낙관적 업데이트를 처리함
         await sendMessageMutation.mutateAsync({
           dmChatRoomId,
           content: text,
         });
-
-        // 전송 성공 시 WebSocket으로 실제 메시지가 들어와서 임시 메시지를 자동으로 교체함
       } catch (error: any) {
         console.error('메시지 전송 실패:', error);
-
-        // 전송 실패 시 임시 메시지 제거
-        setMessages(prev =>
-          prev.filter(msg => msg.dmMessageId !== tempMessageId),
-        );
-
         toastService.error('전송 실패', '메시지 전송에 실패했습니다.');
       }
     },
-    [dmChatRoomId, currentUserId, setMessages, sendMessageMutation],
+    [dmChatRoomId, currentUserId, sendMessageMutation],
   );
 
   const handleBackPress = () => {
@@ -466,12 +377,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     t,
   ]);
 
-  // 컴포넌트 언마운트 시 정리
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  // 컴포넌트 언마운트 시 정리는 더 이상 필요 없음
 
   // 현재 사용자 ID 초기화
   useEffect(() => {
@@ -571,27 +477,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
     [currentUserId, getUserById, t],
   );
 
-  // 빈 리스트 컴포넌트
-  const renderEmptyComponent = useCallback(
-    () => (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingVertical: 50,
-          minHeight: 200,
-        }}>
-        <RNText style={{color: '#999'}}>
-          {t('messages.empty', {
-            defaultValue: '아직 메시지가 없습니다. 첫 메시지를 보내보세요!',
-          })}
-        </RNText>
-      </View>
-    ),
-    [t],
-  );
-
   // 키 추출 함수
   const keyExtractor = useCallback((item: DmMessageResponse, index: number) => {
     return (
@@ -642,7 +527,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
   );
   const chatRoomName = otherUser?.user?.userNickname || '알 수 없는 사용자';
 
-
   // 날짜 계산 (메시지가 있으면 첫 번째 메시지 날짜, 없으면 오늘 날짜)
   const getDisplayDate = () => {
     if (messages && messages.length > 0 && messages[0]?.createdAt) {
@@ -683,7 +567,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
           data={messages}
           keyExtractor={keyExtractor}
           renderItem={renderMessage}
-          ListEmptyComponent={renderEmptyComponent}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.1}
           inverted

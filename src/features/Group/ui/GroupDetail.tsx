@@ -147,7 +147,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({route, navigation}) => {
 
             // 채팅방 ID를 이용해 채팅방 화면으로 이동
             const dmChatRoomId = response.data.detail.dmChatRoomId;
-            navigation.navigate('DmChat', {dmChatRoomId});
+            navigation.navigate('ChatRoom', {dmChatRoomId});
 
             toastService.success(
               t('common.success'),

@@ -59,21 +59,17 @@ const SettingsScreen = () => {
 
   // 회원탈퇴 처리
   const handleWithdrawal = () => {
-    Alert.alert(
-      t('settings.withdrawal'),
-      t('settings.withdrawalConfirm'),
-      [
-        {text: t('common.cancel'), style: 'cancel'},
-        {
-          text: t('common.withdraw'),
-          style: 'destructive',
-          onPress: () => {
-            // TODO: 회원탈퇴 로직 구현
-            console.log(t('settings.withdrawalProcessing'));
-          },
+    Alert.alert(t('settings.withdrawal'), t('settings.withdrawalConfirm'), [
+      {text: t('common.cancel'), style: 'cancel'},
+      {
+        text: t('common.withdraw'),
+        style: 'destructive',
+        onPress: () => {
+          // TODO: 회원탈퇴 로직 구현
+          console.log(t('settings.withdrawalProcessing'));
         },
-      ],
-    );
+      },
+    ]);
   };
 
   return (
@@ -83,7 +79,12 @@ const SettingsScreen = () => {
       <ScrollView style={styles.content}>
         {/* 앱 설정 섹션 */}
         <View style={styles.section}>
-          <Text variant="subtitle1" weight="semiBold" style={styles.sectionTitle}>{t('settings.appSettings')}</Text>
+          <Text
+            variant="subtitle1"
+            weight="semiBold"
+            style={styles.sectionTitle}>
+            {t('settings.appSettings')}
+          </Text>
 
           <TouchableOpacity
             style={styles.menuItem}
@@ -100,11 +101,20 @@ const SettingsScreen = () => {
 
         {/* 이용 안내 섹션 */}
         <View style={styles.section}>
-          <Text variant="subtitle1" weight="semiBold" style={styles.sectionTitle}>{t('settings.usageGuide')}</Text>
+          <Text
+            variant="subtitle1"
+            weight="semiBold"
+            style={styles.sectionTitle}>
+            {t('settings.usageGuide')}
+          </Text>
 
           <TouchableOpacity style={styles.menuItem}>
-            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.appVersion')}</Text>
-            <Text variant="body1" weight="regular" style={styles.menuValue}>1.0.0</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
+              {t('settings.appVersion')}
+            </Text>
+            <Text variant="body1" weight="regular" style={styles.menuValue}>
+              1.0.0
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -113,7 +123,9 @@ const SettingsScreen = () => {
               // TODO: 문의하기 화면으로 이동
               console.log(t('settings.inquiry') + ' 클릭');
             }}>
-            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.inquiry')}</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
+              {t('settings.inquiry')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -122,7 +134,9 @@ const SettingsScreen = () => {
               // TODO: 공지사항 화면으로 이동
               console.log(t('settings.announcements') + ' 클릭');
             }}>
-            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.announcements')}</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
+              {t('settings.announcements')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -131,7 +145,9 @@ const SettingsScreen = () => {
               // TODO: 서비스 이용약관 화면으로 이동
               console.log(t('settings.termsOfService') + ' 클릭');
             }}>
-            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.termsOfService')}</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
+              {t('settings.termsOfService')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -140,7 +156,9 @@ const SettingsScreen = () => {
               // TODO: 개인정보 처리방침 화면으로 이동
               console.log(t('settings.privacyPolicy') + ' 클릭');
             }}>
-            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.privacyPolicy')}</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
+              {t('settings.privacyPolicy')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -149,29 +167,43 @@ const SettingsScreen = () => {
               // TODO: 오픈소스 라이선스 화면으로 이동
               console.log(t('settings.openSourceLicense') + ' 클릭');
             }}>
-            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.openSourceLicense')}</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
+              {t('settings.openSourceLicense')}
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* 기타 섹션 */}
         <View style={styles.section}>
-          <Text variant="subtitle1" weight="semiBold" style={styles.sectionTitle}>{t('settings.others')}</Text>
+          <Text
+            variant="subtitle1"
+            weight="semiBold"
+            style={styles.sectionTitle}>
+            {t('settings.others')}
+          </Text>
 
           <TouchableOpacity style={styles.menuItem} onPress={handleWithdrawal}>
-            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.withdrawal')}</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
+              {t('settings.withdrawal')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.menuItem, styles.lastMenuItem]}
             onPress={handleLogout}>
-            <Text variant="body1" weight="regular" style={styles.menuLabel}>{t('settings.logout')}</Text>
+            <Text variant="body1" weight="regular" style={styles.menuLabel}>
+              {t('settings.logout')}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
       {/* 언어 선택 모달 */}
       <CenterModal
-        title={t('settings.languageSelect') || t('settings.systemLanguageSelectFallback')}
+        title={
+          t('settings.languageSelect') ||
+          t('settings.systemLanguageSelectFallback')
+        }
         options={languageOptions}
         isVisible={isLanguageModalVisible}
         onClose={() => setIsLanguageModalVisible(false)}

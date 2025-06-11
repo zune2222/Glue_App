@@ -65,8 +65,8 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
     },
   });
 
-  // 만료 시간 체크
-  const isExpired = new Date(currentStatus.expiresAt) < new Date();
+  // 만료 시간 체크 - 서버에서 반환하는 status로 판단 (서버 시간 기준)
+  const isExpired = currentStatus.status === InvitationStatus.EXPIRED;
 
   // 현재 사용자가 초대받은 사람인지 확인
   // DM 채팅방에서는 호스트가 아닌 사용자가 초대받은 사용자
@@ -155,21 +155,25 @@ const InvitationBubble: React.FC<InvitationBubbleProps> = ({
     }
   };
 
-  // 만료 시간까지 남은 시간 계산
+  // 만료 시간까지 남은 시간 계산 (서버 시간 기준이 아니므로 참고용)
   const getTimeUntilExpiry = () => {
+    // 서버에서 이미 만료됨으로 표시된 경우
+    if (isExpired) return t('invitation.expired');
+
+    // 클라이언트 시간 기준 계산 (정확하지 않을 수 있음)
     const now = new Date();
     const expiry = new Date(invitationData.expiresAt);
     const diff = expiry.getTime() - now.getTime();
 
-    if (diff <= 0) return t('invitation.expired');
+    if (diff <= 0) return t('invitation.timeExpiredLocal');
 
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     if (hours > 0) {
-      return `${hours}${t('time.hour')} ${minutes}${t('time.minute')}`;
+      return `약 ${hours}${t('time.hour')} ${minutes}${t('time.minute')}`;
     } else {
-      return `${minutes}${t('time.minute')}`;
+      return `약 ${minutes}${t('time.minute')}`;
     }
   };
 

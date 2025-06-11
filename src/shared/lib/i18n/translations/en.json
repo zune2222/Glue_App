@@ -571,7 +571,7 @@
     "joiningChat": "Joining chat room...",
     "expired": "Invitation expired",
     "acceptInvitation": "Accept Invitation",
-    "inviteMessage": "{{senderName}} has invited you to join the 'Maratang Warriors' group. Please press the accept button if you want to participate. The invitation will be automatically cancelled if you don't accept within 6 hours.",
+    "inviteMessage": "{{senderName}} has invited you to join the group. Please press the accept button if you want to participate. The invitation will be automatically cancelled if you don't accept within 6 hours.",
     "shortMessage": "📧 {{senderName}} invited {{inviteeName}} to the group",
     "shortMessageDefault": "📧 Group invitation sent",
     "status": {
