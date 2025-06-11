@@ -395,25 +395,87 @@ export const useToggleGroupChatRoomNotification = () => {
     'toggleGroupChatRoomNotification',
     ({groupChatroomId}) => toggleGroupChatRoomNotification(groupChatroomId),
     {
-      onSuccess: (response, {groupChatroomId}) => {
-        console.log('✅ 그룹 채팅방 알림 토글 응답:', response);
+      // 낙관적 업데이트: 알림 설정 전에 즉시 UI에 반영
+      onMutate: async ({groupChatroomId}) => {
         const queryKey = ['groupChatRoomDetail', groupChatroomId.toString()];
-
-        // 서버 응답값으로 쿼리 데이터 업데이트
+        
+        // 진행 중인 refetch 취소
+        await queryClient.cancelQueries({queryKey});
+        
+        // 이전 데이터 백업
+        const previousData = queryClient.getQueryData(queryKey);
+        
+        // 낙관적 업데이트: 현재 상태의 반대로 변경
         queryClient.setQueryData(queryKey, (old: any) => {
-          if (!old?.data) return old;
-
+          if (!old?.data || old.data.pushNotificationOn === undefined) {
+            console.warn('🔔 그룹 채팅방 데이터가 없어 낙관적 업데이트 스킵');
+            return old;
+          }
+          
+          const currentState = old.data.pushNotificationOn;
+          const newState = currentState === 1 ? 0 : 1;
+          
+          console.log('🔔 그룹 낙관적 업데이트:', {
+            groupChatroomId,
+            current: currentState,
+            new: newState
+          });
+          
           return {
             ...old,
             data: {
               ...old.data,
-              pushNotificationOn: response, // 응답값 그대로 사용
+              pushNotificationOn: newState,
             },
           };
         });
+        
+        return {previousData};
       },
-      onError: error => {
+      
+      onSuccess: (response, {groupChatroomId}) => {
+        console.log('✅ 그룹 채팅방 알림 토글 응답:', response);
+        const queryKey = ['groupChatRoomDetail', groupChatroomId.toString()];
+
+        // 서버 응답값으로 쿼리 데이터 업데이트 (확실하게)
+        queryClient.setQueryData(queryKey, (old: any) => {
+          if (!old?.data) return old;
+          
+          // API 응답 구조에 따라 response.data 사용
+          const serverNotificationState = response.data;
+          const currentState = old.data.pushNotificationOn;
+          
+          console.log('🔔 그룹 서버 응답 반영:', {
+            groupChatroomId,
+            current: currentState,
+            server: serverNotificationState,
+            willUpdate: currentState !== serverNotificationState
+          });
+
+          // 서버 응답과 현재 상태가 다를 때만 업데이트
+          if (currentState !== serverNotificationState) {
+            return {
+              ...old,
+              data: {
+                ...old.data,
+                pushNotificationOn: serverNotificationState,
+              },
+            };
+          }
+          
+          return old; // 변경사항 없으면 기존 데이터 유지
+        });
+      },
+      
+      onError: (error, {groupChatroomId}, context) => {
         console.error('❌ 그룹 채팅방 알림 토글 실패:', error.message);
+        
+        // 실패 시 이전 데이터로 롤백
+        const typedContext = context as {previousData?: any} | undefined;
+        if (typedContext?.previousData) {
+          const queryKey = ['groupChatRoomDetail', groupChatroomId.toString()];
+          queryClient.setQueryData(queryKey, typedContext.previousData);
+        }
       },
     },
   );
@@ -467,25 +529,75 @@ export const useToggleDmChatRoomNotification = () => {
     'toggleDmChatRoomNotification',
     ({dmChatRoomId}) => toggleDmChatRoomNotification(dmChatRoomId),
     {
-      onSuccess: (response, {dmChatRoomId}) => {
-        console.log('✅ API 응답값:', response.data);
+      // 낙관적 업데이트: 알림 설정 전에 즉시 UI에 반영
+      onMutate: async ({dmChatRoomId}) => {
         const queryKey = ['dmChatRoomDetail', dmChatRoomId.toString()];
-
-        // 서버 응답값으로 쿼리 데이터 업데이트
+        
+        // 진행 중인 refetch 취소
+        await queryClient.cancelQueries({queryKey});
+        
+        // 이전 데이터 백업
+        const previousData = queryClient.getQueryData(queryKey);
+        
+        // 낙관적 업데이트: 현재 상태의 반대로 변경
         queryClient.setQueryData(queryKey, (old: any) => {
           if (!old?.data) return old;
+          
+          const currentState = old.data.isPushNotificationOn;
+          const newState = currentState === 1 ? 0 : 1;
+          
+          console.log('🔔 DM 낙관적 업데이트:', {
+            current: currentState,
+            new: newState
+          });
+          
+          return {
+            ...old,
+            data: {
+              ...old.data,
+              isPushNotificationOn: newState,
+            },
+          };
+        });
+        
+        return {previousData};
+      },
+      
+      onSuccess: (response, {dmChatRoomId}) => {
+        console.log('✅ DM 알림 토글 API 응답값:', response.data);
+        const queryKey = ['dmChatRoomDetail', dmChatRoomId.toString()];
+
+        // 서버 응답값으로 쿼리 데이터 업데이트 (확실하게)
+        queryClient.setQueryData(queryKey, (old: any) => {
+          if (!old?.data) return old;
+          
+          // API 응답 구조에 따라 response.data 사용
+          const newNotificationState = response.data;
+          
+          console.log('🔔 DM 서버 응답 반영:', {
+            old: old.data.isPushNotificationOn,
+            new: newNotificationState
+          });
 
           return {
             ...old,
             data: {
               ...old.data,
-              isPushNotificationOn: response.data, // 응답값 그대로 사용
+              isPushNotificationOn: newNotificationState,
             },
           };
         });
       },
-      onError: error => {
-        console.error('❌ 토글 실패:', error.message);
+      
+      onError: (error, {dmChatRoomId}, context) => {
+        console.error('❌ DM 알림 토글 실패:', error.message);
+        
+        // 실패 시 이전 데이터로 롤백
+        const typedContext = context as {previousData?: any} | undefined;
+        if (typedContext?.previousData) {
+          const queryKey = ['dmChatRoomDetail', dmChatRoomId.toString()];
+          queryClient.setQueryData(queryKey, typedContext.previousData);
+        }
       },
     },
   );

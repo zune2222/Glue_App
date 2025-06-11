@@ -287,8 +287,14 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({route, navigation}) => {
       return;
     }
 
-    // React Query의 낙관적 업데이트가 모든 것을 처리함
-    toggleNotificationMutation.mutate({dmChatRoomId});
+    try {
+      // React Query의 뮤테이션으로 알림 설정 토글
+      await toggleNotificationMutation.mutateAsync({dmChatRoomId});
+      console.log('✅ 알림 토글 성공');
+    } catch (error: any) {
+      console.error('❌ 알림 토글 실패:', error);
+      toastService.error('오류', error.message || '알림 설정 변경에 실패했습니다.');
+    }
   };
 
   // ============ 초대 관련 함수들 ============

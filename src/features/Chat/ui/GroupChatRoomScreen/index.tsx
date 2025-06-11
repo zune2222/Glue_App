@@ -460,12 +460,34 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
 
   // 알림 토글 핸들러
   const handleNotificationToggle = async () => {
-    if (!groupChatroomId) return;
+    console.log('🔔 GroupChatRoom handleNotificationToggle 호출됨');
+    
+    if (!groupChatroomId) {
+      console.log('❌ groupChatroomId가 없음:', groupChatroomId);
+      return;
+    }
+
+    const currentState = groupChatRoomDetail?.data?.pushNotificationOn;
+    console.log('🔔 알림 토글 시작:', {
+      groupChatroomId,
+      currentState,
+      expectedNewState: currentState === 1 ? 0 : 1,
+      mutationStatus: toggleNotificationMutation.status
+    });
 
     try {
-      await toggleNotificationMutation.mutateAsync({groupChatroomId});
+      const result = await toggleNotificationMutation.mutateAsync({groupChatroomId});
+      console.log('✅ 알림 토글 성공:', {
+        result,
+        newState: groupChatRoomDetail?.data?.pushNotificationOn
+      });
       toastService.success('알림 설정', '알림 설정이 변경되었습니다.');
     } catch (error: any) {
+      console.error('❌ 알림 토글 실패:', {
+        error,
+        currentState: groupChatRoomDetail?.data?.pushNotificationOn,
+        groupChatroomId
+      });
       toastService.error(
         '오류',
         error.message || '알림 설정 변경에 실패했습니다.',
