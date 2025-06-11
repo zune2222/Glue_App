@@ -2,6 +2,7 @@ import messaging from '@react-native-firebase/messaging';
 import {Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {logger} from '@/shared/lib/logger';
+import {updateFcmToken} from '@/features/auth/api/api';
 
 // FCM 토큰 저장 키
 const FCM_TOKEN_STORAGE_KEY = 'fcm_token';
@@ -138,6 +139,16 @@ export const fcmService = {
       }
 
       logger.info('FCM 토큰 획득 성공');
+
+      // 새 토큰을 서버에 전송
+      try {
+        await updateFcmToken(currentToken);
+        logger.info('FCM 토큰 서버 전송 성공');
+      } catch (error) {
+        logger.warn('FCM 토큰 서버 전송 실패:', error);
+        // 토큰 전송 실패해도 앱 동작에는 영향 없도록 함
+      }
+
       return currentToken;
     } catch (error) {
       logger.error('FCM 토큰 획득 에러:', error);
@@ -173,6 +184,14 @@ export const fcmService = {
         FCM_TOKEN_LAST_UPDATE_KEY,
         Date.now().toString(),
       );
+
+      // 새 토큰을 서버에 전송
+      try {
+        await updateFcmToken(token);
+        logger.info('갱신된 FCM 토큰 서버 전송 성공');
+      } catch (error) {
+        logger.warn('갱신된 FCM 토큰 서버 전송 실패:', error);
+      }
 
       // 콜백 호출
       onTokenRefresh(token);

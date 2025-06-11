@@ -450,6 +450,69 @@ export const checkNicknameDuplicate = async (
 };
 
 // 회원 탈퇴 API
+/**
+ * FCM 토큰을 서버에 전송하는 API
+ * @param fcmToken FCM 토큰
+ * @returns API 응답
+ */
+export const updateFcmToken = async (
+  fcmToken: string,
+): Promise<ApiResponse<any>> => {
+  const endpoint = '/api/user/fcm-token';
+
+  try {
+    // secureStorage에서 토큰을 가져오기
+    const {secureStorage} = await import('@/shared/lib/security');
+    const token = await secureStorage.getToken();
+
+    if (!token) {
+      throw new Error('인증 토큰이 없습니다. 로그인이 필요합니다.');
+    }
+
+    const response = await apiClient.put(
+      endpoint,
+      {
+        fcmToken,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    console.log('FCM 토큰 업데이트 응답:', response.data);
+
+    return {
+      data: response.data.result,
+      success: response.data.isSuccess,
+      message:
+        response.data.message || 'FCM 토큰이 성공적으로 업데이트되었습니다.',
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (!error.response) {
+        throw new Error('네트워크 연결에 문제가 있습니다.');
+      }
+
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+      } else if (status === 403) {
+        throw new Error('FCM 토큰 업데이트 권한이 없습니다.');
+      } else if (status >= 500) {
+        throw new Error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
+      const errorMessage =
+        error.response.data?.message || 'FCM 토큰 업데이트에 실패했습니다.';
+      throw new Error(errorMessage);
+    }
+
+    throw error;
+  }
+};
+
 export const signout = async (): Promise<ApiResponse<void>> => {
   const endpoint = '/api/users/signout';
   const url = `${config.API_URL}${endpoint}`;

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {AppProvider} from './providers';
 import {AppNavigator} from './providers/navigation';
 import {View, ActivityIndicator, StyleSheet} from 'react-native';
@@ -6,6 +6,7 @@ import * as RootNavigation from './navigation/RootNavigation';
 import {useTheme} from './providers/theme';
 import {AppToast} from '@/shared/ui/Toast';
 import {fcmService} from '@/shared/lib/firebase';
+import {localNotificationService} from '@/shared/lib/notifications/localNotification';
 import {logger} from '@/shared/lib/logger';
 import {secureStorage} from '@/shared/lib/security';
 import {jwtDecode} from 'jwt-decode';
@@ -28,13 +29,13 @@ const App = () => {
   };
 
   // 자동 로그인 검증 함수
-  const checkAutoLogin = async (): Promise<boolean> => {
+  const checkAutoLogin = useCallback(async (): Promise<boolean> => {
     try {
       logger.info('자동 로그인 검증 시작');
-      
+
       // 저장된 토큰 가져오기
       const token = await secureStorage.getToken();
-      
+
       if (!token) {
         logger.info('저장된 토큰 없음 - 로그인 필요');
         return false;
@@ -49,19 +50,21 @@ const App = () => {
 
       logger.info('자동 로그인 성공 - 유효한 토큰 확인됨');
       return true;
-      
     } catch (error) {
       logger.error('자동 로그인 검증 중 오류:', error);
       // 오류 발생 시 안전을 위해 토큰 삭제
       await secureStorage.removeToken();
       return false;
     }
-  };
+  }, []);
 
   useEffect(() => {
     // 앱 초기화 로직
     const initializeApp = async () => {
       try {
+        // 로컬 알림 서비스 초기화
+        localNotificationService.init();
+
         // FCM 초기화 및 권한 요청
         await fcmService.requestPermission();
 
@@ -106,28 +109,38 @@ const App = () => {
     const unsubscribeForegroundMessage =
       fcmService.registerForegroundMessageListener(message => {
         logger.info('Foreground 메시지 수신:', message);
-        // TODO: 필요에 따라 알림 표시 로직 추가
-        // 예: Toast 알림, 인앱 알림 등
+        // 로컬 알림 표시
+        localNotificationService.showFCMNotification(message);
       });
 
     // FCM Background 메시지 리스너 설정
     fcmService.registerBackgroundMessageListener(async message => {
       logger.info('Background 메시지 수신:', message);
-      // TODO: 백그라운드에서 필요한 처리 (로컬 알림 등)
+      // 백그라운드에서는 시스템 알림이 자동으로 표시되므로 추가 처리 불필요
+      // 필요시 데이터 저장이나 배지 카운트 업데이트 등 수행 가능
     });
 
     // FCM 알림 탭 리스너 설정
     const unsubscribeNotificationOpened =
       fcmService.registerNotificationOpenedListener(message => {
         logger.info('알림 탭으로 앱 실행:', message);
-        // TODO: 필요에 따라 특정 화면으로 네비게이션
+        // 알림 데이터를 기반으로 적절한 화면으로 네비게이션
+        if (message.data) {
+          RootNavigation.navigateFromNotification(message.data);
+        }
       });
 
     // 앱이 종료된 상태에서 알림으로 실행된 경우 확인
     fcmService.getInitialNotification().then(message => {
       if (message) {
         logger.info('앱 종료 상태에서 알림으로 실행:', message);
-        // TODO: 필요에 따라 특정 화면으로 네비게이션
+        // 알림 데이터를 기반으로 적절한 화면으로 네비게이션
+        if (message.data) {
+          // 네비게이션이 준비될 때까지 약간의 지연 추가
+          setTimeout(() => {
+            RootNavigation.navigateFromNotification(message.data);
+          }, 1000);
+        }
       }
     });
 
@@ -137,7 +150,7 @@ const App = () => {
       unsubscribeForegroundMessage();
       unsubscribeNotificationOpened();
     };
-  }, []);
+  }, [checkAutoLogin]);
 
   useEffect(() => {
     // 인증 상태에 따른 초기 네비게이션 설정

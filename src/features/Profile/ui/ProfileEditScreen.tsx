@@ -21,6 +21,7 @@ import ProfileEditHeader from '@widgets/header/ui/ProfileEditHeader';
 import CameraIcon from '@shared/assets/images/camera.svg';
 import {dummyProfile} from '@shared/assets/images';
 import {useProfileImageUploadAndUpdate} from '@shared/lib/api/profileImageHooks';
+import {getDepartmentNameById} from '../../auth/ui/SignUp/data/departments';
 import {
   launchImageLibrary,
   launchCamera,
@@ -439,7 +440,11 @@ const ProfileEditScreen = () => {
             <Text style={styles.infoLabel}>
               {t('profile.editProfile.department')}
             </Text>
-            <Text style={styles.infoValue}>국어국문학과</Text>
+            <Text style={styles.infoValue}>
+              {profileMe?.major
+                ? getDepartmentNameById(profileMe.major, i18n.language)
+                : t('profile.editProfile.notSet')}
+            </Text>
           </View>
 
           <View style={styles.infoRow}>

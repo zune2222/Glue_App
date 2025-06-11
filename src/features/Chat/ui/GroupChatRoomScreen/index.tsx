@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   PanResponder,
 } from 'react-native';
+import {useQueryClient} from '@tanstack/react-query';
 import {styles} from './styles';
 import {
   ChatHeader,
@@ -29,8 +30,9 @@ import {
 import {GroupMessageResponse} from '../../api/api';
 import {toastService} from '@shared/lib/notifications/toast';
 import {secureStorage} from '@shared/lib/security';
-import {useGroupWebSocket} from './hooks';
+import {webSocketService} from '../../lib/websocket';
 import {dummyProfile} from '@shared/assets/images';
+import {useTranslation} from 'react-i18next';
 
 interface GroupChatRoomScreenProps {
   route?: {
@@ -46,7 +48,8 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
   route,
   navigation,
 }) => {
-  const [messages, setMessages] = useState<GroupMessageResponse[]>([]);
+  const {t} = useTranslation();
+  const queryClient = useQueryClient();
   const scrollViewRef = useRef<FlatList<GroupMessageResponse>>(null);
 
   const [_stickyDate, setStickyDate] = useState<string>('');
@@ -93,8 +96,72 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
   // 채팅방 나가기 뮤테이션 훅
   const leaveChatRoomMutation = useLeaveGroupChatRoom();
 
-  // WebSocket 연결을 통한 실시간 메시지 수신
-  useGroupWebSocket(groupChatroomId, setMessages);
+  // WebSocket 메시지 리스너 설정 - React Query 캐시에 직접 추가
+  useEffect(() => {
+    if (!groupChatroomId) return;
+
+    let isComponentMounted = true;
+
+    // 그룹 메시지 수신 리스너 설정 (이 채팅방 메시지만 필터링)
+    webSocketService.setGroupMessageListener((groupMessage: GroupMessageResponse) => {
+      if (!isComponentMounted) return;
+
+      // 현재 채팅방의 메시지만 처리
+      if (groupMessage.groupChatroomId === groupChatroomId) {
+        // 내가 보낸 메시지는 낙관적 업데이트로 이미 추가되었으므로 WebSocket으로 받은 것은 무시
+        if (groupMessage.sender?.userId === currentUserId) {
+          return;
+        }
+
+        const queryKey = ['groupMessages', groupChatroomId.toString()];
+
+        // React Query 캐시에 직접 메시지 추가
+        queryClient.setQueryData(queryKey, (old: any) => {
+          if (!old?.pages) return old;
+
+          const newPages = [...old.pages];
+          if (newPages.length > 0) {
+            // 중복 체크
+            const firstPageData = newPages[0].data || [];
+            const exists = firstPageData.find(
+              (msg: GroupMessageResponse) =>
+                msg.groupMessageId === groupMessage.groupMessageId,
+            );
+
+            if (!exists) {
+              // 첫 번째 페이지 (최신 메시지들)에 새 메시지 추가
+              newPages[0] = {
+                ...newPages[0],
+                data: [groupMessage, ...firstPageData],
+              };
+            }
+          }
+
+          return {...old, pages: newPages};
+        });
+      }
+    });
+
+    // 그룹 채팅방 구독 시작
+    const subscribeToGroup = async () => {
+      // WebSocket 연결 대기
+      const isConnected = await webSocketService.waitForConnection(5000);
+      if (isConnected) {
+        webSocketService.subscribeToGroupChatRoom(groupChatroomId);
+      } else {
+        console.error('[GroupChatRoomScreen] WebSocket 연결 대기 실패');
+      }
+    };
+
+    subscribeToGroup();
+
+    // 클린업: 리스너 제거 및 구독 해제
+    return () => {
+      isComponentMounted = false;
+      webSocketService.setGroupMessageListener(null);
+      webSocketService.unsubscribeFromGroupChatRoom(groupChatroomId);
+    };
+  }, [groupChatroomId, queryClient, currentUserId]);
 
   // 날짜 포맷팅 함수를 먼저 선언
   const formatDateForDivider = useCallback((dateString: string) => {
@@ -148,72 +215,25 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
     }
   }, [groupChatRoomDetail]);
 
-  // 무한 스크롤 메시지 데이터를 평면 배열로 변환
-  const allMessages = useMemo(() => {
+  // 무한 스크롤 메시지 데이터를 평면 배열로 변환 (React Query 캐시에서 직접 사용)
+  const messages = useMemo(() => {
     if (!messagesData?.pages) return [];
 
     // 모든 페이지의 메시지를 하나의 배열로 합치기
     const combined = messagesData.pages.flatMap(page => page.data || []);
 
-    console.log('📊 그룹 메시지 페이지 합치기 결과:', {
-      pageCount: messagesData.pages.length,
-      totalMessages: combined.length,
-      firstMessage: combined[0]?.groupMessageId,
-      lastMessage: combined[combined.length - 1]?.groupMessageId,
-    });
-
     // 중복 제거
     const uniqueMessages = combined.filter(
       (message, index, array) =>
-        array.findIndex(m => m.groupMessageId === message.groupMessageId) ===
-        index,
+        array.findIndex(m => m.groupMessageId === message.groupMessageId) === index,
     );
 
     // 시간순으로 정렬 후 역순으로 배치 (inverted FlatList용)
-    return uniqueMessages.sort((a, b) => {
-      const dateA = new Date(a.createdAt);
-      const dateB = new Date(b.createdAt);
-      return dateB.getTime() - dateA.getTime();
-    });
+    return uniqueMessages.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }, [messagesData]);
-
-  // 메시지 초기 설정 및 무한 스크롤 처리
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [lastLoadedMessageCount, setLastLoadedMessageCount] = useState(0);
-
-  useEffect(() => {
-    if (!allMessages || allMessages.length === 0) return;
-
-    if (isInitialLoad) {
-      console.log('🔄 초기 그룹 메시지 로드:', allMessages.length, '개');
-      setMessages(allMessages);
-      setLastLoadedMessageCount(allMessages.length);
-      setIsInitialLoad(false);
-
-      // 초기 로드 시 첫 번째 메시지의 날짜를 sticky date로 설정
-      if (allMessages.length > 0) {
-        setStickyDate(formatDateForDivider(allMessages[0].createdAt));
-      }
-    } else if (allMessages.length > lastLoadedMessageCount) {
-      const newMessages = allMessages.slice(lastLoadedMessageCount);
-      console.log('📄 무한 스크롤 그룹 메시지 추가:', newMessages.length, '개');
-
-      setMessages(prev => {
-        const existingIds = new Set(prev.map(msg => msg.groupMessageId));
-        const filteredNewMessages = newMessages.filter(
-          msg => !existingIds.has(msg.groupMessageId),
-        );
-        return [...prev, ...filteredNewMessages];
-      });
-
-      setLastLoadedMessageCount(allMessages.length);
-    }
-  }, [
-    allMessages,
-    isInitialLoad,
-    lastLoadedMessageCount,
-    formatDateForDivider,
-  ]);
 
   // 현재 사용자 ID 설정
   useEffect(() => {
@@ -231,58 +251,27 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
     initCurrentUser();
   }, []);
 
-  // 메시지 전송 핸들러
-  const handleSendMessage = async (text: string) => {
-    if (!groupChatroomId || !currentUserId) {
-      toastService.error('오류', '채팅방 정보를 찾을 수 없습니다.');
-      return;
-    }
+  // 메시지 전송 핸들러 - React Query 뮤테이션 사용 (이미 낙관적 업데이트 구현됨)
+  const handleSendMessage = useCallback(
+    async (text: string) => {
+      if (!groupChatroomId || !currentUserId) {
+        toastService.error('오류', '채팅방 정보가 없습니다.');
+        return;
+      }
 
-    console.log(
-      '그룹 메시지 전송:',
-      text,
-      'to groupChatroomId:',
-      groupChatroomId,
-    );
-
-    // 낙관적 업데이트: 임시 메시지를 즉시 화면에 추가
-    const tempMessage: GroupMessageResponse = {
-      groupMessageId: Date.now(), // 임시 ID
-      groupChatroomId: groupChatroomId,
-      sender: {
-        userId: currentUserId,
-        userNickname: '나', // 임시 닉네임
-        profileImageUrl: null,
-      },
-      message: text,
-      createdAt: new Date().toISOString(),
-    };
-
-    // 메시지를 즉시 화면에 추가
-    setMessages(prev => [tempMessage, ...prev]);
-
-    try {
-      await sendGroupMessageMutation.mutateAsync({
-        groupChatroomId: groupChatroomId,
-        content: text,
-      });
-      console.log('✅ 그룹 메시지 전송 성공');
-
-      // 성공 시 임시 메시지는 WebSocket을 통해 실제 메시지로 교체될 예정
-    } catch (error: any) {
-      console.error('❌ 그룹 메시지 전송 실패:', error);
-
-      // 실패 시 임시 메시지 제거
-      setMessages(prev =>
-        prev.filter(msg => msg.groupMessageId !== tempMessage.groupMessageId),
-      );
-
-      toastService.error(
-        '메시지 전송 실패',
-        error.message || '알 수 없는 오류가 발생했습니다.',
-      );
-    }
-  };
+      try {
+        // useSendGroupMessage 훅이 이미 낙관적 업데이트를 처리함
+        await sendGroupMessageMutation.mutateAsync({
+          groupChatroomId,
+          content: text,
+        });
+      } catch (error: any) {
+        console.error('메시지 전송 실패:', error);
+        toastService.error('전송 실패', '메시지 전송에 실패했습니다.');
+      }
+    },
+    [groupChatroomId, currentUserId, sendGroupMessageMutation],
+  );
 
   // 뒤로 가기 핸들러
   const handleBackPress = () => {
@@ -394,62 +383,61 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
     }
   };
 
-  // 무한 스크롤 핸들러
+  // 이전 메시지 로드 핸들러 - 맨 아래 도달시 호출
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
-      console.log('📄 더 많은 메시지 로드 요청');
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const formatSafeTime = (dateString: string | null) => {
-    if (!dateString) return '';
 
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '';
-
-      const now = new Date();
-      const isToday = now.toDateString() === date.toDateString();
-
-      if (isToday) {
-        return date.toLocaleTimeString('ko-KR', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true,
-        });
-      } else {
-        return date.toLocaleDateString('ko-KR', {
-          month: 'numeric',
-          day: 'numeric',
-        });
+  // 메시지 렌더링 함수
+  const renderMessage = useCallback(
+    ({item: message}: {item: GroupMessageResponse}) => {
+      // message 안전성 검사
+      if (!message) {
+        console.warn('Invalid message:', message);
+        return null;
       }
-    } catch (error) {
-      return '';
-    }
-  };
 
-  // 렌더링 함수들
-  const renderItem = useCallback(
-    ({item}: {item: GroupMessageResponse}) => {
-      const isMyMessage = item.sender.userId === currentUserId;
+      // senderId 또는 sender.userId 가져오기
+      const messageSenderId = message.sender?.userId;
+      if (!messageSenderId) {
+        console.warn('No sender ID found in message:', message);
+        return null;
+      }
+
+      // 일반 텍스트 메시지 렌더링
       return (
-        <View>
-          <ChatMessage
-            id={item.groupMessageId.toString()}
-            text={item.message}
-            isMine={isMyMessage}
-            sender={{
-              id: item.sender.userId.toString(),
-              name: item.sender.userNickname,
-              profileImage: item.sender.profileImageUrl || '',
-            }}
-            timestamp={formatSafeTime(item.createdAt)}
-          />
-        </View>
+        <ChatMessage
+          id={message.groupMessageId?.toString() || ''}
+          text={message.message || ''}
+          timestamp={
+            message.createdAt
+              ? new Date(message.createdAt).toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                })
+              : '시간 미상'
+          }
+          isMine={messageSenderId === currentUserId}
+          sender={{
+            id: message.sender?.userId?.toString() || 'unknown',
+            name:
+              message.sender?.userNickname ||
+              t('common.unknownUser', {defaultValue: '알 수 없는 사용자'}),
+            profileImage:
+              message.sender?.profileImageUrl &&
+              message.sender.profileImageUrl.trim() !== ''
+                ? message.sender.profileImageUrl
+                : '',
+            isHost: false, // TODO: 그룹 채팅에서는 호스트 정보 필요시 추가
+          }}
+        />
       );
     },
-    [currentUserId],
+    [currentUserId, t],
   );
 
   const renderFooter = () => {
@@ -514,8 +502,13 @@ const GroupChatRoomScreen: React.FC<GroupChatRoomScreenProps> = ({
             messages.length === 0 && {flex: 1},
           ]}
           data={messages}
-          keyExtractor={item => item.groupMessageId.toString()}
-          renderItem={renderItem}
+          keyExtractor={(item: GroupMessageResponse, index: number) => {
+            return (
+              item.groupMessageId?.toString() ||
+              `msg-${item.sender?.userId}-${index}-${item.createdAt}`
+            );
+          }}
+          renderItem={renderMessage}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.1}
           inverted
