@@ -82,7 +82,7 @@ android {
         applicationId "com.sadajo.glue"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
+        versionCode 4
         versionName "1.1"
         
         // 카카오 네이티브 앱 키 설정 (Manifest에서 ${KAKAO_NATIVE_APP_KEY} 값으로 사용)
